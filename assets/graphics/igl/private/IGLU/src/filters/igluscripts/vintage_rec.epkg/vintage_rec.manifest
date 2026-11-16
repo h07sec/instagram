@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "607640828216665",
+  "displayName": "Vintage rec",
+  "description": "[IG Edits] Video effect name. With \"Vintage rec\", the creator can apply a Spark-ported vintage camcorder look: a cool film grade, sweeping amber light leaks, faint grain and a soft film-gate border.",
+  "iglu": {
+    "legacyId": 3336
+  },
+  "assets": [
+    {
+      "name": "vintage_rec_lut.png",
+      "assetHash": "8ae1ad609b7d7d1dbb6456297294b351f4c202f7b1753445e98651eb282f1c72",
+      "hubAssetId": "1863502738146413"
+    },
+    {
+      "name": "vintage_rec_leak.png",
+      "assetHash": "9bbddc5f8ebc7d488e94b483bbe9c06cfca58d7abd464afcfd72fb0700408b4c",
+      "hubAssetId": "1468614248514957"
+    },
+    {
+      "name": "vintage_rec_frame.png",
+      "assetHash": "007cf48c1b0406f95b5c61ce3bd0b6c3b44d749f0ab181df9daaf48fdfed6b83",
+      "hubAssetId": "996221759440744"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQBlnJD7fKkC"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "89e46324",
+      "handle": "AQAId8c21CDk",
+      "md5": "4b72465f9db6c0e03674dbe1c430f26f"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GG8xjTM96dkpL0EGAJjb0GjmNAJJbhQoAAAD"
+    }
+  }
+}

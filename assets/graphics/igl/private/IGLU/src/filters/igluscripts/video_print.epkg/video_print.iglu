@@ -1,0 +1,280 @@
+[Filter TransitionPrint]
+
+fun hueChannel(f32 h, f32 k) f32 {
+    f32 x = h + k;
+    x = x - floor(x);
+    f32 t = clamp(abs(x * 6.0 - 3.0) - 1.0, 0.0, 1.0);
+    return t;
+}
+
+# Shifts a colour's HSV hue by `shift` turns, keeping its saturation and value.
+fun rotateHue(vec4 c, f32 shift) vec4 {
+    f32 mx = max(c.r, max(c.g, c.b));
+    f32 mn = min(c.r, min(c.g, c.b));
+    f32 d = mx - mn;
+    f32 h = 0.0;
+    if (d > 0.0) {
+        if (mx == c.r) {
+            h = (c.g - c.b) / d;
+        } else if (mx == c.g) {
+            h = (c.b - c.r) / d + 2.0;
+        } else {
+            h = (c.r - c.g) / d + 4.0;
+        }
+    }
+    h = h / 6.0 + shift;
+    f32 s = 0.0;
+    if (mx > 0.0) {
+        s = d / mx;
+    }
+    vec4 rotated = {
+        mx * mix(1.0, hueChannel(h, 1.0), s),
+        mx * mix(1.0, hueChannel(h, 2.0 / 3.0), s),
+        mx * mix(1.0, hueChannel(h, 1.0 / 3.0), s),
+        c.a
+    };
+    return rotated;
+}
+
+[Init]
+fun init(Filter filter) {
+filter.parameters = {
+    {size = 0.15, min = 0.0, max = 1.0, description = "size"},
+    {ditherWidth = 0.1, min = 0.0, max = 1.0, description = "ditherWidth"},
+    {bandColor = {0.7529411764705882, 0.14901960784313725, 0.9490196078431372, 1.0}, description = "bandColor"},
+    {bandColorHigh = {1.0, 0.0, 0.3843137254901961, 1.0}, description = "bandColorHigh"},
+    {posterizeThreshold = 0.5, min = 0.0, max = 1.0, description = "posterizeThreshold"},
+    {edgeSoftness = 0.001, min = 0.001, max = 0.5, description = "edgeSoftness"},
+    {lineColor = {0.78779296875, 0.5401026030294764, 0.0, 1.0}, description = "lineColor"},
+    {lineWidth = 0.017391304347826087, min = 0.0, max = 0.2, description = "lineWidth"},
+    {lineSpread = 0.046739130434782616, min = 0.0, max = 0.1, description = "lineSpread"},
+    {shiftAmount = 0.035869565217391305, min = 0.0, max = 0.1, description = "shiftAmount"},
+    {shiftDistance = 0.07575, min = 0.001, max = 0.3, description = "shiftDistance"},
+    {framerate = 0.15, min = 0.0, max = 1.0, description = "framerate"},
+    {outro = 0.0, min = 0.0, max = 1.0, description = "outro"},
+    {variation = 0.0, min = 0.0, max = 1.0, description = "variation"},
+    {direction = 3.0, min = 2.0, max = 3.0, description = "Print travel direction: 2 = up, 3 = down"},
+};
+
+    filter.passes = {
+        {
+            name = 'alphaBlur,
+            inputs = {'default},
+            scale = {0.25, 0.25},
+            uniforms = {
+                spread = 0.01,
+            },
+            glslShader = blurGlsl,
+        },
+        {
+            name = 'pass0,
+            inputs = {'default, 'alphaBlur},
+            uniforms = {
+                progress = 0.0,
+                bandWidth = 0.15,
+                ditherWidth = 0.1,
+                bandColor = {0.55, 0.15, 0.95, 1.0},
+                bandColorHigh = {1.0, 0.9, 1.0, 1.0},
+                posterizeThreshold = 0.5,
+                edgeSoftness = 0.02,
+                lineColor = {1.0, 0.85, 0.1, 1.0},
+                lineWidth = 0.012,
+                shiftAmount = 0.02,
+                shiftDistance = 0.05,
+                framerate = 0.15,
+                outro = 0.0,
+                direction = 3.0,
+                outputSize = {1080.0, 1920.0},
+            },
+            glslShader = glsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    setShaderUniform('pass0, 'bandWidth, getParameterFloat('size));
+    setShaderUniform('pass0, 'ditherWidth, getParameterFloat('ditherWidth));
+    f32 hue = getParameterFloat('variation);
+    setShaderUniform('pass0, 'bandColor, rotateHue(getParameterVec4('bandColor), hue));
+    setShaderUniform('pass0, 'bandColorHigh, rotateHue(getParameterVec4('bandColorHigh), hue));
+    setShaderUniform('pass0, 'posterizeThreshold, getParameterFloat('posterizeThreshold));
+    setShaderUniform('pass0, 'edgeSoftness, getParameterFloat('edgeSoftness));
+    setShaderUniform('pass0, 'lineColor, rotateHue(getParameterVec4('lineColor), hue));
+    setShaderUniform('pass0, 'lineWidth, getParameterFloat('lineWidth));
+    setShaderUniform('pass0, 'shiftAmount, getParameterFloat('shiftAmount));
+    setShaderUniform('pass0, 'shiftDistance, getParameterFloat('shiftDistance));
+    setShaderUniform('pass0, 'framerate, getParameterFloat('framerate));
+    setShaderUniform('pass0, 'outro, getParameterFloat('outro));
+    setShaderUniform('pass0, 'direction, getParameterFloat('direction));
+
+    setShaderUniform('alphaBlur, 'spread, getParameterFloat('lineSpread));
+}
+
+string glsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform float progress;
+    uniform float bandWidth;
+    uniform float ditherWidth;
+    uniform vec4 bandColor;
+    uniform vec4 bandColorHigh;
+    uniform float posterizeThreshold;
+    uniform float edgeSoftness;
+    uniform vec4 lineColor;
+    uniform float lineWidth;
+    uniform float shiftAmount;
+    uniform float shiftDistance;
+    uniform float framerate;
+    uniform float outro;
+    uniform float direction;
+    uniform vec2 outputSize;
+    uniform sampler2D auxSampler1;
+
+    // Length of the effect in seconds; keep in sync with [BehaviorDuration].
+    #define EFFECT_SECONDS 1.6
+
+    // Cheap per-pixel white noise in 0 .. 1, used instead of an ordered
+    // pattern so the dither reads as scattered grain rather than a grid.
+    float hash12(vec2 p) {
+        vec3 p3 = fract(vec3(p.x, p.y, p.x) * 0.1031);
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.x + p3.y) * p3.z);
+    }
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        vec2 guv = vec2(uv.x, max(DOWN, 0.0) + UP * uv.y);
+
+        // Distance from the edge the print starts at on every backend: the top
+        // for down (3), the bottom for up (2). The grain coordinate mirrors
+        // with it so up is an exact vertical flip of down.
+        float depth = 1.0 - guv.y;
+        vec2 grainUv = guv;
+        if (direction < 2.5) {
+            depth = guv.y;
+            grainUv.y = 1.0 - guv.y;
+        }
+
+        // Quantise progress to fake a lower framerate, same mapping as
+        // transition_chalk_reveal: framerate = 1 is 60 fps (effectively
+        // smooth), 0 is 1 fps. EFFECT_SECONDS tracks [BehaviorDuration 1600]
+        // so the fps the slider implies is the one you actually get.
+        // Flooring totalFrames to a whole number matters: with a fractional
+        // frame count, progress = 1 would quantise to less than 1 and leave
+        // the effect visibly unfinished on the last frame.
+        float fps = 1.0 + framerate * 59.0;
+        float totalFrames = max(floor(fps * EFFECT_SECONDS), 1.0);
+        float stepped = floor(progress * totalFrames) / totalFrames;
+
+        float p = mix(stepped, 1.0 - stepped, outro);
+        float e = max(edgeSoftness, 0.001);
+
+        // The head enters above the frame and exits below it by whatever
+        // reaches furthest from it - the tinted band, the printing line, or
+        // the shift falloff. That keeps all three fully off-frame at progress
+        // 0 and 1, so none of them disturb the first or last frame.
+        float lead = max(lineWidth, shiftDistance);
+        float trail = max(bandWidth + ditherWidth, lead);
+        float head = p * (1.0 + trail + e + lead) - lead;
+        float revealed = smoothstep(depth, depth + e, head);
+
+        // Distance behind the head. The first bandWidth is solid tint, then it
+        // falls off over ditherWidth - and because that falloff is dithered
+        // below, the ramp shows up as a band of thinning dots, not a blend.
+        float behind = head - depth;
+
+        // Falloff for the printing line itself, centred on the head.
+        float lineFade = 1.0 - smoothstep(0.0, max(lineWidth, 0.0001), abs(behind));
+
+        // The paper shift gets its own, usually wider falloff: full offset on
+        // the head, lerping back to the true sample over shiftDistance.
+        float shiftFade = 1.0 - smoothstep(0.0, max(shiftDistance, 0.0001), abs(behind));
+
+        // The head drags the paper: sampling to the left makes the image read
+        // as pushed right. Every other read below uses srcUv too, so the mask
+        // and the line stay registered with the displaced image instead of
+        // tearing away from it.
+        vec2 srcUv = vec2(uv.x - shiftFade * shiftAmount, uv.y);
+        vec4 color = sampleInput(srcUv);
+
+        float band = 1.0 - smoothstep(bandWidth, bandWidth + max(ditherWidth, 0.001), behind);
+        float tint = clamp(band, 0.0, 1.0) * revealed * bandColor.a;
+
+        // Squeezing the noise into an open range keeps every threshold strictly
+        // between 0 and 1, which is what guarantees tint = 0 dithers to nothing
+        // at all instead of leaving stray lit pixels wherever the hash hits 0.
+        // Pixel-centre coordinate built from uv; shaderc has no Metal translation
+        // for the fragment-coordinate builtin.
+        float d = hash12(floor(grainUv * outputSize) + 0.5) * 0.998 + 0.001;
+
+        // Plain-threshold posterize: everything below the cut is pure black.
+        vec3 straightRgb = vec3(0.0);
+        if (color.a > 0.0) {
+            straightRgb = color.rgb / color.a;
+        }
+        float luma = dot(straightRgb, vec3(0.299, 0.587, 0.114));
+        float bw = step(posterizeThreshold, luma);
+
+        // What survives is desaturated and its grey level drives a gradient
+        // between the two band colours. The grey is renormalised across the
+        // surviving range [threshold, 1] so the whole gradient gets used
+        // wherever the cut sits, instead of only its top end.
+        float gray = clamp((luma - posterizeThreshold) / max(1.0 - posterizeThreshold, 0.001), 0.0, 1.0);
+        vec3 ink = mix(bandColor.rgb, bandColorHigh.rgb, gray);
+        vec3 printed = vec3(bw) * ink;
+
+        // The band fade is dithered rather than blended: the posterized colour
+        // only has two states, so mixing it smoothly would produce in-between
+        // greys and wash out the 1-bit look. Each pixel is fully in or out,
+        // and the fade shows up as the density of pixels that are in.
+        float inBand = step(d, tint);
+
+        printed *= color.a;
+        color.rgb = mix(color.rgb, printed, inBand) * revealed;
+        color.a *= revealed;
+
+        // The printing line sits on the head itself, fading out symmetrically
+        // over lineWidth. Masking it with the horizontally blurred source
+        // alpha makes it hug the subject's silhouette while spilling a little
+        // past its edges, which is what sells it as a print bar rather than a
+        // full-width rule.
+        float spillMask = texture2D(auxSampler1, srcUv).r;
+        float lineA = lineFade * spillMask * lineColor.a;
+
+        // Composite the line over everything else. Going through a proper
+        // source-over keeps the line its own colour where the image below is
+        // still transparent, instead of tinting the unrevealed pixels.
+        float outA = lineA + color.a * (1.0 - lineA);
+        vec3 rgb = lineColor.rgb * lineA + color.rgb * (1.0 - lineA);
+
+        gl_FragColor = toOutputFormat(vec4(rgb, outA));
+    }
+";
+
+string blurGlsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform float spread;
+
+    // Horizontal-only blur of the source alpha. The printing line only needs
+    // to reach sideways past the subject, so a single 1D pass is enough and
+    // avoids the cost of a full separable blur.
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        float s = max(spread, 0.0001);
+        float stepSize = s * 0.25;
+
+        float sum = 0.0;
+        float wsum = 0.0;
+        for (int i = -8; i <= 8; i++) {
+            float fi = float(i);
+            float w = exp(-fi * fi * 0.25);
+            sum += sampleInput(uv + vec2(fi * stepSize, 0.0)).a * w;
+            wsum += w;
+        }
+
+        float a = sum / wsum;
+        gl_FragColor = toOutputFormat(vec4(a, a, a, a));
+    }
+";

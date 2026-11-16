@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "583783949611964",
+  "displayName": "Portrait | Cinema",
+  "description": "[IG Edits] Video effect name. With \"Portrait | Cinema\", the creator can apply a Spark-ported portrait-mode look: the person stays sharp with a warm grade and the background is blurred.",
+  "iglu": {
+    "legacyId": 3340,
+    "subject": {
+      "enabled": true,
+      "fullFrameEnabled": true,
+      "typeSuggestions": [
+        "person"
+      ]
+    }
+  },
+  "assets": [
+    {
+      "name": "portrait_cinema_lut.png",
+      "assetHash": "d3fa4e7ea7c839b493bb7bfef4a83b1e505cced11f591d20fcb527d527a8735a",
+      "hubAssetId": "1393700490496194"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFOqpzLuGO"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "2f14e421",
+      "handle": "AQAFC2LOwLWU",
+      "md5": "326fd3113d71ed769914ab8e8cf58535"
+    }
+  }
+}

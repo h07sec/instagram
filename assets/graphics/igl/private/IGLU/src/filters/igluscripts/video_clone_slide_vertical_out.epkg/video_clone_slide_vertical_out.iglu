@@ -1,0 +1,31 @@
+[Filter IgluscriptVideoCloneSlideVerticalOutFilter]
+
+[Init]
+fun init(Filter filter) {
+  filter.passes = {{
+      name = 'slideVOut,
+      igid = 'video_clone_slide,
+      inputs = {'default},
+      uniforms = {},
+    }};
+
+  filter.parameters = {
+    {direction = 3.0, min = 2.0, max = 3.0, description = "2 = Up, 3 = Down"},
+    {distance = 0.5, min = 0.0, max = 1.0, description = "Gap between clones (0 = flush/touching, 1 = one frame of blank between)"},
+    {amount = 5.0, min = 1.0, max = 10.0, description = "Number of clones in the train"},
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 direction = -1.0;
+  if (getParameterFloat('direction) < 2.5) { direction = 1.0; }
+
+  setShaderUniform('slideVOut, 'progress, getParameterFloat('progress));
+  setShaderUniform('slideVOut, 'directionX, 0.0);
+  setShaderUniform('slideVOut, 'directionY, direction);
+  setShaderUniform('slideVOut, 'intensity, 0.5);
+  setShaderUniform('slideVOut, 'distance, getParameterFloat('distance));
+  setShaderUniform('slideVOut, 'iterations, floor(getParameterFloat('amount)));
+  setShaderUniform('slideVOut, 'outro, 1.0);
+}

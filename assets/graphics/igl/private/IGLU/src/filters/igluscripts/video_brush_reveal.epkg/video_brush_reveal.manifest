@@ -1,0 +1,33 @@
+{
+  "assets": [
+    {
+      "assetHash": "fc02e18c4b89e56365e6fba75dee5b9bf6e6795465bd55811ae416852e465b78",
+      "hubAssetId": "2104621856813108",
+      "name": "brushTex.png"
+    }
+  ],
+  "description": "[IG Edits] Video effect name. With \"Brush Reveal\", the creator can reveal the subject with a sweeping brush stroke that paints it into view.",
+  "displayName": "Brush Reveal",
+  "identifier": "63d41cc5-ed22-4b27-8feb-de143a0c902e",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 2000,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "default": 3.0,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      }
+    ],
+    "legacyId": 4004
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

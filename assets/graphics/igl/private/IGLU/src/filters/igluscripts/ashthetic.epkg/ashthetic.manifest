@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "DA0CBD13-2109-48A2-BDD9-95E388FB8ABC",
+  "displayName": "𝘼𝙎𝙃𝘛𝘏𝘌𝘛𝘐𝘊.",
+  "description": "[IG Edits] Color filter name. With \"𝘼𝙎𝙃𝘛𝘏𝘌𝘛𝘐𝘊.\", the creator gets a dark, near black-and-white color grade with light skin smoothing.",
+  "iglu": {
+    "legacyId": 3320
+  },
+  "assets": [
+    {
+      "name": "ashthetic_lut.png",
+      "assetHash": "f53dba8d3b953a82e9a6a80c61cb9376d3551f995b540fdfe48d4e170f3b536a",
+      "hubAssetId": "1147953814255999"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGXBQ4AJsX"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f1cb2b72",
+      "handle": "AQAF--nyayhr",
+      "md5": "fbc4f38b621626b3e2842cf71e0c9ff9"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GKsadzNciY3_iGcIAAcG7QebQPxAbhQoAAAD"
+    }
+  }
+}

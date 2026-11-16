@@ -1,0 +1,48 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAJaH1a5flr",
+      "key": "43c5e2cf",
+      "md5": "8977254878c72abe0fcf1898b1b84a62"
+    }
+  },
+  "assets": [
+    {
+      "assetHash": "3e52f21aa96d1cf649c00466685d048d79f1ccb8f565f1b0efd56ee127cca2df",
+      "hubAssetId": "1668176594910566",
+      "name": "spriteTex.png"
+    }
+  ],
+  "dependencies": [
+    "video_unfold"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Unfold Out\", the creator can wipe the subject away as unfolding paper folds out of view.",
+  "displayName": "Unfold Out",
+  "identifier": "6584f9b2-4362-4c09-9396-aa0b07ae0c9a",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 1600,
+      "type": "fixedOutro"
+    },
+    "customization": [
+      {
+        "default": 3.0,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      }
+    ],
+    "legacyId": 4015
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFK49JSEUB"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

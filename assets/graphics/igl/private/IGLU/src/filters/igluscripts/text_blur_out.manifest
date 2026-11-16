@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "text_blur_out",
+  "displayName": "Blur Out",
+  "description": "Label for the Blur Out text effect style. This is a text effect that users can add to their content. It animates with a blur fade-out animation.",
+  "iglu": {
+    "behavior": {
+      "type": "fixedOutro",
+      "durationMs": 1000,
+      "curve": "linear"
+    }
+  }
+}

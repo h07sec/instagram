@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1607312219606848",
+  "displayName": "Bas a Droite",
+  "description": "[IG Edits] Video effect name. With \"Bas a Droite\", the creator can overlay a grain texture at 60% opacity and inset a half-scale picture-in-picture of the original frame in the bottom-right.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGOZ5twM8U"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "6737d865",
+      "handle": "AQAP6Yr6J_hZ",
+      "md5": "71dce27d70b86168eec2ebfbbd32a0f6"
+    }
+  },
+  "iglu": {
+    "legacyId": 3073
+  },
+  "assets": [
+    {
+      "name": "bas_a_droite_grain.png",
+      "assetHash": "612e0381af604005d7e12790f640e8e9ad2242fd237a4b0643366380182bfdbf",
+      "hubAssetId": "1651989906501644"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GEoRIDL0OcaBiMoFAM_6ajgnpe9TbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "E033E4C1-96D6-4386-B887-B3D7E7645380",
+  "displayName": "Dispo Cam",
+  "description": "[IG Edits] Color filter name. With \"Dispo Cam\", the creator gets a disposable-camera LUT color grade with a soft vignette and animated film grain.",
+  "iglu": {
+    "legacyId": 3248
+  },
+  "assets": [
+    {
+      "name": "dispo_cam_lut.png",
+      "assetHash": "02da9d3ee57097452a15c2bee17021facf992aa3fd7e95726f4e0a7de24a8a99",
+      "hubAssetId": "1622047869567367"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADrpP9q_mk"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "2facaeda",
+      "handle": "AQAEAYPqS9rS",
+      "md5": "192f7869fe2b41b0d42c63d20571be29"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFx9SDOyfN9uBpYPAKui25SQf3wdbhQoAAAD"
+    }
+  }
+}

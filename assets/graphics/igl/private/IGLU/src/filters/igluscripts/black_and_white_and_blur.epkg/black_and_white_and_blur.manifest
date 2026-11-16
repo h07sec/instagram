@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1147928238896162",
+  "displayName": "black&white&blur",
+  "description": "[IG Edits] Video effect name. With \"black&white&blur\", the creator can apply a Spark-ported black-and-white look with a soft motion echo.",
+  "iglu": {
+    "legacyId": 3331
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQALaUMnB1OR"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3c1a7b18",
+      "handle": "AQAD9geObRzY",
+      "md5": "4f21ae7787e17af8ba76f059804d5f09"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GHJi3TPyAnjCT_gDAGWWL6ajRqFXbhQoAAAD"
+    }
+  }
+}

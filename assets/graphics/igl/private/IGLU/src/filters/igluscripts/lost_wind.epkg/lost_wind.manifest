@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "356917112209580",
+  "displayName": "Lost wind",
+  "description": "[IG Edits] Color filter name. With \"Lost wind\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3374
+  },
+  "assets": [
+    {
+      "name": "lost_wind_lut.png",
+      "assetHash": "8de84ab3ba4c867bc5ad786c9305c5a2fd35d24884d28a28397ae0cee30cb3ed",
+      "hubAssetId": "2148886855717419"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADWJUHEgTI"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "bf614558",
+      "handle": "AQADy-ADlWOF",
+      "md5": "51761fac8f73e56436ddf13cbf3e569f"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOGJ0DST3sQdVygFAJzJFgf573gTbhQoAAAD"
+    }
+  }
+}

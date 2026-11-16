@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "438174FA-3BB6-408F-83C2-9322DB52E72C",
+  "displayName": "𝟡𝟘𝕤𝕥𝕖𝕥𝕙𝕚𝕔",
+  "description": "[IG Edits] Color filter name. With \"𝟡𝟘𝕤𝕥𝕖𝕥𝕙𝕚𝕔\", the creator gets a light pink-lavender 90s color grade with skin smoothing and twinkling sparkles on bright highlights.",
+  "iglu": {
+    "legacyId": 3317
+  },
+  "assets": [
+    {
+      "name": "nineties_aesthetic_lut.png",
+      "assetHash": "7b0b4b6df398f9a5b032062f7047efc3219beef247eabdd4b9fbec531bd4d156",
+      "hubAssetId": "1091819850524373"
+    },
+    {
+      "name": "nineties_aesthetic_sparkle.png",
+      "assetHash": "713855a2bed9f173d19f30e14ad2f6338e7aa80e29b3eb7e96aa13156065076a",
+      "hubAssetId": "1719020526518013"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHpUs6p_UH"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e72189",
+      "handle": "AQAJAZv8oCxP",
+      "md5": "9516f22a56e647904a74c40becf836de"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GLYdijOBQ08UhBYFAGqFmEEFZRFAbhQoAAAD"
+    }
+  }
+}

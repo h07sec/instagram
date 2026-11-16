@@ -1,0 +1,321 @@
+[Filter TransitionMulticlipHyperwarpZoom]
+
+# Multiclip Hyperwarp Zoom (AE: Edits_Transition_collect_01 / hyperwarp_zoom).
+#   Clip A: accelerating push-in, Scale 100% -> 300% over 0.4s-0.8s.
+#   Clip B (from 0.767s): mirror-tiled (CC RepeTile, 4000px each side) and
+#     lens-stretched (Optics Compensation FOV 160 -> 0, Reverse Lens
+#     Distortion, 0.467s-2.083s), growing from 14% to 100% (0.717s-1.317s), so
+#     it lands as a tunnel of tiles streaking out from the centre and settles
+#     into the clip.
+#   Adjustment layer: Camera Lens Blur 0 -> 80px -> 0 and VR Chromatic
+#     Aberration (red -10 / blue +10) peaking at 0.767s.
+# Progress spans 0.4s-1.65s (blur and aberration are done by then; the
+# remaining lens distortion is a few degrees of FOV). Pixel sizes are in the 2160px-wide
+# AE comp and scale with the output width.
+#
+# Ported from the Easel web tool's multiclip_hyperwarp_zoom.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {blurAmount = 1.0, min = 0.0, max = 2.0, description = "Lens Blur Amount"},
+    {aberrationAmount = 1.0, min = 0.0, max = 2.0, description = "Chromatic Aberration Amount"},
+  };
+
+  filter.passes = {
+    {
+      name = 'warp,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        invScales[] = {
+          {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},
+          {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}
+        },
+        staticA = true,
+        staticB = true,
+        showB = false,
+        useLens = false,
+        tanHalfFov = 0.0,
+        lensRadius = 0.78,
+        tileB = 1.0,
+        aspect = 1.7778,
+      },
+      glslShader = warpGlsl,
+    },
+    {
+      name = 'post,
+      inputs = {'warp},
+      uniforms = {
+        noBlur = true,
+        applyCA = false,
+        caScales = {1.0, 1.0},
+        blurRadius = 0.0,
+        aspect = 1.7778,
+      },
+      glslShader = postGlsl,
+    },
+  };
+}
+
+f32 T0 = 0.4;
+f32 T1 = 1.65;
+f32 T_B = 0.7666;
+f32 COMP_WIDTH = 2160.0;
+
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 is = 1.0 - s;
+  return 3.0 * is * is * s * a + 3.0 * is * s * s * b + s * s * s;
+}
+
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 uu = clamp(u, 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = uu;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < uu) {
+      lo = s;
+    } else {
+      hi = s;
+    }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+# One AE bezier keyframe segment (t0, v0) -> (t1, v1). io/so: out influence and
+# speed of the first key; ii/si: in influence and speed of the second key.
+fun aeSeg(f32 t, f32 t0, f32 v0, f32 t1, f32 v1, f32 io, f32 so, f32 ii, f32 si) f32 {
+  f32 dt = t1 - t0;
+  f32 dv = v1 - v0;
+  f32 r = v0;
+  if (t >= t1) {
+    r = v1;
+  } else if (t > t0) {
+    f32 y1 = io * so * dt / dv;
+    f32 y2 = 1.0 - ii * si * dt / dv;
+    r = v0 + dv * aeEase((t - t0) / dt, io, y1, 1.0 - ii, y2);
+  }
+  return r;
+}
+
+# Linear keyframes 0 -> peak -> 0.
+fun tri(f32 t, f32 t0, f32 t1, f32 t2, f32 peak) f32 {
+  f32 r = 0.0;
+  if (t > t0 and t <= t1) {
+    r = peak * (t - t0) / (t1 - t0);
+  } else if (t > t1 and t < t2) {
+    r = peak * (t2 - t) / (t2 - t1);
+  }
+  return r;
+}
+
+# Layer scales; speeds are AE %/s over 300 (a clip filling the frame is 300%).
+fun scaleAAt(f32 t) f32 {
+  return aeSeg(t, 0.4, 1.0, 0.8, 3.0, 0.99, 10.8 / 300.0, 0.13, 7620.0 / 300.0);
+}
+
+fun scaleBAt(f32 t) f32 {
+  return aeSeg(t, 0.717, 0.1433, 1.317, 1.0, 0.36, 0.0, 0.98, 6.34 / 300.0);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 t = T0 + p * (T1 - T0);
+  vec2 size = getTextureSize('default);
+  f32 aspect = size.y / max(size.x, 1.0);
+
+  f32 fov = aeSeg(t, 0.467, 160.0, 2.083, 0.0, 0.33, 0.0, 1.0, 0.0 - 1.8);
+
+  f32 blur = 0.0;
+  if (t <= T_B) {
+    blur = aeSeg(t, 0.533, 0.0, T_B, 80.0, 1.0, 0.0, 0.33, 0.0);
+  } else {
+    blur = aeSeg(t, T_B, 80.0, 1.65, 0.0, 0.33, 0.0, 1.0, 0.0);
+  }
+  f32 aberration = tri(t, 0.533, T_B, 1.4, 10.0);
+
+  f32 showB = 0.0;
+  if (t >= T_B) {
+    showB = 1.0;
+  }
+  if (p >= 1.0) {
+    fov = 0.0;
+    blur = 0.0;
+  }
+
+  # Layer motion blur: 180 degree shutter at 60fps.
+  f32 mb = 0.0041667;
+  f32 tB = t;
+  if (p >= 1.0) {
+    tB = 10.0;
+  }
+  f32 scaleA0 = scaleAAt(t - mb);
+  f32 scaleA1 = scaleAAt(t + mb);
+  f32 scaleB0 = scaleBAt(tB - mb);
+  f32 scaleB1 = scaleBAt(tB + mb);
+  vec2[6.0] invScales = {
+    {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},
+    {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}
+  };
+  for (f32 i = 0.0; i < 6.0; i = i + 1.0) {
+    f32 f = (i + 0.5) / 6.0;
+    invScales[i] = {1.0 / mix(scaleA0, scaleA1, f), 1.0 / mix(scaleB0, scaleB1, f)};
+  }
+  f32 hf = 0.5 * radians(fov);
+  setShaderUniform('warp, 'invScales, invScales);
+  setShaderUniform('warp, 'staticA, scaleA0 == scaleA1);
+  setShaderUniform('warp, 'staticB, scaleB0 == scaleB1);
+  setShaderUniform('warp, 'showB, showB > 0.5);
+  setShaderUniform('warp, 'useLens, not (hf < 0.001));
+  setShaderUniform('warp, 'tanHalfFov, tan(hf));
+  setShaderUniform('warp, 'aspect, aspect);
+  # Blur radius as a fraction of the output width.
+  f32 blurRadius = blur / COMP_WIDTH * getParameterFloat('blurAmount);
+  f32 ca = aberration * getParameterFloat('aberrationAmount);
+  boolean noBlur = blurRadius < 0.0001;
+  boolean applyCA = ca != 0.0;
+  if (noBlur) {
+    applyCA = ca > 0.0;
+  }
+  vec2 caScales = {1.0 - ca * 0.004, 1.0 + ca * 0.004};
+  setShaderUniform('post, 'noBlur, noBlur);
+  setShaderUniform('post, 'applyCA, applyCA);
+  setShaderUniform('post, 'caScales, caScales);
+  setShaderUniform('post, 'blurRadius, blurRadius);
+  setShaderUniform('post, 'aspect, aspect);
+}
+
+string warpGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform vec2 invScales[6];
+uniform bool staticA;
+uniform bool staticB;
+uniform bool showB;
+uniform bool useLens;
+uniform float tanHalfFov;
+uniform float lensRadius;
+uniform float tileB;
+uniform float aspect;
+
+vec2 mirrorTile(vec2 uv) {
+  vec2 m = mod(uv, 2.0);
+  return mix(m, 2.0 - m, step(1.0, m));
+}
+
+// Optics Compensation with Reverse Lens Distortion: undoes a lens of the
+// given FOV (fisheye to rectilinear), so the centre holds its size and the
+// outside is stretched outward. p is in layer half-widths; lensRadius was fit
+// against the AE render.
+vec2 undistort(vec2 p) {
+  if (!useLens) return p;
+  float rho = length(p) / lensRadius;
+  if (rho < 1e-6) return p;
+  return p * (atan(rho * tanHalfFov) / tanHalfFov / rho);
+}
+
+vec4 sampleB(vec2 c, float invScale) {
+  vec2 pb = undistort(c * invScale);
+  vec2 buv = vec2(pb.x, pb.y / aspect) * 0.5 + 0.5;
+  if (tileB > 0.5) return texture2D(s_texture1, mirrorTile(buv));
+  bool inside = buv.x >= 0.0 && buv.x <= 1.0 && buv.y >= 0.0 && buv.y <= 1.0;
+  if (inside) return texture2D(s_texture1, buv);
+  return vec4(0.0);
+}
+
+vec4 averageStaticSample(vec4 s) {
+  vec4 acc = vec4(0.0);
+  for (int i = 0; i < 6; i++) {
+    acc += s;
+  }
+  return acc / 6.0;
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  // Centred coordinates in clip half-widths.
+  vec2 c = vec2(uv.x - 0.5, (uv.y - 0.5) * aspect) * 2.0;
+
+  // Layer motion blur: average the scale across the shutter.
+  const int N = 6;
+  vec4 a = vec4(0.0);
+  if (staticA) {
+    vec2 pa = c * invScales[0].x;
+    a = averageStaticSample(sampleInput(vec2(pa.x, pa.y / aspect) * 0.5 + 0.5));
+  } else {
+    for (int i = 0; i < N; i++) {
+      vec2 pa = c * invScales[i].x;
+      a += sampleInput(vec2(pa.x, pa.y / aspect) * 0.5 + 0.5);
+    }
+    a /= float(N);
+  }
+
+  vec4 col = a;
+  if (showB) {
+    vec4 b = vec4(0.0);
+    if (staticB) {
+      b = averageStaticSample(sampleB(c, invScales[0].y));
+    } else {
+      for (int i = 0; i < N; i++) {
+        b += sampleB(c, invScales[i].y);
+      }
+      b /= float(N);
+    }
+    float outA = b.a + a.a * (1.0 - b.a);
+    col = vec4((b.rgb * b.a + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5), outA);
+  }
+  gl_FragColor = toOutputFormat(col);
+}
+";
+
+string postGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform bool noBlur;
+uniform bool applyCA;
+uniform vec2 caScales;
+uniform float blurRadius;
+uniform float aspect;
+
+// Radial chromatic aberration: red pulled in, blue pushed out.
+vec3 sampleCA(vec2 uv) {
+  if (!applyCA) return sampleInput(uv).rgb;
+  vec2 d = uv - 0.5;
+  float r = sampleInput(0.5 + d * caScales.x).r;
+  vec4 g = sampleInput(uv);
+  float b = sampleInput(0.5 + d * caScales.y).b;
+  return vec3(r, g.g, b);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec3 col;
+  if (noBlur) {
+    col = sampleCA(uv);
+  } else {
+    // Camera Lens Blur: a flat disc kernel, golden-angle spiral taps.
+    const int N = 32;
+    vec3 acc = vec3(0.0);
+    for (int i = 0; i < N; i++) {
+      float f = (float(i) + 0.5) / float(N);
+      float ang = float(i) * 2.39996;
+      vec2 o = vec2(cos(ang), sin(ang) / aspect) * sqrt(f) * blurRadius;
+      acc += sampleCA(uv + o);
+    }
+    col = acc / float(N);
+  }
+  gl_FragColor = toOutputFormat(vec4(col, 1.0));
+}
+";

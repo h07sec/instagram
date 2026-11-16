@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1183996159029581",
+  "displayName": "𝗥𝗲𝘁𝗿𝗼 𝗧𝗩 ™",
+  "description": "[IG Edits] Color filter name. With \"𝗥𝗲𝘁𝗿𝗼 𝗧𝗩 ™\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3380
+  },
+  "assets": [
+    {
+      "name": "retro_tv_lut.png",
+      "assetHash": "73c6e40b83eb886e4b06c9ba323b5ed62b8775ca19cbe3b7bcbf78506639159e",
+      "hubAssetId": "1560241062540331"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFWMVp3TTS"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5f0ba60d",
+      "handle": "AQAFwdifDTxJ",
+      "md5": "67170b6b68c06adb5065730a2a15b07b"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GHYnkDPjrCsjg5IFAKwEQGI72dAEbhQoAAAD"
+    }
+  }
+}

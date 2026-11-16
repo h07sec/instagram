@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "740687216913775",
+  "displayName": "ᴋᴏᴅᴀᴋ ɢʀᴀɪɴ",
+  "description": "[IG Edits] Color filter name. With \"ᴋᴏᴅᴀᴋ ɢʀᴀɪɴ\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3384
+  },
+  "assets": [
+    {
+      "name": "kodak_grain_lut.png",
+      "assetHash": "0d7038460a08942c7c5cc0263cf83e3d74afc4fc53aac178773557f97c50bc80",
+      "hubAssetId": "2118764215675375"
+    },
+    {
+      "name": "kodak_grain_leak.png",
+      "assetHash": "7c0c10f6302bee98bdaef25a52147227ad92cff2427033e394675516addc8cfa",
+      "hubAssetId": "2197209254477730"
+    },
+    {
+      "name": "kodak_grain_date.png",
+      "assetHash": "f878009c7ec9f589ace08e0e82339c012d541e621e6ca2180db52acc853033ab",
+      "hubAssetId": "1437274498519103"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQBpgCHfgVxg"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "728160c3",
+      "handle": "AQAEDTMxG13D",
+      "md5": "1623cc7ef4de88d6bff44d157a937a1c"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GCMgczQ5eESawKYFAE9WxRBZawtqbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130002">Igihugu</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Aderesi</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130008">Kwiyuzuza hakoreshejwe ikarita yo kuri konti y’ibyamamaza yawe?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Gufunga mushakisha</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002e">%1$s irashaka gukoresha kamera na mikoro by’igikoresho cyawe.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">"%1$s irashaka gukoresha kamera y'igikoresho cyawe."</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">"%1$s irashaka gukoresha ahantu y'igikoresho cyawe."</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130031">%1$s irashaka gukoresha mikoro by’igikoresho cyawe.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130032">Emerera mediya zose gukoresha mutoranyadosiye</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Kwemerera</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Guhagarika</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130035">Gutubya mushakisha</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130036">Gusubira inyuma</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130037">Gukomeza imbere</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130038">"Icyemezo cy'umutekano cy'uru rubuga gifite ibibazo"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Komereza ku rubuga</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">"Icyemezo cy'umutekano gikoreshwa na %1$s gifite ikibazo. Amakuru bwite yawe nk'amagambobanga cyangwa nomero z'amakarita ya keredi ashobora kuba adatekanye mu gihe asangijwe kuri uru rubuga."</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">Uru rubuga ntiruri gukoresha ukwihuza gutekanye.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">"Ikosa ry'umutekano"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Umutwengaruka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003e">Kureka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003f">Imeyiri</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009e">Urubuga uri kureba ruri kugerageza gufungura porogaramu yo hanze. Urifuza gukomeza?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Gukomeza</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Uri kuva kuri porogaramu yacu</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Ibi bishobora kuba biterwa n’ikosa rya tekiniki turimo kugerageza gukosora. Gerageza kongera gufungura iyi paji.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Kugaruraho</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Paji ntiboneka ubu</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">"Izina ry'ababyeyi"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Paji ntishobora gufunguka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Gufunguza …</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Gufungira muri %1$s</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Andi mahitamo</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">Izina ry’idini</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Ubu uri kureba mugaragaza yuzuye. Nyatura ugana ibumoso cyangwa ukande buto yo gusubira inyuma kugira ngo usohoke.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Amateka y’amahuza. Kanda kabiri kugira ngo ubone urutonde rw’amahuza yo ku mbuga wari wasuye mbere.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Gufunga</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Kanda kugira ngo wongereho ikarita</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f5">"Agasanduku k'iposita"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f6">Kwemeza aderesi yo kwishyuzwa imeze kimwe no kohereza</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010a">"[card brand or issuer] ishusho y'ikarita"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010d">"Kwagura amakuru n'utugenzura byo kwiyuzuza"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13013b">Menya ibindi</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130149">Telefoni</string>
+</resources>

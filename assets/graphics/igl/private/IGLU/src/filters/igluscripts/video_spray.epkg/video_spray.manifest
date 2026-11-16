@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "4dd9a1c2-b178-441c-96b8-ec7a825adc6e",
+  "displayName": "Spray",
+  "description": "[IG Edits] Video effect name. With \"Spray\", the creator can reveal the subject with a grainy pixel spray that sharpens from blur into focus.",
+  "iglu": {
+    "legacyId": 4010,
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 1000,
+      "curve": "quadraticOut"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      }
+    ]
+  }
+}

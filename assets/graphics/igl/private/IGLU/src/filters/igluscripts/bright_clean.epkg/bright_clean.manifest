@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "561569378037746",
+  "displayName": "Bright Clean",
+  "description": "[IG Edits] Color filter name. With \"Bright Clean\", the creator gets a bright, clean LUT color grade with subtle skin smoothing for a fresh, polished look.",
+  "android": {
+    "previewAsset": {
+      "key": "5e6f0a4e",
+      "handle": "AQAKIYYFSvV4",
+      "md5": "f88658adb52df03436958b0754708ef1"
+    }
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFkl7Lql9p"
+    }
+  },
+  "iglu": {
+    "legacyId": 3169
+  },
+  "assets": [
+    {
+      "name": "bright_clean_lut.png",
+      "assetHash": "feff7bd11e27c0aafa8ba3a19d1c12f261d20ead7f020d07809638647fd17ed1",
+      "hubAssetId": "1810242106625843"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GE5jEDL_mDh9rwgFAMHS_PiS3gVbbhQoAAAD"
+    }
+  }
+}

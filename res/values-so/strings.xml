@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130003">Magaalo</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130006">Guriga/nambarka qolka (ikhtiyaari ah)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Daalacdaha xidh</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">%1$s waxa uu doonayaa in uu isticmaalo kaamirada aaladdaada.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s ayaa rabo inuu isticmaalo goobta aaladaada.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130032">Fadlan u oggolow dhammaan warbaahinada in ay isticmaalaan doortaha faylka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Oggolow</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Xannib</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Sii gal mareegta</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Dib u noqo</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">Waxaa ka jira dhib shahaadada amniga ee uu isticmaalay %1$s. Macluumaadkaaga khaaska ah, sida furayaasha sirta ama lambarada kaadhka bangiga, ayaa laga yaabaa in aanay ammaan ahayn marka lala wadaago mareegtadan.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Mareegtan ma isticmaaleyso khad sugan</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Wax Ayaa Khaldamay</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Isdhaafi</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009e">Iimaylka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Mareegta aad eegeyso waxay isku dayaysaa in ay furto app dibadda ah. Ma jeclaan lahayd inaad sii wadato?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Sii wad</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Waxaad ka baxeysaa app-kayaga</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Tani waxa laga yaabaa inay sabab u tahay cilad farsamo oo aanu ka shaqaynayno sidii aanu u hagaajin lahayn. Isku day inaad dib u soo kiciso boggan.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Dib u cusboonaysii</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Bogga hadda lama heli karo</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Magaca Labaad</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Bogga lama soo muujin karo</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Ku fur ...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Ku fur %1$s</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">Ikhtiyaaro badan</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Magaca Koowaad</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Waxaad hadda ku daawanaysaa shaashad dhammeystiran. Dhinaca bidix u dhaqaaji ama taabo badhanka dib u noqo si aad uga baxdo.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Waxaan dhibaato ku qabnaa dajinta %2$s ee %1$s hadeer. Waad isku dayi kartaa markale, ama ku isticmaali kartaa %2$s af Ingiriis (US) hadda.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Waxyar inta aan diyaarineyno %1$s…</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Markale isku day</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Ku sii wad Ingiriiska (US)</string>
+</resources>

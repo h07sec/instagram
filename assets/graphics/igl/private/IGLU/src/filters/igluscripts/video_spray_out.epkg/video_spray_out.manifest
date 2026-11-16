@@ -1,0 +1,67 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAFa-6XAcnD",
+      "key": "4b3e4af",
+      "md5": "f57eb923cf6aa7f6babcb7a3b741fd92"
+    }
+  },
+  "dependencies": [
+    "video_spray"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Spray Out\", the creator can wipe the subject away as a grainy pixel spray dissolves it out of view.",
+  "displayName": "Spray Out",
+  "identifier": "753351b8-e396-425e-82fe-a29758c22396",
+  "iglu": {
+    "behavior": {
+      "curve": "quadraticOut",
+      "durationMs": 1500,
+      "type": "fixedOutro"
+    },
+    "customization": [
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "up",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 1.5,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "default": 0.25,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect.",
+        "max": 1.0,
+        "min": 0.1,
+        "name": "size"
+      },
+      {
+        "default": 1.0,
+        "displayName": "Amount",
+        "displayNameDescription": "[IG Edits] Slider label controlling the strength of a video effect. Generic across many effects (glow, blur, color, distortion, etc.); exact range varies per effect.",
+        "max": 1.0,
+        "min": 0.0,
+        "name": "amount"
+      }
+    ],
+    "legacyId": 4012
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADcm6ltasU"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

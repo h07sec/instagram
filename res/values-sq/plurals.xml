@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$dm ago</item>
+        <item quantity="one">%1$d m më parë</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d detyra të shfletuesit</item>
+        <item quantity="one">%1$d browser task</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Expires in %1$d hours</item>
+        <item quantity="one">Skadon pas %1$d ore</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Skadon pas %1$d minutash</item>
+        <item quantity="one">Skadon pas %1$d minute</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d detyra kanë nevojë për rishikim</item>
+        <item quantity="one">A task needs review</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d passengers</item>
+        <item quantity="one">%1$d udhëtar</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d detyra kanë nevojë për rishikim</item>
+        <item quantity="one">%1$d task needs review</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d lidhës</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d çanta dore</item>
+        <item quantity="one">%1$d carry-on bag</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d checked bags</item>
+        <item quantity="one">%1$d çantë e kontrolluar</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d ndalesa</item>
+        <item quantity="one">%1$d ndalesë</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Use %1$d images</item>
+        <item quantity="one">Përdor %1$d imazh</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Karta e përkohshme skadon brenda %1$d orësh</item>
+        <item quantity="one">Temporary card expires in %1$d hour</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Every %1$d hours</item>
+        <item quantity="one">Çdo %1$d orë</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Every %1$d seconds</item>
+        <item quantity="one">Çdo %1$d sekondë</item>
+    </plurals>
+</resources>

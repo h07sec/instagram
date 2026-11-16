@@ -1,0 +1,284 @@
+[Filter TransitionMulticlipFilmstrip]
+
+# Multiclip Filmstrip (AE: Edits_Transition_collect_01 / PRE_TRANSITION_FILMSTRIP_POSITIONAL_FAST).
+# Clip A jolts down a notch, then the frame becomes a strip of film that
+# whips down three frames (CC RepeTile copies stacked above a cropped layer,
+# Y Position +3 frames with layer motion blur): clip A's strip first, clip B's
+# strip from 1.2s, landing square on clip B at 1.3s. Warm film-burn frames
+# (CC Toner washes, screened light-leak bands, grain) flash over the strip on
+# hand-timed frames. Progress spans 1.0s-1.3s (nine frames at 30fps); the
+# frame schedule scales with duration.
+#
+# Ported from the Easel web tool's multiclip_filmstrip.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {burnAmount = 1.0, min = 0.0, max = 1.0, description = "Film Burn Amount"},
+    {motionBlur = 1.0, min = 0.0, max = 1.0, description = "Motion Blur"},
+  };
+
+  filter.passes = {{
+    name = 'strip,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      offset0 = 0.0,
+      offset1 = 0.0,
+      tiled = 0.0,
+      showB = 0.0,
+      gap = 0.04,
+      wash = 0.0,
+      flare = 0.0,
+      bandTop = 0.0,
+      bandBottom = 0.0,
+      bandSoft = 0.1,
+      bandColor = {1.0, 1.0, 1.0},
+      grain = 0.0,
+      washTint = {1.0, 1.0, 1.0},
+      seed = 0.0,
+    },
+    glslShader = glsl,
+  }};
+}
+
+f32 T0 = 1.0;
+f32 T1 = 1.3;
+f32 FRAMES = 9.0;
+# Layer motion blur: 180 degree shutter at 30fps.
+f32 SHUTTER = 0.008333;
+
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 is = 1.0 - s;
+  return 3.0 * is * is * s * a + 3.0 * is * s * s * b + s * s * s;
+}
+
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 uu = clamp(u, 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = uu;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < uu) {
+      lo = s;
+    } else {
+      hi = s;
+    }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+fun aeSeg(f32 t, f32 t0, f32 v0, f32 t1, f32 v1, f32 io, f32 so, f32 ii, f32 si) f32 {
+  f32 dt = t1 - t0;
+  f32 dv = v1 - v0;
+  f32 r = v0;
+  if (t >= t1) {
+    r = v1;
+  } else if (t > t0) {
+    f32 y1 = io * so * dt / dv;
+    f32 y2 = 1.0 - ii * si * dt / dv;
+    r = v0 + dv * aeEase((t - t0) / dt, io, y1, 1.0 - ii, y2);
+  }
+  return r;
+}
+
+# Downward offset of the visible strip, in frame heights, at PRE_MOVEMENT time u.
+fun stripOffset(f32 u, f32 isB) f32 {
+  f32 r = 0.0;
+  if (isB > 0.5) {
+    # Y Position 640 -> 4355 -> 4480 px (1280px frames); speeds in frames/s.
+    if (u < 0.267) {
+      r = aeSeg(u, 0.0, 0.0, 0.267, 2.9023, 0.51, 0.0, 0.42, 5.797);
+    } else {
+      r = aeSeg(u, 0.267, 2.9023, 0.333, 3.0, 0.29, 5.797, 0.39, 0.0);
+    }
+  } else if (u < 0.067) {
+    # The un-tiled clip A jolts down 161px then settles to 110px.
+    if (u < 0.033) {
+      r = 0.1258 * u / 0.033;
+    } else {
+      r = 0.1258 + (0.0859 - 0.1258) * (u - 0.033) / 0.034;
+    }
+  } else {
+    r = aeSeg(u, 0.0, 0.0, 0.333, 3.0, 0.48, 0.0, 0.52, 0.0);
+  }
+  return r;
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 u = p * (T1 - T0);
+  f32 k = floor(p * FRAMES + 0.001);
+  f32 burn = getParameterFloat('burnAmount);
+  f32 mb = SHUTTER * getParameterFloat('motionBlur);
+
+  f32 isB = 0.0;
+  if (u >= 0.199) {
+    isB = 1.0;
+  }
+  f32 tiled = 0.0;
+  if (u >= 0.066) {
+    tiled = 1.0;
+  }
+
+  f32 o0 = stripOffset(max(u - mb, 0.0), isB);
+  f32 o1 = stripOffset(u + mb, isB);
+  if (p <= 0.0 or p >= 1.0) {
+    o0 = 0.0;
+    o1 = 0.0;
+    tiled = 0.0;
+  }
+  if (p >= 1.0) {
+    isB = 1.0;
+  }
+
+  # Film-burn schedule, one entry per frame.
+  f32 wash = 0.0;
+  f32 flare = 0.0;
+  f32 top = 0.0;
+  f32 bottom = 0.0;
+  f32 soft = 0.1;
+  vec3 bandColor = {1.0, 0.75, 0.35};
+  vec3 washTint = {1.0, 1.0, 1.0};
+  f32 grain = 0.0;
+  if (p > 0.0 and p < 1.0) {
+    if (k == 1.0) {
+      wash = 0.9;
+      top = 0.0 - 0.2;
+      bottom = 0.06;
+      soft = 0.06;
+      bandColor = {1.0, 0.85, 0.1};
+      washTint = {1.0, 0.82, 1.05};
+      grain = 1.0;
+    } else if (k == 3.0) {
+      wash = 0.4;
+      flare = 0.15;
+      top = 0.38;
+      bottom = 0.6;
+      soft = 0.12;
+    } else if (k == 4.0) {
+      wash = 0.5;
+      flare = 0.25;
+      top = 0.1;
+      bottom = 0.5;
+      soft = 0.25;
+      bandColor = {0.6, 0.45, 0.3};
+    } else if (k == 5.0) {
+      wash = 0.6;
+      flare = 0.3;
+      top = 0.25;
+      bottom = 0.7;
+      soft = 0.25;
+      bandColor = {0.8, 0.5, 0.2};
+    } else if (k == 7.0) {
+      wash = 0.85;
+      grain = 1.0;
+    } else if (k == 8.0) {
+      wash = 0.7;
+      grain = 1.0;
+    }
+  }
+
+  setShaderUniform('strip, 'offset0, o0);
+  setShaderUniform('strip, 'offset1, o1);
+  setShaderUniform('strip, 'tiled, tiled);
+  setShaderUniform('strip, 'showB, isB);
+  setShaderUniform('strip, 'wash, wash * burn);
+  setShaderUniform('strip, 'flare, flare * burn);
+  setShaderUniform('strip, 'bandTop, top);
+  setShaderUniform('strip, 'bandBottom, bottom);
+  setShaderUniform('strip, 'bandSoft, soft);
+  setShaderUniform('strip, 'bandColor, bandColor);
+  setShaderUniform('strip, 'grain, grain * burn);
+  setShaderUniform('strip, 'washTint, washTint);
+  setShaderUniform('strip, 'seed, k);
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float offset0;
+uniform float offset1;
+uniform float tiled;
+uniform float showB;
+uniform float gap;
+uniform float wash;
+uniform float flare;
+uniform float bandTop;
+uniform float bandBottom;
+uniform float bandSoft;
+uniform vec3 bandColor;
+uniform float grain;
+uniform vec3 washTint;
+uniform float seed;
+
+// Maps uv.y to distance from the top edge, and back, on every backend.
+float fromTop(float v) {
+  return max(UP, 0.0) + DOWN * v;
+}
+
+// One sample of the strip with the content moved down by 'off' frame heights.
+// y runs top to bottom.
+vec3 stripAt(vec2 uv, float off) {
+  float y = fromTop(uv.y) - off;
+  float m = 1.0;
+  if (tiled > 0.5) {
+    y = fract(y);
+    // Black gaps between film frames (the layer is cropped by a shape matte).
+    float g = 0.5 * gap;
+    m = smoothstep(0.0, 0.004, y - g) * smoothstep(0.0, 0.004, 1.0 - g - y);
+  } else if (y < 0.0) {
+    m = 0.0;
+  }
+  vec2 suv = vec2(uv.x, fromTop(clamp(y, 0.0, 1.0)));
+  vec4 c = showB > 0.5 ? texture2D(s_texture1, suv) : sampleInput(suv);
+  return c.rgb * m;
+}
+
+// Warm film-burn tone (stand-in for the CC Toner washes): warm colours go
+// orange, cool ones lavender, both lifted.
+vec3 burnTone(vec3 c) {
+  float l = dot(c, vec3(0.299, 0.587, 0.114));
+  float w = clamp((c.r - c.b) * 2.0 + 0.5, 0.0, 1.0);
+  vec3 cool = vec3(0.88, 0.80, 0.96) * (0.65 + 0.4 * l);
+  vec3 warm = vec3(1.0, 0.72, 0.28) * (0.75 + 0.4 * l);
+  return clamp(mix(cool, warm, w), 0.0, 1.0);
+}
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed * 17.0) * 43758.5453);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  vec3 col = vec3(0.0);
+  const int N = 12;
+  for (int i = 0; i < N; i++) {
+    float f = (float(i) + 0.5) / float(N);
+    col += stripAt(uv, mix(offset0, offset1, f));
+  }
+  col /= float(N);
+
+  col = mix(col, burnTone(col) * washTint, wash);
+
+  float y = fromTop(uv.y);
+  float s = max(bandSoft, 1e-3);
+  float band = smoothstep(bandTop - s, bandTop + s, y) * (1.0 - smoothstep(bandBottom - s, bandBottom + s, y));
+  float hasBand = step(1e-4, bandBottom - bandTop);
+  vec3 light = bandColor * band * hasBand + vec3(flare);
+  col = 1.0 - (1.0 - col) * (1.0 - clamp(light, 0.0, 1.0));
+
+  col += (hash(floor(uv * vec2(720.0, 1280.0))) - 0.5) * 0.12 * grain;
+  gl_FragColor = toOutputFormat(vec4(clamp(col, 0.0, 1.0), 1.0));
+}
+";

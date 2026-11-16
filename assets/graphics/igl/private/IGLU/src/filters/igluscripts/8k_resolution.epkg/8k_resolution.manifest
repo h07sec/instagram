@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1043101933014456",
+  "displayName": "8K Resolution",
+  "description": "[IG Edits] Color filter name. With \"8K Resolution\", the creator can apply a Spark-ported crisp sharpened look with a warm colour grade.",
+  "iglu": {
+    "legacyId": 3417
+  },
+  "assets": [
+    {
+      "name": "8k_resolution_lut.png",
+      "assetHash": "3058da00d50ed9cea64851c6556239fd4f2d08874ec2575226393668e208c8cd",
+      "hubAssetId": "1377806720907507"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEIkDXJbIB"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "4d635c2b",
+      "handle": "AQAJGnVYb5Uq",
+      "md5": "9e2796a7a6dd8897332a3050685ec8b0"
+    }
+  }
+}

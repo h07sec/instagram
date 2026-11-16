@@ -1,0 +1,516 @@
+[Filter ProductShimmerContinuous]
+[MaskBehavior composite]
+[TimeBehavior monotonic]
+
+[Init]
+fun init(Filter filter) {
+
+makeTexture('mask);
+
+filter.parameters = {
+    {waveWidth = 1.75, min = 0.05, max = 2.0, description = "waveWidth"},
+    {waveScaling = -0.25, min = -1.0, max = 1.0, description = "waveScaling"},
+    {blurRadius = 3.0, min = 0.0, max = 8.0, description = "blurRadius"},
+    {edgeWidth = 0.15, min = 0.01, max = 0.5, description = "edgeWidth"},
+    {edgeBlurOffset = 0.6, min = 0.0, max = 1.0, description = "edgeBlurOffset"},
+    {opacity = 0.55, min = 0.0, max = 1.0, description = "opacity"},
+    {washStrength = 0.2, min = 0.0, max = 1.0, description = "washStrength"},
+    {imageDim = 0.0, min = 0.0, max = 1.0, description = "imageDim"},
+    {type = 0.0, min = 0.0, max = 1.0, description = "type"},
+    {falloff = 6.0, min = 0.25, max = 6.0, description = "falloff"},
+    {easeOut = 1.0, min = 0.0, max = 1.0, description = "easeOut"},
+    {shimmer_speed = 0.115, min = 0.01, max = 2.0, description = "shimmer_speed"},
+    {shimmer_pause = 1.0, min = 0.0, max = 15.0, description = "shimmer_pause"},
+    {dipAmount = 0.25, min = 0.0, max = 1.0, description = "dipAmount"},
+    {dipSlope = 0.25, min = 0.25, max = 6.0, description = "dipSlope"},
+    {edgeGain = 1.25, min = 0.0, max = 16.0, description = "edgeGain"},
+    {edgeLevels = 0.75, min = 0.25, max = 4.0, description = "edgeLevels"},
+    {edgeBlur = 1.25, min = 0.0, max = 8.0, description = "edgeBlur"},
+    {edgeAmount = 0.8, min = 0.0, max = 1.0, description = "edgeAmount"},
+    {washColor = {1.0, 1.0, 1.0, 1.0}, description = "washColor"},
+};
+
+  filter.passes = {
+    {
+      name = 'maskBlurH,
+      inputs = {'mask},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 3.0,
+        axis = {1.0, 0.0},
+      },
+      glslShader = blurGlsl,
+    },
+    {
+      name = 'maskAA,
+      inputs = {'maskBlurH},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 3.0,
+        axis = {0.0, 1.0},
+        edgeWidth = 0.25,
+        edgeBlurOffset = 0.6,
+      },
+      glslShader = maskAAGlsl,
+    },
+    {
+      name = 'maskStats,
+      inputs = {'maskAA},
+      scale = {0.01, 0.01},
+      uniforms = {
+        statsTexel = {0.1, 0.05},
+      },
+      glslShader = maskStatsGlsl,
+    },
+    {
+      name = 'edges,
+      inputs = {'default},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        edgeGain = 4.0,
+        edgeLevels = 1.0,
+      },
+      glslShader = edgesGlsl,
+    },
+    {
+      name = 'edgeBlurH,
+      inputs = {'edges},
+      scale = {0.25, 0.25},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 1.0,
+        axis = {1.0, 0.0},
+      },
+      glslShader = edgeBlurGlsl,
+    },
+    {
+      name = 'edgeBlurV,
+      inputs = {'edgeBlurH},
+      scale = {0.25, 0.25},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 1.0,
+        axis = {0.0, 1.0},
+      },
+      glslShader = edgeBlurGlsl,
+    },
+    {
+      name = 'compose,
+      inputs = {'default, 'maskAA, 'maskStats, 'edgeBlurV},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        statsTexel = {0.1, 0.05},
+        timeSec = 0.0,
+        sweepSpeed = 0.115,
+        restSeconds = 1.0,
+        easeOutAmount = 1.0,
+        waveWidth = 0.5,
+        waveExponent = 1.0,
+        visAhead = 1.0,
+        visBehind = 1.0,
+        litAhead = 1.0,
+        litBehind = 1.0,
+        opacity = 0.6,
+        washStrength = 0.0,
+        imageDim = 0.0,
+        type = 0.0,
+        falloff = 1.0,
+        edgeAmount = 1.0,
+        dipAmount = 0.25,
+        invDipSlope = 1.0,
+        washColor = {1.0, 1.0, 1.0, 1.0},
+      },
+      glslShader = composeGlsl,
+    }
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  vec2 size = getTextureSize('default);
+  f32 sizeScale = min(size.x, size.y) / 1080.0;
+
+  f32 maskBlurStep = getParameterFloat('blurRadius) * sizeScale;
+  setShaderUniform('maskBlurH, 'outputSize, size);
+  setShaderUniform('maskBlurH, 'blurStep, maskBlurStep);
+  setShaderUniform('maskAA, 'outputSize, size);
+  setShaderUniform('maskAA, 'blurStep, maskBlurStep);
+  setShaderUniform('maskAA, 'edgeWidth, max(getParameterFloat('edgeWidth), 0.001));
+  setShaderUniform('maskAA, 'edgeBlurOffset, getParameterFloat('edgeBlurOffset));
+
+  # maskStats only computes in its corner 2x2 texels; compose samples their shared corner.
+  # Falls back to the expected size when the pass isn't allocated yet (or the host can't
+  # resolve pass names and hands back the input size).
+  vec2 statsSize = getTextureSize('maskStats);
+  f32 statsW = statsSize.x;
+  f32 statsH = statsSize.y;
+  if (statsW < 1.0 or statsH < 1.0 or statsW >= size.x) {
+    statsW = max(floor(size.x * 0.01), 1.0);
+    statsH = max(floor(size.y * 0.01), 1.0);
+  }
+  f32 statsTexelX = 1.0 / statsW;
+  f32 statsTexelY = 1.0 / statsH;
+  vec2 statsTexel = {statsTexelX, statsTexelY};
+  setShaderUniform('maskStats, 'statsTexel, statsTexel);
+  setShaderUniform('compose, 'statsTexel, statsTexel);
+
+  setShaderUniform('edges, 'outputSize, size);
+  setShaderUniform('edges, 'edgeGain, getParameterFloat('edgeGain));
+  setShaderUniform('edges, 'edgeLevels, max(getParameterFloat('edgeLevels), 0.05));
+
+  f32 blurStep = getParameterFloat('edgeBlur) * sizeScale;
+  setShaderUniform('edgeBlurH, 'outputSize, size);
+  setShaderUniform('edgeBlurH, 'blurStep, blurStep);
+  setShaderUniform('edgeBlurV, 'outputSize, size);
+  setShaderUniform('edgeBlurV, 'blurStep, blurStep);
+
+
+  # The sweep's length depends on the silhouette's height, which only the compose pass knows,
+  # so the phase is solved there.
+  setShaderUniform('compose, 'timeSec, getParameterFloat('time_sec));
+  setShaderUniform('compose, 'sweepSpeed, max(getParameterFloat('shimmer_speed), 0.001));
+  setShaderUniform('compose, 'restSeconds, max(getParameterFloat('shimmer_pause), 0.0));
+  setShaderUniform('compose, 'easeOutAmount, clamp(getParameterFloat('easeOut), 0.0, 1.0));
+
+  # Band visibility extents (frame-constant, so solved here instead of per pixel).
+  f32 waveType = getParameterFloat('type);
+  f32 falloff = max(getParameterFloat('falloff), 0.05);
+  f32 gradientSmooth = 0.15;
+  f32 visThr = pow(0.02, 1.0 / falloff);
+  f32 dSine = acos(clamp(2.0 * visThr - 1.0, 0.0 - 1.0, 1.0)) / 3.14159265;
+  f32 gradAhead = 1.0 - 2.0 * gradientSmooth * sqrt(visThr * (1.0 - gradientSmooth) / 3.0);
+  f32 gradBehind = 1.0 - 2.0 * visThr * (1.0 - gradientSmooth);
+  f32 visAhead = clamp(dSine + (gradAhead - dSine) * waveType, 0.05, 1.0);
+  f32 visBehind = clamp(dSine + (gradBehind - dSine) * waveType, 0.05, 1.0);
+
+  # The same extents where the band's light falls to 20%: beyond them it is too faint to read as a
+  # shimmer, so the time spent there counts as dark.
+  f32 litThr = pow(0.2, 1.0 / falloff);
+  f32 litSine = acos(clamp(2.0 * litThr - 1.0, 0.0 - 1.0, 1.0)) / 3.14159265;
+  f32 litGradAhead = 1.0 - 2.0 * gradientSmooth * sqrt(litThr * (1.0 - gradientSmooth) / 3.0);
+  f32 litGradBehind = 1.0 - 2.0 * litThr * (1.0 - gradientSmooth);
+  f32 litAhead = clamp(litSine + (litGradAhead - litSine) * waveType, 0.05, visAhead);
+  f32 litBehind = clamp(litSine + (litGradBehind - litSine) * waveType, 0.05, visBehind);
+
+  setShaderUniform('compose, 'edgeAmount, getParameterFloat('edgeAmount));
+  setShaderUniform('compose, 'dipAmount, getParameterFloat('dipAmount));
+  setShaderUniform('compose, 'invDipSlope, 1.0 / max(getParameterFloat('dipSlope), 0.05));
+  setShaderUniform('compose, 'outputSize, size);
+  setShaderUniform('compose, 'waveWidth, max(getParameterFloat('waveWidth), 0.01));
+  setShaderUniform('compose, 'waveExponent, pow(2.0, clamp(getParameterFloat('waveScaling), 0.0 - 1.0, 1.0)));
+  setShaderUniform('compose, 'visAhead, visAhead);
+  setShaderUniform('compose, 'visBehind, visBehind);
+  setShaderUniform('compose, 'litAhead, litAhead);
+  setShaderUniform('compose, 'litBehind, litBehind);
+  setShaderUniform('compose, 'opacity, getParameterFloat('opacity));
+  setShaderUniform('compose, 'washStrength, getParameterFloat('washStrength));
+  setShaderUniform('compose, 'imageDim, getParameterFloat('imageDim));
+  setShaderUniform('compose, 'type, waveType);
+  setShaderUniform('compose, 'falloff, falloff);
+  setShaderUniform('compose, 'washColor, getParameterVec4('washColor));
+}
+
+string maskAAGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform vec2 axis;
+uniform float blurStep;
+uniform float edgeWidth;
+uniform float edgeBlurOffset;
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 offset = axis * blurStep / outputSize;
+
+  vec4 c = sampleInput(uv) * 0.2270270270;
+  c += (sampleInput(uv + offset) + sampleInput(uv - offset)) * 0.1945945946;
+  c += (sampleInput(uv + offset * 2.0) + sampleInput(uv - offset * 2.0)) * 0.1216216216;
+  c += (sampleInput(uv + offset * 3.0) + sampleInput(uv - offset * 3.0)) * 0.0540540541;
+  c += (sampleInput(uv + offset * 4.0) + sampleInput(uv - offset * 4.0)) * 0.0162162162;
+
+  float coverage = maskCoverage(c);
+  float aa = smoothstep(edgeBlurOffset - edgeWidth, edgeBlurOffset + edgeWidth, coverage);
+
+  gl_FragColor = toOutputFormat(vec4(vec3(aa), aa));
+}
+";
+
+string maskStatsGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 statsTexel;
+
+#define GRID_SIZE 64
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+// One scan of the mask grid -> (centroid x, half width, lowest y, highest y).
+// Only the 2x2 corner texels run it; compose samples their shared corner.
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  if (uv.x > 2.0 * statsTexel.x || uv.y > 2.0 * statsTexel.y) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+
+  float gridStep = 1.0 / float(GRID_SIZE);
+
+  float weightedX = 0.0;
+  float total = 0.0;
+  float minX = 1.0;
+  float maxX = 0.0;
+  float lowest = 1.0;
+  float highest = 0.0;
+
+  for (int y = 0; y < GRID_SIZE; y++) {
+    for (int x = 0; x < GRID_SIZE; x++) {
+      vec2 sampleUV = (vec2(float(x), float(y)) + 0.5) * gridStep;
+      float coverage = maskCoverage(sampleInput(sampleUV));
+      weightedX += sampleUV.x * coverage;
+      total += coverage;
+      if (coverage > 0.5) {
+        minX = min(minX, sampleUV.x);
+        maxX = max(maxX, sampleUV.x);
+        lowest = min(lowest, sampleUV.y);
+        highest = max(highest, sampleUV.y);
+      }
+    }
+  }
+
+  float centerX = total > 0.0001 ? weightedX / total : 0.5;
+  // max |x - centerX| over covered samples
+  float halfWidth = max(max(maxX - centerX, centerX - minX), 0.02);
+
+  if (highest <= lowest) {
+    lowest = 0.0;
+    highest = 1.0;
+  }
+
+  gl_FragColor = toOutputFormat(vec4(centerX, halfWidth, lowest, highest));
+}
+";
+
+string blurGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform vec2 axis;
+uniform float blurStep;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 offset = axis * blurStep / outputSize;
+
+  vec4 c = sampleInput(uv) * 0.2270270270;
+  c += (sampleInput(uv + offset) + sampleInput(uv - offset)) * 0.1945945946;
+  c += (sampleInput(uv + offset * 2.0) + sampleInput(uv - offset * 2.0)) * 0.1216216216;
+  c += (sampleInput(uv + offset * 3.0) + sampleInput(uv - offset * 3.0)) * 0.0540540541;
+  c += (sampleInput(uv + offset * 4.0) + sampleInput(uv - offset * 4.0)) * 0.0162162162;
+
+  gl_FragColor = toOutputFormat(c);
+}
+";
+
+string edgeBlurGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform vec2 axis;
+uniform float blurStep;
+
+// Same 9-tap Gaussian as blurGlsl, folded into 5 taps via linear filtering
+// (exact at a 1-texel step, a close approximation at the default ~1.25-texel step).
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 offset = axis * blurStep / outputSize;
+
+  vec4 c = sampleInput(uv) * 0.2270270270;
+  c += (sampleInput(uv + offset * 1.3846153846) + sampleInput(uv - offset * 1.3846153846)) * 0.3162162162;
+  c += (sampleInput(uv + offset * 3.2307692308) + sampleInput(uv - offset * 3.2307692308)) * 0.0702702703;
+
+  gl_FragColor = toOutputFormat(c);
+}
+";
+
+string edgesGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform float edgeGain;
+uniform float edgeLevels;
+
+float luma(vec3 c) {
+  return pow(max(dot(c, vec3(0.299, 0.587, 0.114)), 0.0), edgeLevels);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 duv = 1.0 / outputSize;
+
+  float tl = luma(sampleInput(uv + duv * vec2(-1.0, 1.0)).rgb);
+  float tc = luma(sampleInput(uv + duv * vec2(0.0, 1.0)).rgb);
+  float tr = luma(sampleInput(uv + duv * vec2(1.0, 1.0)).rgb);
+  float ml = luma(sampleInput(uv + duv * vec2(-1.0, 0.0)).rgb);
+  float mr = luma(sampleInput(uv + duv * vec2(1.0, 0.0)).rgb);
+  float bl = luma(sampleInput(uv + duv * vec2(-1.0, -1.0)).rgb);
+  float bc = luma(sampleInput(uv + duv * vec2(0.0, -1.0)).rgb);
+  float br = luma(sampleInput(uv + duv * vec2(1.0, -1.0)).rgb);
+
+  float gx = tl + 2.0 * ml + bl - tr - 2.0 * mr - br;
+  float gy = tl + 2.0 * tc + tr - bl - 2.0 * bc - br;
+
+  float edge = clamp(sqrt(gx * gx + gy * gy) * edgeGain, 0.0, 1.0);
+
+  gl_FragColor = toOutputFormat(vec4(vec3(edge), 1.0));
+}
+";
+
+string composeGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform sampler2D auxSampler2;
+uniform sampler2D auxSampler3;
+
+uniform vec2 outputSize;
+uniform vec2 statsTexel;
+uniform float timeSec;
+uniform float sweepSpeed;
+uniform float restSeconds;
+uniform float easeOutAmount;
+uniform float waveWidth;
+uniform float waveExponent;
+uniform float visAhead;
+uniform float visBehind;
+uniform float litAhead;
+uniform float litBehind;
+uniform float opacity;
+uniform float washStrength;
+uniform float imageDim;
+uniform float type;
+uniform float falloff;
+uniform float edgeAmount;
+uniform float dipAmount;
+uniform float invDipSlope;
+uniform vec4 washColor;
+
+#define PI 3.14159265
+#define GRADIENT_SMOOTH 0.15
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+// The share of the sweep's time at which the eased band has covered `progress` of its path.
+float sweepTimeAt(float progress, float easing) {
+  float b = 1.0 + easing;
+  return 2.0 * progress / (b + sqrt(max(b * b - 4.0 * easing * progress, 0.0)));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  vec4 base = sampleInput(uv);
+  vec3 dimColor = vec3(12.0/255.0, 16.0/255.0, 20.0/255.0);
+  float subject = maskCoverage(texture2D(auxSampler1, uv));
+
+  // Outside the subject the wash contributes nothing.
+  if (subject <= 0.0) {
+    gl_FragColor = toOutputFormat(vec4(mix(base.rgb, dimColor, imageDim), base.a));
+    return;
+  }
+
+  // (centroid x, half width, lowest y, highest y)
+  vec4 stats = texture2D(auxSampler2, statsTexel);
+  float centerX = stats.x;
+  float halfWidth = max(stats.y, 0.001);
+  float upY = uv.y * UP;
+  float maskBottom = min(stats.z * UP, stats.w * UP);
+  float maskTop = max(stats.z * UP, stats.w * UP);
+  float maskHeight = max(maskTop - maskBottom, 0.001);
+
+  float halfBand = max(waveWidth * pow(maskHeight, waveExponent) * 0.5, 0.001);
+  float startY = maskTop + visAhead * halfBand;
+  float endY = maskBottom - visBehind * halfBand;
+
+  // The band crosses the silhouette at `shimmer_speed` frame heights a second (never in under 1 s),
+  // easing out. Only the stretch where its light shows on the silhouette's centre line plays: the
+  // faint run-in above, the bend holding the centre back, and the slow eased tail below all read as
+  // darkness and all grow with the object, so they are skipped. Every object then stays dark for
+  // `shimmer_pause` between flashes, whatever its height. A short fade hides the cut at each end.
+  float sweepSeconds = max(maskHeight / sweepSpeed, 1.0);
+  float bend = dipAmount * maskHeight;
+  float centrePath = startY - endY + 2.0 * bend;
+  float litFrom = sweepTimeAt((bend + (visAhead - litAhead) * halfBand) / centrePath, easeOutAmount);
+  float litTo = sweepTimeAt(1.0 - (bend + (visBehind - litBehind) * halfBand) / centrePath, easeOutAmount);
+  float litSeconds = (litTo - litFrom) * sweepSeconds;
+  float fadeSeconds = min(0.15, litSeconds / 3.0);
+  float cycleSeconds = litSeconds + max(restSeconds - fadeSeconds, 0.0);
+  float cycleTime = timeSec - cycleSeconds * floor(timeSec / cycleSeconds);
+  float lit = smoothstep(0.0, fadeSeconds, cycleTime) * smoothstep(0.0, fadeSeconds, litSeconds - cycleTime);
+  float phase = litFrom + min(cycleTime, litSeconds) / sweepSeconds;
+  float remaining = 1.0 - phase;
+  float easedPhase = mix(phase, 1.0 - remaining * remaining, easeOutAmount);
+  float dipDirection = 1.0 - 2.0 * easedPhase;
+  float bandY = mix(startY, endY, easedPhase);
+
+  float horizontal = clamp(abs(uv.x - centerX) / halfWidth, 0.0, 1.0);
+  float warped = pow(horizontal, invDipSlope);
+  float bell = 0.5 + 0.5 * cos(warped * PI);
+  bandY = bandY + bend * bell * dipDirection;
+
+  float d = clamp((upY - bandY) / halfBand, -1.0, 1.0);
+  float sineWave = 0.5 + 0.5 * cos(d * PI);
+
+  float f = clamp(0.5 - 0.5 * d, 0.0, 1.0);
+  float gradientWave = clamp(
+      f * smoothstep(0.0, GRADIENT_SMOOTH, 1.0 - f) / (1.0 - GRADIENT_SMOOTH),
+      0.0, 1.0);
+
+  float wave = mix(sineWave, gradientWave, type);
+  wave = pow(clamp(wave, 0.0, 1.0), falloff) * lit;
+
+  float edge = texture2D(auxSampler3, uv).r;
+  float washTerm = washStrength + edge * edgeAmount;
+
+  float shape = subject * washTerm;
+
+  float alpha = wave * opacity * washColor.a * shape;
+
+  vec3 color = (base.rgb + washColor.rgb * alpha);
+
+  // multiproduct version
+  // vec3 color = (washColor.rgb * alpha);
+
+  color = mix(color, dimColor, imageDim);
+  gl_FragColor = toOutputFormat(vec4(color, base.a));
+}
+";

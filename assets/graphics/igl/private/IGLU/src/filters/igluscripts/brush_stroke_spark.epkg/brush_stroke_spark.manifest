@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "BD3E7E68-9AC7-4846-82DF-482EBB034695",
+  "displayName": "Brush Stroke",
+  "description": "[IG Edits] Video effect name. With \"Brush Stroke\", the creator's video shows through a painterly brush-stroke frame over a dusty, grungy film texture.",
+  "iglu": {
+    "legacyId": 3271
+  },
+  "assets": [
+    {
+      "name": "brush_stroke_spark_lut.png",
+      "assetHash": "924547690d8d5f4a1a4c608c51c904c4411883ced61192ff245c4494d00d2a51",
+      "hubAssetId": "1087162780878678"
+    },
+    {
+      "name": "brush_stroke_spark_grunge.png",
+      "assetHash": "5f329b22ebb839759bcf7a2554f4bfc48eae6d8863abe5cefbca25e2322ff632",
+      "hubAssetId": "1845337426499058"
+    },
+    {
+      "name": "brush_stroke_spark_mask.png",
+      "assetHash": "590acbe007e084ecbd7a5faa5a270e14150757c06f8005833b9a09bbc8e3668e",
+      "hubAssetId": "1143423971966918"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFpPYMUffF"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "30f79bd6",
+      "handle": "AQAF5XHXqrBS",
+      "md5": "29f4891a0cd45b0057a7c43613426d59"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GHGkMDTG6DI_2h0EAG_2IrisHSEKbhQoAAAD"
+    }
+  }
+}

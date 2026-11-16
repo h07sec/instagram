@@ -1,0 +1,87 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_flare, QE-selectable for A/B vs TransitionFlareFilter.
+[Filter TransitionFlare]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'flare,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      blend = 0.0,
+      exposureGain = 1.0,
+      flareScale = 1.0,
+      radialScale = {1.0, 1.0},
+      flareColor = {1.0, 0.918, 0.671, 1.0},
+      flarePosition = {-1.0, 1.0},
+    },
+    glslShader = glsl,
+  }};
+}
+
+# GLSL smoothstep(edge0, edge1, x) with the interpolant precomputed by the caller.
+# IGLUScript only registers smoothstep for vector types, not f32.
+fun smoothstep01(f32 t) f32 {
+  f32 v = clamp(t, 0.0, 1.0);
+  return v * v * (3.0 - 2.0 * v);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progress = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+
+  # smoothCurveSegment(progress, 0.0, 1.0, 0.0, 0.4) -- GLSL mix(x, y, a) is x*(1-a) + y*a.
+  f32 alphaA = clamp((progress - 0.0) / (0.4 - 0.0), 0.0, 1.0);
+  f32 sA = smoothstep01(alphaA);
+  f32 curveA = 0.0 * (1.0 - sA) + 1.0 * sA;
+
+  # smoothCurveSegment(progress, curveA, 0.0, 0.4, 1.0)
+  f32 alphaB = clamp((progress - 0.4) / (1.0 - 0.4), 0.0, 1.0);
+  f32 sB = smoothstep01(alphaB);
+  f32 curveB = curveA * (1.0 - sB) + 0.0 * sB;
+
+  f32 exposureValue = smoothstep01((curveB - 0.8) / (1.0 - 0.8));
+  setShaderUniform('flare, 'exposureGain, pow(2.0, exposureValue));
+  setShaderUniform('flare, 'flareScale, curveB * 8.0 + 1.0);
+
+  # step(0.4, progress)
+  f32 blend = 1.0;
+  if (progress < 0.4) {
+    blend = 0.0;
+  }
+  setShaderUniform('flare, 'blend, blend);
+
+  # radialGradientIn(): length(centered * aspect) / length(vec2(aspect * 0.5, 0.5))
+  # folds into a single per-axis scale.
+  vec2 size = getTextureSize('default);
+  f32 aspect = size.x / size.y;
+  vec2 halfExtent = {aspect * 0.5, 0.5};
+  f32 invLen = 1.0 / length(halfExtent);
+  vec2 radialScale = {aspect * invLen, invLen};
+  setShaderUniform('flare, 'radialScale, radialScale);
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform float blend;
+  uniform float exposureGain;
+  uniform float flareScale;
+  uniform vec2 radialScale;
+  uniform vec4 flareColor;
+  uniform vec2 flarePosition;
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    vec4 a = sampleInput(uv);
+    vec4 b = texture2D(s_texture1, uv);
+    vec4 sampled = mix(a, b, blend);
+    vec4 exposed = vec4(exposureGain * sampled.rgb, sampled.a);
+    vec2 flareUV = (flarePosition + uv - 0.5) / flareScale + 0.5;
+    float gradient = clamp(1.0 - length((flareUV - 0.5) * radialScale), 0.0, 1.0);
+    vec4 flare = flareColor * gradient;
+    vec4 texel = clamp(exposed + flare, 0.0, 1.0);
+    gl_FragColor = toOutputFormat(texel);
+  }
+";

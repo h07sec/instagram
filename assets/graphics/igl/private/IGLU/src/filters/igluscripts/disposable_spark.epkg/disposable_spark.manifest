@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "67430CB6-06EC-494F-8D1E-8C794E44D17B",
+  "displayName": "𝘿𝙞𝙨𝙥𝙤𝙨𝙖𝙗𝙡𝙚",
+  "description": "[IG Edits] Color filter name. With \"𝘿𝙞𝙨𝙥𝙤𝙨𝙖𝙗𝙡𝙚\", the creator gets a warm disposable-camera color grade with occasional red-orange light leak bursts and a date stamp.",
+  "iglu": {
+    "legacyId": 3310
+  },
+  "assets": [
+    {
+      "name": "disposable_spark_lut.png",
+      "assetHash": "ef62ea25794d7bada2cb558027dd834a4c1afe36ad9ffd321d6fc7734082d18c",
+      "hubAssetId": "1760976951649900"
+    },
+    {
+      "name": "disposable_spark_leaks.png",
+      "assetHash": "460c526f1c5a7dec6699f47b4f63f2a8397354ddcab6e8bd52445b2516ce5e56",
+      "hubAssetId": "1694888498922589"
+    },
+    {
+      "name": "disposable_spark_date.png",
+      "assetHash": "683e02f14bdb81a87322fcd6b39b6e41bf5294e66b322e1a7a3dfd219f1001f5",
+      "hubAssetId": "1812801093126822"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFwwP4h0lR"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b29ff1a1",
+      "handle": "AQAGZBQJ3H94",
+      "md5": "25c686a32128e2c2a0fd665b88aeb11e"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMPJsTMXIuHWeqQEAEJGec6fUv4ZbhQoAAAD"
+    }
+  }
+}

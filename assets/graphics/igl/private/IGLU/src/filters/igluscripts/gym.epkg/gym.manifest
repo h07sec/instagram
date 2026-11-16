@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "813734153767099",
+  "displayName": "GYM",
+  "description": "[IG Edits] Color filter name. With \"GYM\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3365
+  },
+  "assets": [
+    {
+      "name": "gym_lut.png",
+      "assetHash": "896b03078880a1212fcbc398ed905f281f69af83db1ed169538853d3d89128cc",
+      "hubAssetId": "2648090095644580"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD9GW4IO1Y"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "85761aa1",
+      "handle": "AQAGDGPCT05q",
+      "md5": "065c2330495062713cd218dc9a146294"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GDhc2jRxvG4MxogGAF2XFCEoP2VlbhQoAAAD"
+    }
+  }
+}

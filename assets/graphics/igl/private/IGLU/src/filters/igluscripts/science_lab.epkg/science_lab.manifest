@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "251943630606726",
+  "displayName": "Science Lab",
+  "description": "[IG Edits] Color filter name. B&W background with a smaller color picture-in-picture centered on top, overlaid with a grungy film-noise texture -- like a photo print in a chemistry lab.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAJO1xB-dgE"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "4eab20ec",
+      "handle": "AQADZqR7k4Fm",
+      "md5": "760b3b0aa4af5c06ffe0e128bafc5dd5"
+    }
+  },
+  "iglu": {
+    "legacyId": 3190
+  },
+  "assets": [
+    {
+      "name": "science_lab_bw_lut.png",
+      "assetHash": "cd97575cc5a178f77e3ea492fa4aed5f7952c91da5347b498b2cffcd738090e8",
+      "hubAssetId": "1460811463773686"
+    },
+    {
+      "name": "science_lab_color_lut.png",
+      "assetHash": "6a73d5e27f3703129955de585c644982b1aaa31c27a0a25e70fa6ef256030b2e",
+      "hubAssetId": "1604154391463710"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFw28TGOLUiUDXYPANaRvrZ2V8QVbhQoAAAD"
+    }
+  }
+}

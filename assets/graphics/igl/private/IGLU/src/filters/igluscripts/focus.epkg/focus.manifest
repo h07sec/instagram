@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "208681691022343",
+  "displayName": "Focus",
+  "description": "[IG Edits] Video effect name. With \"Focus\", the creator can apply a Spark-ported portrait-mode look: the person stays sharp, the background is blurred and the frame gets a soft contrast lift.",
+  "iglu": {
+    "legacyId": 3406,
+    "subject": {
+      "enabled": true,
+      "fullFrameEnabled": true,
+      "typeSuggestions": [
+        "person"
+      ]
+    }
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF9JHpPmaa"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c1b18980",
+      "handle": "AQAF99Pav2lO",
+      "md5": "5e05e1d1da99897111484a52694cee91"
+    }
+  }
+}

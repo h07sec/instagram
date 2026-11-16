@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "color_wide_lut12",
+  "displayName": "Frosty",
+  "description": "[IG Edits] Color filter name. With \"Frosty\", the creator can remap pixel RGB through the Frosty 3D LUT for a cool icy blue-white tone.",
+  "iglu": {
+    "legacyId": 5035
+  },
+  "assets": [
+    {
+      "name": "frosty.lutpk",
+      "assetHash": "16ec494f4031d26a841e4b08b67db996e02666eb9a78538fd0cde6e4826e2566",
+      "hubAssetId": "1323614546331425"
+    }
+  ]
+}

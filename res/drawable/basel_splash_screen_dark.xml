@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list android:opacity="opaque"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="@color/basel_splash_screen_background" />
+    </item>
+    <item android:bottom="88.0dip">
+        <bitmap android:gravity="center" android:src="@drawable/edits_splash_a10_2e_dark_mode" />
+    </item>
+    <item android:bottom="80.0dip">
+        <bitmap android:gravity="bottom" android:src="@drawable/from_meta_attribution" />
+    </item>
+</layer-list>

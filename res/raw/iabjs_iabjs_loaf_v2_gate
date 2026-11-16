@@ -1,0 +1,1 @@
+(function(loafFixesV2Enabled,loafInitialScrollDepthReadDiagnosticEnabled){const iabjs=window.__iabjs||{};iabjs.loafFixesV2Enabled=loafFixesV2Enabled,iabjs.loafInitialScrollDepthReadDiagnosticEnabled=loafInitialScrollDepthReadDiagnosticEnabled,window.__iabjs=iabjs})

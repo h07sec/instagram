@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Ističe za %1$d min.</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">Sljedeći broj zadataka treba pregledati: %1$d</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">Sljedeći broj zadataka treba pregledati: %1$d</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d interfejsa za povezivanje</item>
+        <item quantity="one">%1$d interfejs za povezivanje</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">Broj ručne prtljage: %1$d</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d zaustavljanja</item>
+        <item quantity="one">%1$d zaustavljanje</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Privremena kartica ističe za %1$d sati</item>
+        <item quantity="one">Privremena kartica ističe za %1$d sat</item>
+        <item quantity="few">Privremena kartica ističe za %1$d sata</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Svakih %1$d sekundi</item>
+        <item quantity="one">Svaku %1$d sekundu</item>
+        <item quantity="few">Svake %1$d sekunde</item>
+    </plurals>
+</resources>

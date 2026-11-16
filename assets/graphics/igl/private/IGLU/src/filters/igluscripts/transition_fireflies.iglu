@@ -1,0 +1,418 @@
+[Filter TransitionFireflies]
+
+# A dense swarm of fireflies picks up clip A's color, flares, and carries it off
+# frame, leaving clip B behind.
+#
+# Ported from the Easel web tool's FireflyTransition (src/filters/transitions/
+# FireflyTransition.ts, igid transitions_fireflies).
+#
+# Three passes:
+#  1. srcRgba   - quarter-res RGBA copy of clip A, so the vertex stage has
+#                 something format-safe to sample (see below).
+#  2. particles - up to 2304 vertex-shader quads in an aspect-aware grid,
+#                 each lit by the clip A pixel it sits on.
+#  3. compose   - dims the background as the swarm charges up, carries the
+#                 A/B swap through that dip, then restores clip B's light.
+#
+# At full dip amount the base reaches the chosen color and hides a hard A/B
+# cut. Reduced amount keeps a visible background that crossfades through the
+# same timing markers; both weights are continuous at the cut.
+#
+# Why the srcRgba pass: the vertex stage samples a texture directly, with none
+# of the fragment stage's format-convert machinery. A YUV input leaves the
+# 's_texture' slot inactive and would sample black, so clip A is first copied
+# through a fragment pass - whose output is always RGBA - and the vertex shader
+# samples that. Quarter res is still far above the particle grid.
+#
+# Everything is a pure function of (progress, seed): u_time is derived from
+# progress rather than the wall clock, so scrubbing, thumbnails and export are
+# all deterministic and frame-identical.
+#
+# Runs on OpenGL and Metal; shaderc cross-compiles the vertex stage to a Metal
+# vertex entry point.
+
+[Init]
+fun init(Filter filter)
+{
+    makeTexture('transition);
+
+    filter.parameters = {
+        {duration = 2.0, min = 0.5, max = 10.0, description = "Transition length in seconds, drives flicker and wander rate"},
+        {u_sizeScale = 2.0, min = 0.2, max = 8.0, description = "Particle size, in grid cells"},
+        {darkness = 0.65, min = 0.0, max = 1.0, description = "Dip amount; 1 reaches the dip color, 0 keeps the background visible"},
+        {dipColor = {0.0, 0.0, 0.0}, description = "Background dip color"},
+        {crossfade = 3.0, min = 0.25, max = 8.0, description = "Crossfade sharpness; higher is sharper"},
+    };
+
+    filter.passes = {
+      {
+        name = 'srcRgba,
+        inputs = {'default},
+        scale = {0.25, 0.25},
+        uniforms = { unused = 0.0 },
+        glslShader = fsCopy,
+      },
+      {
+        name = 'particles,
+        inputs = {'default, 'srcRgba},
+        shaderInputNames = {'default, 's_srcRgba},
+        geometry = {type = 'quads, count = 2304.0},
+        blendMode = 'premultiplied,
+        bufferType = 'float16,
+        clearBeforeDraw = true,
+        uniforms = {
+          u_progress = 0.0,
+          u_time = 0.0,
+          u_aspect = 1.0,
+          u_seed = 3.0,
+          u_cols = 36.0,
+          u_rows = 64.0,
+          u_sizeScale = 2.0,
+          u_wake = 0.0,
+          u_burst = 0.804304,
+        },
+        glslVertexShader = vsFireflies,
+        glslShader = fsFireflies,
+      },
+      {
+        name = 'compose,
+        inputs = {'default, 'transition, 'particles},
+        shaderInputNames = {'default, 's_texture1, 's_particles},
+        uniforms = {
+          u_gainA = 1.0,
+          u_gainB = 0.0,
+          u_crossfade = 0.0,
+          u_dipWeight = 0.0,
+          u_dipColor = {0.0, 0.0, 0.0},
+        },
+        glslShader = fsCompose,
+      },
+    };
+}
+
+# Only the particle budget is baked into the vertex buffer. PreRender fits an
+# approximately square-cell grid to the clip aspect; unused quads are collapsed
+# in the vertex stage. Keep this budget in sync with geometry.count above.
+f32 kParticleCount = 2304.0;
+
+fun smoothstep3(f32 e0, f32 e1, f32 x) f32 {
+    f32 t = clamp((x - e0) / (e1 - e0), 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
+}
+
+[PreRender]
+fun preRender(Filter filter){
+    f32 progress = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+    setShaderUniform('particles, 'u_progress, progress);
+
+    # Derived from progress, not the wall clock, so flicker and wander are
+    # deterministic across scrubbing, thumbnails and export.
+    f32 duration = getParameterFloat('duration);
+    setShaderUniform('particles, 'u_time, progress * duration);
+
+    vec2 size = getTextureSize('default);
+    f32 aspect = 1.0;
+    if (size.x > 0.0 and size.y > 0.0) {
+        aspect = size.x / size.y;
+    }
+    f32 cols = clamp(floor(sqrt(kParticleCount * aspect)), 1.0, kParticleCount);
+    f32 rows = max(floor(kParticleCount / cols), 1.0);
+    setShaderUniform('particles, 'u_aspect, aspect);
+    setShaderUniform('particles, 'u_cols, cols);
+    setShaderUniform('particles, 'u_rows, rows);
+
+    setShaderUniform('particles, 'u_sizeScale, getParameterFloat('u_sizeScale));
+    setShaderUniform('particles, 'u_wake, smoothstep3(0.0, 0.08, progress) * 0.5);
+
+    # The frame's flare and the swarm's flash are the same event, so both passes
+    # read one burst timing.
+    f32 burstAt = 0.28;
+    f32 burstWidth = 0.6;
+
+    f32 darkStart = 0.18;
+    f32 switchAt = 0.34;
+    f32 lightEnd = 0.62;
+    f32 darkT = clamp((progress - darkStart) / max(switchAt - darkStart, 0.001), 0.0, 1.0);
+    f32 lightT = clamp((progress - switchAt) / max(lightEnd - switchAt, 0.001), 0.0, 1.0);
+
+    # Full darkness hides the hard cut; the visible remainder crossfades
+    # continuously through the same cut marker when darkness is reduced.
+    f32 brightness = 1.0 - smoothstep3(0.0, 1.0, darkT);
+    f32 crossfade = 0.5 * smoothstep3(0.0, 1.0, darkT);
+    if (progress >= switchAt) {
+        brightness = smoothstep3(0.0, 1.0, lightT);
+        crossfade = 0.5 + 0.5 * brightness;
+    }
+    f32 sharpness = clamp(getParameterFloat('crossfade), 0.25, 8.0);
+    f32 fadeB = pow(crossfade, sharpness);
+    f32 fadeA = pow(1.0 - crossfade, sharpness);
+    crossfade = fadeB / (fadeA + fadeB);
+
+    # A short flare on clip A at the flash, so the light reads as being pulled
+    # out of the frame rather than simply switched off. The Gaussian is far too
+    # wide to use raw (at the defaults it is still ~0.80 of its peak at progress
+    # 0 and ~0.99 just before the cut), and it is added to brightness, so it is
+    # windowed at both ends:
+    #   ramp in  over [0, u_darkStart]        - keeps progress 0 an untouched
+    #                                           clip A, matching the swarm's wake.
+    #   ramp out over [u_burstAt, u_switchAt] - reaches 0 exactly at the cut,
+    #                                           where brightness is also 0, so
+    #                                           there is no pop.
+    # The out-ramp starts at the peak, so the flare keeps its full height and
+    # only its trailing edge is reshaped.
+    f32 flareIn = smoothstep3(0.0, max(darkStart, 0.001), progress);
+    f32 flareOut = 1.0 - smoothstep3(min(burstAt, switchAt - 0.001), switchAt, progress);
+    f32 bx = (progress - burstAt) / max(burstWidth, 0.001);
+    f32 burst = exp(0.0 - bx * bx);
+    setShaderUniform('particles, 'u_burst, burst);
+    f32 flare = burst * 0.25 * flareIn * flareOut;
+
+    f32 darkness = clamp(getParameterFloat('darkness), 0.0, 1.0);
+    f32 gainA = (1.0 - darkness) * (1.0 - crossfade);
+    f32 gainB = (1.0 - darkness) * crossfade;
+    if (progress >= switchAt) {
+        gainB = gainB + darkness * brightness;
+    } else {
+        gainA = gainA + darkness * brightness;
+    }
+    setShaderUniform('compose, 'u_gainA, gainA + flare);
+    setShaderUniform('compose, 'u_gainB, gainB);
+    setShaderUniform('compose, 'u_crossfade, crossfade);
+    setShaderUniform('compose, 'u_dipWeight, darkness * (1.0 - brightness));
+    setShaderUniform('compose, 'u_dipColor, getParameterVec3('dipColor));
+}
+
+#### GLSL shaders ####
+
+string fsCopy = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    void main() {
+        gl_FragColor = toOutputFormat(sampleInput(sourceTextureCoordinate));
+    }
+";
+
+string vsFireflies = "
+    attribute float a_particleId;
+    attribute vec2 a_cornerOffset;
+
+    // Quarter-res RGBA copy of clip A. Sampled per particle, not per pixel.
+    uniform sampler2D s_srcRgba;
+
+    uniform float u_progress;
+    uniform float u_time;
+    uniform float u_aspect;
+    uniform float u_cols;
+    uniform float u_rows;
+    uniform float u_sizeScale;
+    uniform float u_wake;
+    uniform float u_burst;
+
+    uniform float u_seed;
+    const float u_jitter = 0.7;
+    const float u_lumaBias = 0.6;
+    const float u_igniteSpread = 0.25;
+    const float u_burstGrow = 1.4;
+    const float u_flyStart = 0.17;
+    const float u_flyStagger = 0.3;
+    const float u_flySpeed = 0.9;
+    const float u_decel = 3.0;
+    const float u_rise = 0.0;
+    const float u_burstPush = 1.5;
+    const float u_wander = 0.05;
+    const float u_wanderSpeed = 3.0;
+    const float u_flicker = 0.45;
+    const float u_flickerRamp = 1.0;
+    const float u_flickerSpeed = 20.0;
+    const float u_glow = 0.8;
+    const vec4 u_tintColor = vec4(0.7, 0.7, 0.7, 1.0);
+    const float u_tintAmount = 0.35;
+
+    varying vec2 vUv;
+    varying vec4 vColor;
+
+    // Hugo Elias style fract/multiply hash. A sin-based hash degrades badly
+    // once its input grows past ~1e5 on GPU. Inputs here are bounded by the
+    // grid size, so no cycle-index wrapping is needed.
+    vec3 hash31(float n) {
+        vec3 p3 = fract(vec3(n + u_seed) * vec3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.xxy + p3.yzz) * p3.zyx);
+    }
+
+    vec2 hash21(float n) {
+        vec3 p3 = fract(vec3(n + u_seed, n * 1.37 + u_seed * 7.13, n + u_seed) *
+                        vec3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.xx + p3.yz) * p3.zy);
+    }
+
+    vec2 safeNormalize(vec2 v) {
+        return v * inversesqrt(max(dot(v, v), 1e-8));
+    }
+
+    void main() {
+        float pid = a_particleId;
+        if (pid >= u_cols * u_rows) {
+            gl_Position = vec4(2.0, 2.0, 0.0, 1.0);
+            vUv = vec2(0.0);
+            vColor = vec4(0.0);
+            return;
+        }
+        float col = mod(pid, u_cols);
+        float row = floor(pid / u_cols);
+
+        vec3 rndA = hash31(pid);
+        vec2 rndB = hash21(pid + 91.7);
+        vec3 rndC = hash31(pid + 411.3);
+
+        // Home position: cell center plus a sub-cell jitter, so the grid reads
+        // as a scatter rather than a lattice while still covering every pixel.
+        vec2 grid = vec2(max(u_cols, 1.0), max(u_rows, 1.0));
+        vec2 cellUv = (vec2(col, row) + 0.5) / grid;
+        vec2 homeUv = clamp(cellUv + (rndA.xy - 0.5) * u_jitter / grid, vec2(0.0), vec2(1.0));
+
+        // The whole point of the vertex stage here: every firefly is lit in the
+        // color of the clip A pixel it came from.
+        vec4 src = texture2D(s_srcRgba, homeUv);
+        float luma = dot(src.rgb, vec3(0.2126, 0.7152, 0.0722));
+
+        // Ignition rank. Blending the random rank toward (1 - luma)
+        // makes highlights catch first, which is what sells 'the image is
+        // glowing' instead of 'random dots are glowing'.
+        float order = clamp(mix(rndA.z, rndA.z * 0.5 + (1.0 - luma) * 0.5, u_lumaBias), 0.0, 1.0);
+
+        // The swarm settles onto clip A first - dim, un-staggered, at source
+        // color - so the frame visibly granulates into fireflies before any of
+        // them catch. Ramping from 0 keeps progress 0 an untouched clip A,
+        // which a transition needs in order to cut cleanly.
+        float ignite = smoothstep(order * u_igniteSpread,
+                                  order * u_igniteSpread + 0.14,
+                                  u_progress);
+        float lightLevel = max(ignite, u_wake);
+
+        // Frame-wide flash and wake are evaluated once in PreRender.
+        float burst = u_burst;
+
+        // Seeded departure times stay fixed while clip A changes.
+        float flyDelay = rndA.z * u_flyStagger;
+        float span = max(1.0 - u_flyStart - flyDelay, 1e-3);
+        float ft = clamp((u_progress - u_flyStart - flyDelay) / span, 0.0, 1.0);
+
+        vec2 homeNdc = homeUv * 2.0 - 1.0;
+
+        // Work in height-normalized screen space, with a radial origin at the
+        // clip center. Rise remains optional; its zero default keeps the burst centered.
+        float aspect = max(u_aspect, 1e-4);
+        vec2 aspectCorrect = vec2(1.0 / aspect, 1.0);
+        vec2 escape = safeNormalize(vec2(rndB.x * 2.0 - 1.0,
+                                        (rndB.y * 2.0 - 1.0) + u_rise));
+        vec2 radial = safeNormalize(homeNdc * vec2(aspect, 1.0));
+
+        // A short smooth launch leads into this ease-out, then they coast.
+        // u_decel of 1 is linear, higher brakes harder.
+        float ease = 1.0 - pow(1.0 - ft, max(u_decel, 1.0));
+
+        vec2 wander = vec2(
+          sin(u_time * u_wanderSpeed * (0.5 + rndC.x) + rndC.y * 6.2831),
+          cos(u_time * u_wanderSpeed * (0.4 + rndC.y) + rndC.z * 6.2831)
+        ) * u_wander * ft;
+
+        vec2 pos = homeNdc
+                 + (escape * u_flySpeed * ease
+                    + radial * u_burstPush * ease
+                    + wander) * aspectCorrect * smoothstep(0.0, 0.06, ft);
+
+        // Grid-cell height in NDC; aspect-correcting x keeps particles square.
+        // Size is held constant over the flight - the exit is carried by the fade.
+        float cellH = 2.0 / max(u_rows, 1.0);
+        float size = cellH * u_sizeScale * (1.0 + burst * u_burstGrow);
+
+        gl_Position = vec4(pos + a_cornerOffset * size * aspectCorrect, 0.0, 1.0);
+        vUv = a_cornerOffset + 0.5;
+
+        // Flicker deepens as they travel, so they gutter out in blinks rather
+        // than dimming evenly to nothing.
+        float flickAmt = clamp(u_flicker * (1.0 + ft * u_flickerRamp), 0.0, 1.0);
+        float flick = mix(1.0,
+                          0.45 + 0.55 * sin(u_time * u_flickerSpeed * (0.5 + rndC.z) + rndA.x * 6.2831),
+                          flickAmt);
+        float fade = 1.0 - smoothstep(0.3, 1.0, ft);
+
+        float alpha = lightLevel * clamp(flick, 0.0, 1.0) * fade * (0.55 + 0.45 * rndB.y);
+        alpha = clamp(alpha, 0.0, 1.0);
+
+        // Tint and glow are keyed to how lit the particle is, so a resting
+        // firefly reads as the clip A pixel it sits on and only turns once it
+        // catches.
+        float hot = clamp(ignite, 0.0, 1.0);
+        vec3 lit = mix(src.rgb, u_tintColor.rgb, u_tintAmount * hot)
+                 * mix(1.0, u_glow, hot)
+                 * (1.0 + burst * 1.6 * hot);
+
+        vColor = vec4(lit * alpha, alpha);
+    }
+";
+
+string fsFireflies = "
+    precision highp float;
+
+    varying vec2 vUv;
+    varying vec4 vColor;
+
+    const float u_softness = 0.17;
+    const float u_haloGain = 0.55;
+
+    void main() {
+        vec2 p = vUv * 2.0 - 1.0;
+        // Compare the squared radius so the quad corners outside the sprite skip
+        // the sqrt. Where r rounds to 1 the shape is 0 and is discarded below.
+        float r2 = dot(p, p);
+        if (r2 > 1.0) {
+            discard;
+        }
+
+        float r = sqrt(r2);
+        float core = 1.0 - smoothstep(0.0, mix(0.25, 0.7, u_softness), r);
+        float h = max(0.0, 1.0 - r);
+        float shape = clamp(core + h * h * h * u_haloGain, 0.0, 1.0);
+        if (shape <= 0.002) {
+            discard;
+        }
+
+        gl_FragColor = vColor * shape;
+    }
+";
+
+string fsCompose = "
+    precision highp float;
+
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    uniform sampler2D s_texture1;   // clip B
+    uniform sampler2D s_particles;  // premultiplied firefly layer
+
+    uniform float u_gainA;
+    uniform float u_gainB;
+    uniform float u_crossfade;
+    uniform float u_dipWeight;
+    uniform vec3 u_dipColor;
+    const float u_additiveMix = 0.45;
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+
+        vec4 fl = texture2D(s_particles, uv);
+        vec4 a = sampleInput(uv);
+        vec4 b = texture2D(s_texture1, uv);
+        vec3 base = a.rgb * u_gainA + b.rgb * u_gainB + u_dipColor * u_dipWeight;
+
+        vec3 over = base * (1.0 - clamp(fl.a, 0.0, 1.0)) + fl.rgb;
+        vec3 additive = min(base + fl.rgb, vec3(1.0));
+        vec3 composed = mix(over, additive, u_additiveMix);
+
+        gl_FragColor = toOutputFormat(vec4(composed, mix(a.a, b.a, u_crossfade)));
+    }
+";

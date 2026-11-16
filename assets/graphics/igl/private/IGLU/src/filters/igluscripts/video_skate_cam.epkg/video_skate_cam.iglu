@@ -1,0 +1,467 @@
+[Filter IgluscriptSkateCamFilter]
+
+[Init]
+fun init(Filter filter) {
+
+  filter.parameters = {
+        {strength = 1.0, min = 0.0, max = 1.0, description = "Mix of the effect over the original image (1.0 = full effect)"},
+    {time_sec = -1.0, description = "Elapsed time in seconds, sent by the host app (-1 = not sent: fall back to the filter clock)"},
+    {intensity = 1.0, min = 0.0, max = 1.0, description = "Intensity"},
+    {amount = 0.6, min = 0.0, max = 1.0, description = "Fisheye"},
+    {opacity = 0.5, min = 0.0, max = 1.0, description = "Color Aberration"},
+    {reflectionIntensity = 0.07, min = 0.0, max = 1.0, description = "Reflection intensity"},
+  };
+
+  loadTexture('noiseTex, 'texture://TextEffectsSharedAssets/RgbaNoise256);
+
+  filter.passes = {
+    {
+      name = 'unsharp,
+      inputs = {'default},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        smoothStrength = 1.0,
+      },
+      glslShader = unsharpGlsl,
+    },
+    {
+      name = 'gaussianH,
+      inputs = {'unsharp},
+      scale = {0.5, 0.5},
+      uniforms = {
+        progress = 0.0,
+        axis = {1.0, 0.0},
+        blurStep = 1.0,
+        numSamples = 40.0,
+        falloffCurve = 9.0,
+        outputSize = {480.0, 270.0},
+        maskIntensity = 1.0,
+        intensity = 1.0,
+      },
+      glslShader = gaussianGlsl,
+    },
+    {
+      name = 'gaussianV,
+      inputs = {'gaussianH},
+      scale = {0.5, 0.5},
+      uniforms = {
+        progress = 0.0,
+        axis = {0.0, 1.0},
+        blurStep = 1.0,
+        numSamples = 40.0,
+        falloffCurve = 9.0,
+        outputSize = {480.0, 270.0},
+        maskIntensity = 1.0,
+        intensity = 1.0,
+      },
+      glslShader = gaussianGlsl,
+    },
+    {
+      # Source for the reflection ring. `intensity = 0.0` makes gaussianGlsl take its
+      # kernelSize <= 1 branch, so this is a plain quarter-res resample of 'gaussianV,
+      # NOT a blur -- which is what the ring has always sampled: [PreRender] never set
+      # `intensity` here, so it sat at its zero-initialized default. Stating the 0.0
+      # keeps that deliberate instead of accidental. Raising it is a look change; see
+      # T291985453 before touching it, and re-record the goldens with a case that
+      # actually shows the ring (the default-parameter case cannot see it).
+      name = 'gaussianHB,
+      inputs = {'gaussianV},
+      scale = {0.25, 0.25},
+      uniforms = {
+        progress = 0.0,
+        axis = {1.0, 0.0},
+        blurStep = 5.0,
+        numSamples = 40.0,
+        falloffCurve = 9.0,
+        outputSize = {480.0, 270.0},
+        maskIntensity = 0.0,
+        intensity = 0.0,
+      },
+      glslShader = gaussianGlsl,
+    },
+    {
+      name = 'grainy,
+      inputs = {'gaussianV, 'noiseTex},
+      uniforms = {
+        strength = 0.2,
+        time = 0.0,
+        uInputImageSize = {1080.0, 1920.0},
+      },
+      glslShader = grainyGlsl,
+    },
+    {
+      name = 'composite,
+      # IGLUScript binding quirk: the first input MUST be 'default' for aux indices to align
+      # correctly across GLSL + Metal. With this layout:
+      #   sampleInput()       -> outer filter input frame (original video, unused here)
+      #   auxSampler1         -> 'grainy   (the main image we composite + chromatic-aberrate)
+      #   auxSampler2         -> 'gaussianHB (the quarter-res resample used for the frame ring)
+      inputs = {'default, 'grainy, 'gaussianHB},
+      uniforms = {
+        bulge = 1.0,
+        # Render-target size, written every frame by the graph runtime. For cropped
+        # media the input texture is still the full uncropped frame, so the input
+        # size is the wrong aspect to fit the lens circle to. Do NOT set this from
+        # getTextureSize('default) in [PreRender].
+        outputSize = {1080.0, 1920.0},
+        chromaticAberrationAmount = 2.0,
+        reflectionIntensity = 0.07,
+      },
+      glslShader  = glslShader
+    }
+    };
+}
+
+
+[PreRender]
+fun preRender(Filter filter){
+    f32 effect_strength = getParameterFloat('strength);
+    setShaderUniform('grainy, 'strength, effect_strength);
+
+    vec2 textureSize = getTextureSize('default);
+    setShaderUniform('unsharp, 'outputSize, textureSize);
+    f32 time = getParameterFloat('time_sec);
+    # Hosts that never send time_sec (IG camera) leave the -1 default: use the filter clock.
+    if (time < 0.0) {
+        time = getLocalTime();
+    }
+    setShaderUniform('grainy, 'time, time);
+    setShaderUniform('grainy, 'uInputImageSize, textureSize);
+
+
+    f32 amount = getParameterFloat('amount);
+    f32 reflectionIntensity = getParameterFloat('reflectionIntensity);
+    f32 intensity = getParameterFloat('intensity) * 2.0;
+
+
+
+    setShaderUniform('gaussianH, 'intensity, amount);
+    setShaderUniform('gaussianV, 'intensity, amount);
+
+    setShaderUniform('composite, 'intensity, amount);
+    setShaderUniform('composite, 'bulge, intensity * amount);
+    setShaderUniform('composite,  'reflectionIntensity, reflectionIntensity);
+
+    f32 colorDistortion = getParameterFloat('opacity) * 2.0;
+    setShaderUniform('composite, 'chromaticAberrationAmount, colorDistortion);
+    setShaderUniform('unsharp, 'smoothStrength, colorDistortion);
+}
+
+
+string unsharpGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+uniform float smoothStrength;
+uniform vec2 outputSize;
+
+void main(){
+
+    vec2 uv = sourceTextureCoordinate;
+
+    vec2 offset = 1.0 / outputSize;
+
+    vec3 c = sampleInput(uv).rgb;
+    vec3 n = sampleInput(uv + vec2(0.0, offset.y)).rgb;
+    vec3 s = sampleInput(uv - vec2(0.0, offset.y)).rgb;
+    vec3 e = sampleInput(uv + vec2(offset.x, 0.0)).rgb;
+    vec3 w = sampleInput(uv - vec2(offset.x, 0.0)).rgb;
+
+    // Net high-boost of the former blur->sharpen pass pair, folded into one
+    // kernel: the 5x gain of the old sharpen minus what the old box blur
+    // removed. Retune this factor, not the tap offsets, to change crispness.
+    vec3 col = c + (c - (n + s + e + w) * 0.25) * (3.5 * smoothStrength);
+
+    gl_FragColor = toOutputFormat(vec4(col, 1.0));
+}
+";
+
+
+# ==========================================================================
+# Gaussian blur H/V (single-input)
+# ==========================================================================
+string gaussianGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+uniform float progress;
+uniform float blurStep;
+uniform float numSamples;
+uniform float falloffCurve;
+uniform vec2 axis;
+uniform vec2 outputSize;
+uniform float intensity;
+uniform float maskIntensity;
+
+float trianglePulse(float t) {
+  return 1.0 - abs(2.0 * fract(t) - 1.0);
+}
+
+float gauss(float x, float e) {
+  return exp(-(x * x) / e);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  float aspect = outputSize.x / outputSize.y;
+  vec2 centeredUv = sourceTextureCoordinate * 2.0 - 1.0;
+  float dist = distance(centeredUv * vec2(aspect, 1.0), vec2(0.0, 0.0));
+  float frameOffset = mix(0.0, 0.05, 1.0 - intensity);
+  float frame = max(smoothstep(0.35 + frameOffset, 1.0 + frameOffset, dist), 0.00);
+
+  frame = mix(frame, 1.0, 1.0 - maskIntensity);
+
+  float kernelSizef = numSamples * frame * intensity; // * trianglePulse(progress);
+  int kernelSize = int(kernelSizef);
+  float halfKernel = -0.5 * float(kernelSize - 1);
+
+  if (kernelSize <= 1) {
+    gl_FragColor = toOutputFormat(sampleInput(uv));
+    return;
+  }
+
+  float falloff = falloffCurve * kernelSizef * 0.5;
+  float accumWeight = 0.0;
+  vec4 accumColor = vec4(0.0);
+  vec2 offset = axis * blurStep / outputSize;
+
+  const int maxSamples = 40;
+
+  for (int i = 0; i < maxSamples; i++) {
+    if (i >= kernelSize) break;
+    float x = halfKernel + float(i);
+    float weight = gauss(x, falloff);
+    vec4 tex = sampleInput(uv + x * offset);
+    accumColor += weight * tex;
+    accumWeight += weight;
+  }
+  accumColor /= accumWeight;
+  gl_FragColor = toOutputFormat(accumColor);
+
+}
+";
+
+
+# ==========================================================================
+# Skate Cam grain and tone
+# ==========================================================================
+
+string grainyGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+uniform sampler2D auxSampler1;
+uniform float time;
+uniform vec2 uInputImageSize;
+
+float hash11(float n) {
+  return fract(sin(n * 91.3458) * 47453.5453);
+}
+
+vec2 hash21(float n) {
+  return vec2(hash11(n), hash11(n + 13.137));
+}
+
+vec2 mirror(vec2 v) {
+  vec2 m = mod(v, 2.0);
+  return mix(m, 2.0 - m, step(1.0, m));
+}
+
+vec4 linearScale(sampler2D tex, vec2 uv, float scaleFactor) {
+  float invScaleFactor = 1.0 / scaleFactor;
+  vec2 g = floor(uv * scaleFactor) * invScaleFactor;
+  vec2 p = fract(uv * scaleFactor);
+
+  vec4 c0 = texture2D(tex, mirror(g));
+  vec4 c1 = texture2D(tex, mirror(g + vec2(invScaleFactor, 0.0)));
+  vec4 c2 = texture2D(tex, mirror(g + vec2(invScaleFactor, invScaleFactor)));
+  vec4 c3 = texture2D(tex, mirror(g + vec2(0.0, invScaleFactor)));
+  return mix(mix(c0, c1, p.x), mix(c3, c2, p.x), p.y);
+}
+
+float luma(vec3 color) {
+  return dot(color, vec3(0.299, 0.587, 0.114));
+}
+
+vec3 brightnessContrast(vec3 value, float brightness, float contrast) {
+  return (value - 0.5 + brightness) * (1.0 + contrast) + 0.5;
+}
+
+vec3 levels(vec3 color, float gamma) {
+  return pow(clamp(color, 0.0, 1.0), vec3(1.0 / gamma));
+}
+
+vec3 saturation(vec3 color, float amount) {
+  return mix(vec3(luma(color)), color, amount);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 aspect = vec2(1.0, uInputImageSize.y / uInputImageSize.x);
+  vec2 texel = 1.0 / (aspect * 675.0);
+  float tick = floor(time * 8.0);
+  vec2 offset0 = hash21(tick);
+  vec2 offset1 = hash21(tick + 17.0);
+  vec2 dustOffset = hash21(tick + 91.7);
+
+  vec3 noise0 = texture2D(auxSampler1, fract(uv * 6.0 + offset0)).rgb;
+  vec3 noise1 = texture2D(auxSampler1, fract(vec2(1.0 - uv.x, uv.y) * 5.4 + offset1)).gbr;
+  vec3 grain = fract(noise0 * 1.7 + noise1 * 1.3);
+  grain = smoothstep(0.0, 1.0, grain);
+  grain = brightnessContrast(grain, 0.0, -0.24);
+  grain = mix(grain, smoothstep(0.0, 1.0, grain), 0.9);
+  grain = saturation(grain * 2.0 - 1.0, 0.33) * 0.9;
+
+  vec4 color = sampleInput(uv);
+  vec4 blurColor = color;
+  blurColor += sampleInput(uv + vec2(texel.x, 0.0) * 1.5);
+  blurColor += sampleInput(uv - vec2(texel.x, 0.0) * 1.5);
+  blurColor += sampleInput(uv + vec2(0.0, texel.y) * 1.5);
+  blurColor += sampleInput(uv - vec2(0.0, texel.y) * 1.5);
+  blurColor /= 5.0;
+  color.rgb = mix(color.rgb, blurColor.rgb, 0.2 * strength);
+  color.rgb += grain * 0.2 * strength;
+
+  float luminance = luma(color.rgb);
+  color.rgb = levels(color.rgb, 1.0 + 0.1 * strength);
+
+  float blue = color.b;
+  float warmMids = smoothstep(0.6, 0.0, blue) * smoothstep(0.3, 0.35, blue);
+  color.r += warmMids * 0.1 * strength;
+  color.b -= warmMids * 0.1 * strength;
+
+  color.rgb += 0.05 * smoothstep(0.5, 0.0, luminance) * strength;
+  color.rgb = brightnessContrast(color.rgb, 0.0, 0.1 * strength);
+  color.rgb -= 0.05 * smoothstep(0.75, 1.0, luminance) * strength;
+  color.r += 0.05 * smoothstep(0.5, 1.0, luminance) * strength;
+
+  float dust = smoothstep(0.88, 1.0, linearScale(auxSampler1, uv + dustOffset, 200.0).r);
+  float alpha = color.a;
+  color += strength * 0.2 * dust;
+  color.a = alpha;
+
+  gl_FragColor = toOutputFormat(color);
+}
+";
+
+
+# ==========================================================================
+# Skate Cam compose
+# ==========================================================================
+
+string glslShader = "
+varying vec2 textureCoordinate;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+uniform sampler2D auxSampler1; // bound to the 'grainy pass output
+uniform sampler2D auxSampler2; // bound to the 'gaussianHB pass output (quarter-res resample)
+
+uniform vec2 outputSize;
+uniform float chromaticAberrationAmount;
+
+uniform float reflectionIntensity;
+
+uniform float bulge;
+uniform float intensity;
+
+void main() {
+  // constants (can be moved to uniforms in the future)
+  const float fishEyeSize = 0.697;
+  const float falloff = 2.0;
+
+  float amountR = mix(0.31, 0.314, chromaticAberrationAmount) * bulge;
+  float amountG = mix(0.31, 0.317, chromaticAberrationAmount) * bulge;
+  float amountB = mix(0.31, 0.32, chromaticAberrationAmount) * bulge;
+
+  // aspect ratio correction.
+  //
+  // `outputSize` is the RENDER TARGET (the whole canvas). The quad this pass draws is
+  // placed inside that canvas by `content_transform`, so `textureCoordinate` spans the
+  // MEDIA RECT, which after a crop is a different shape from the canvas -- a 1:1 crop
+  // inside a 9:16 canvas being the reported case. Correcting with the canvas aspect
+  // while drawing into a square media rect is exactly what stretched the lens: a 9:16
+  // correction (0.5625, 1.0) in a square space is an ellipse 1/0.5625 = 1.78x wider
+  // than tall, clipped left/right with black bands top and bottom.
+  //
+  // So scale the canvas size by the quad's on-screen extent to get the aspect actually
+  // being drawn. Taken from the lengths of the transform's basis vectors rather than
+  // the diagonal terms, so a rotated crop is handled too. With an identity
+  // content_transform (uncropped) quadScale is (1,1) and this is a no-op.
+  vec2 quadScale = vec2(length(content_transform[0].xy), length(content_transform[1].xy));
+  vec2 res = outputSize * max(quadScale, vec2(0.0001));
+  float longestSide = step(res.y, res.x);
+  float aspect = res.x / res.y;
+  vec2 correction = vec2(mix(aspect, 1.0, longestSide),
+                          mix(1.0, 1.0 / aspect, longestSide));
+
+  // distort uvs
+  //
+  // Two coordinate spaces, deliberately. On the output pass the host's
+  // texture_transform carries the crop (UniformsAndParameters.cpp:373 forwards
+  // transform params to the output pass only), so `sourceTextureCoordinate` is the
+  // crop-aware SAMPLING coord while `textureCoordinate` is the raw 0..1 DESTINATION
+  // coord the base vertex shader emits untransformed (Common.cpp:101-106).
+  //
+  //   uv    (destination) -> lens + frame GEOMETRY. A lens is a screen-space object:
+  //                          it must stay circular in whatever is on screen.
+  //   srcUv (source)      -> SAMPLING the aux textures. The intermediate passes run
+  //                          with identity transforms and cover the full frame, so
+  //                          reading them through the crop transform is what applies
+  //                          the crop to the image.
+  //
+  // Building the geometry from srcUv is what made the circle an ellipse on cropped
+  // media: a 1:1 crop of a 9:16 clip puts a non-uniform scale in texture_transform
+  // and the shape inherited it. Precedent for the split: cinematic_vignette.epkg
+  // (vignette uses textureCoordinate so it scales with the output size like a real
+  // lens vignette) and black_gradient.epkg.
+  vec2 uv = textureCoordinate * 2.0 - 1.0;
+  vec2 srcUv = sourceTextureCoordinate * 2.0 - 1.0;
+
+  vec2 duv = uv * correction * fishEyeSize;
+  float l = 1.0 - pow(length(duv), falloff);
+
+  vec2 dduvR = srcUv * clamp(1.0 - l * amountR, 0.0, 1.0);
+  dduvR = dduvR * 0.5 + 0.5;
+
+  vec2 dduvG = srcUv * clamp(1.0 - l * amountG, 0.0, 1.0);
+  dduvG = dduvG * 0.5 + 0.5;
+
+  vec2 dduvB = srcUv * clamp(1.0 - l * amountB, 0.0, 1.0);
+  dduvB = dduvB * 0.5 + 0.5;
+
+  // sample color (use the grainy texture via auxSampler1, NOT sampleInput which is the default)
+  vec4 color = vec4(
+      texture2D(auxSampler1, dduvR).r,
+      texture2D(auxSampler1, dduvG).g,
+      texture2D(auxSampler1, dduvB).b,
+      1.0);
+
+  //round frame
+  // Short-side counterpart of `correction` (the two axis terms swapped).
+  vec2 shortCorrection;
+  shortCorrection.x = mix(1.0, aspect, longestSide);
+  shortCorrection.y = shortCorrection.x / aspect;
+  // Blend long-side -> short-side normalization across the Distortion range: at 0 the
+  // circle keeps its original framing and opens out past the frame, at 1 it is fully
+  // contained by the short edges. Both vectors are scalar multiples of (width, height),
+  // so every blend in between is still exactly circular.
+  vec2 frameCorrection = mix(correction, shortCorrection, intensity);
+  float frameDist = length(uv * frameCorrection);
+
+  float frameRadiusOffset = mix(0.0, 0.5, 1.0 - intensity);
+  float frame = smoothstep(0.87 + frameRadiusOffset, 0.9  + frameRadiusOffset, frameDist);
+
+  vec4 reflection = texture2D(auxSampler2, sourceTextureCoordinate);
+  vec4 frameColor = mix(vec4(vec3(1.0 - frameDist * 0.8) * 0.3, 1.0), reflection, reflectionIntensity); // color tint
+
+  //calculate blue fringe
+  float fringeMask = sin(smoothstep(0.85 + frameRadiusOffset * 0.8, 1.01 + frameRadiusOffset, frameDist) * 3.14 * 2.0) * 0.8 * chromaticAberrationAmount;
+  vec3 blueFringe = mix(vec3(1.0), vec3(0.0, 0.0, 1.0), fringeMask);
+  color = color * vec4(blueFringe, 1.0);
+
+  // final composition
+  color = mix(color, frameColor, frame);
+
+  gl_FragColor = vec4(vec3(color), 1.0);
+}
+";

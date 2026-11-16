@@ -1,0 +1,85 @@
+[Filter Filter2014]
+
+[Init]
+fun init(Filter filter)
+{
+    makeTexture('filter_2014_lut);
+
+    filter.parameters = {
+        {strength = 1.0, min = 0.0, max = 1.0, description = "Mix of the effect over the original image (1.0 = full effect)"},
+        {lut_strength = 1.0, min = 0.0, max = 1.0, description = "LUT mix strength"},
+    };
+
+    filter.passes = {{
+      name = 'pass0,
+      inputs = {'default, 'filter_2014_lut},
+      uniforms = {
+        strength = 1.0,
+        lut_strength = 1.0,
+      },
+      glslShader = glslLut,
+    }};
+}
+
+string lut_path = "lut_path";
+string filter_2014_lut_path = "filter_2014_lut_path";
+string lut_filename = "";
+
+[PreRender]
+fun preRender(Filter filter){
+    f32 effect_strength = getParameterFloat('strength);
+    setShaderUniform('pass0, 'strength, effect_strength);
+
+    # iOS passes the remote LUT under the generic 'lut_path; filter_2014_lut_path is for local testing.
+
+    string lut_filename_parameter = getParameterString(lut_path);
+
+    if (lut_filename_parameter == "") {
+
+        lut_filename_parameter = getParameterString(filter_2014_lut_path);
+
+    }
+    if (lut_filename_parameter != "") {
+        string new_lut_filename = stringAppend("textureFilePath://", lut_filename_parameter);
+        if (new_lut_filename != lut_filename) {
+            lut_filename = new_lut_filename;
+            loadTexture('filter_2014_lut, lut_filename);
+        }
+    }
+
+    f32 s = getParameterFloat('lut_strength);
+    setShaderUniform('pass0, 'lut_strength, s);
+}
+
+#### GLSL shader ####
+
+string glslLut = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    uniform sampler2D auxSampler0;
+    uniform sampler2D auxSampler1;
+    uniform sampler2D auxSampler2;
+
+    uniform float lut_strength;
+
+    void main() {
+      vec4 texel = sampleInput(sourceTextureCoordinate);
+
+      // Spark colorLUTShader decode: nearest blue slice of an 8x8 grid, sampled half a texel
+      // inside the cell so bilinear filtering never bleeds into the neighbouring slice.
+      vec3 c = clamp(texel.rgb, 0.0, 1.0);
+      float sliceNo = floor(64.0 * (255.0 / 256.0) * c.b);
+      float row = floor(sliceNo / 8.0);
+      float col = sliceNo - row * 8.0;
+      vec2 lutUv = (vec2(col, row) + c.rg) / 8.0 + (0.5 - c.rg) / 512.0;
+
+      // auxSampler1 = second pass input (the LUT); pass inputs bind in order after 'default, which is auxSampler0.
+      vec3 color = texture2D(auxSampler1, lutUv).xyz;
+
+      // strength: global effect-strength uniform declared by BaseUniformsOpenGL (IGLUScript/igluscript/UniformsMacros.h:10).
+      texel = mix(texel, vec4(color, texel.a), strength * lut_strength);
+
+      gl_FragColor = toOutputFormat(texel);
+    }
+    ";

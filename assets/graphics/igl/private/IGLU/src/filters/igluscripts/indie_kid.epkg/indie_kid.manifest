@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1550655788627043",
+  "displayName": "ɪɴᴅɪᴇ.ᴋɪᴅ🍄",
+  "description": "[IG Edits] Color filter name. With \"ɪɴᴅɪᴇ.ᴋɪᴅ🍄\", the creator can apply a Spark-ported vivid, saturated colour grade.",
+  "iglu": {
+    "legacyId": 3431
+  },
+  "assets": [
+    {
+      "name": "indie_kid_lut.png",
+      "assetHash": "0a9a8d7d9a6143a4aab0fb914ef232ac225b415543c69f8e33d25eb21828af74",
+      "hubAssetId": "1104002438917217"
+    }
+  ]
+}

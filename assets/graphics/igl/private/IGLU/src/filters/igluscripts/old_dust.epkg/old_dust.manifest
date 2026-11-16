@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "9AB99595-08B7-4A6A-A564-D4068AB7523F",
+  "displayName": "OLD+DUST",
+  "description": "[IG Edits] Color filter name. With \"OLD+DUST\", the creator gets a faded, desaturated vintage LUT color grade with flickering old-film dust specks applied to the camera image.",
+  "iglu": {
+    "legacyId": 3292
+  },
+  "assets": [
+    {
+      "name": "old_dust_lut.png",
+      "assetHash": "19799246a93feb38620e97bdf1643e8436863a4b675eee738ca5755c5f0e8d26",
+      "hubAssetId": "1685745469823256"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADbeJlFu37"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "66ddc7d0",
+      "handle": "AQAJIqY3zvzZ",
+      "md5": "afc3bb37b6f56a2e859784556ac87a4b"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNOyRzNAt0BUR5IHAKNYTt7qyuodbhQoAAAD"
+    }
+  }
+}

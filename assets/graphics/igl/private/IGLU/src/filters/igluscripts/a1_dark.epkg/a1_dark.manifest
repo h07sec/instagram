@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "9DB9A15B-CB12-42AB-A6B3-E33553A31BD8",
+  "displayName": "A1 Dark",
+  "description": "[IG Edits] Color filter name. With \"A1 Dark\", the creator gets a dark, muted LUT color grade with deep shadows and warm skin and red tones applied to the camera image.",
+  "iglu": {
+    "legacyId": 3278
+  },
+  "assets": [
+    {
+      "name": "a1_dark_lut.png",
+      "assetHash": "1588a3adbe3672428aba06b78c2762ccebcdbbfba74b982dbed80d7a199d619c",
+      "hubAssetId": "1386706733244871"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEB3lPdIGa"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b4b31b48",
+      "handle": "AQAF1Y8n73fK",
+      "md5": "3199cce286deb514a6da63a517f0103c"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GLbXLTNzBJc06MYGADe2rJ5sWdc_bhQoAAAD"
+    }
+  }
+}

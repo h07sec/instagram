@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "7794438773902958",
+  "displayName": "Showy Blue",
+  "description": "[IG Edits] Color filter name. With \"Showy Blue\", the creator can apply a Spark-ported deep, contrasty colour grade with vivid blue skies.",
+  "iglu": {
+    "legacyId": 3434
+  },
+  "assets": [
+    {
+      "name": "showy_blue_lut.png",
+      "assetHash": "a79324c659bd12c5410fc500ca7f2e894367036070c3a4436eacadf7edbfebb0",
+      "hubAssetId": "1473646387433965"
+    }
+  ]
+}

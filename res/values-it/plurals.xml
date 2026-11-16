@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d g fa</item>
+        <item quantity="one">%1$d g fa</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d h fa</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d min fa</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d attività del browser</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Scade tra %1$d ore</item>
+        <item quantity="one">Scade tra %1$d ora</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Scade tra %1$d minuti</item>
+        <item quantity="one">Scade tra %1$d minuto</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d attività da controllare</item>
+        <item quantity="one">"Un'attività da controllare"</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d passeggeri</item>
+        <item quantity="one">%1$d passeggero</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d attività da controllare</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">%1$d articoli</item>
+        <item quantity="one">%1$d articolo</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d connettori</item>
+        <item quantity="one">%1$d connettore</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d bagagli a mano</item>
+        <item quantity="one">%1$d bagaglio a mano</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d bagagli da stiva</item>
+        <item quantity="one">%1$d bagaglio da stiva</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d scali</item>
+        <item quantity="one">%1$d scalo</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d stop</item>
+        <item quantity="one">%1$d fermata</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">Opzioni %1$s</item>
+        <item quantity="one">Opzione %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Usa %1$d immagini</item>
+        <item quantity="one">Usa %1$d immagine</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">Resi gratuiti per %1$d giorni</item>
+        <item quantity="one">Resi gratuiti per %1$d giorno</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">Resi entro %1$d giorni</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">La carta temporanea scade tra %1$d ore</item>
+        <item quantity="one">La carta temporanea scade tra %1$d ora</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">%1$d articoli</item>
+        <item quantity="one">%1$d articolo</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">%1$d articoli</item>
+        <item quantity="one">%1$d articolo</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">Segui tutti (%1$d)</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">Segui (%1$d)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Ogni %1$d ore</item>
+        <item quantity="one">Ogni %1$d ora</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">Ogni %1$d minuti</item>
+        <item quantity="one">Ogni minuto (%1$d)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Ogni %1$d secondi</item>
+        <item quantity="one">Ogni %1$d secondo</item>
+    </plurals>
+</resources>

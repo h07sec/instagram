@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "212D2589-252E-412A-A864-F215DA9EEB5D",
+  "displayName": "Glossy",
+  "description": "[IG Edits] Color filter name. With \"Glossy\", the creator gets a warm, soft beauty LUT color grade with gentle skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3282
+  },
+  "assets": [
+    {
+      "name": "glossy_lut.png",
+      "assetHash": "baf9a2adbb45ba1b0399b30914441d22289a4ec96232d8af10cf96f38dfa7d24",
+      "hubAssetId": "1639410457734007"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAMUbccVdvA"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c6bf5eff",
+      "handle": "AQAD-nFwwoPb",
+      "md5": "fdfe73f40fdecb73aed4498b9095d242"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOIvQzNMgxZzFREFAPQUSdN6qMxFbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,185 @@
+[Filter TransitionMulticlipEmphasis]
+
+# Clip B pops in with an overshoot and a decaying shake (the Emphasis effect)
+# over an untouched clip A.
+#
+# Ported from the Easel web tool's multiclip_emphasis.iglu.
+#
+# The video_emphasis transform and the over-composite run in one pass that reads
+# both clips. Every sample position is an affine transform of the pixel that is
+# the same for every pixel, so [PreRender] folds each one into a 2x2 matrix.
+
+fun lerp(f32 a, f32 b, f32 t) f32 {
+  return a * (1.0 - t) + b * t;
+}
+
+f32 shakeDecay = 8.0;
+f32 shakeFreq = 40.0;
+
+# Inverse rotation about center in aspect-corrected space, then inverse scale,
+# as a column-major 2x2 matrix (m00, m10, m01, m11).
+fun inverseTransform(f32 s, f32 rot, f32 aspect) vec4 {
+  f32 invScale = 1.0 / max(s, 0.001);
+  f32 cr = cos(0.0 - rot) * invScale;
+  f32 sr = sin(0.0 - rot) * invScale;
+  vec4 m = {0.0, 0.0, 0.0, 0.0};
+  m.x = cr;
+  m.y = sr * aspect;
+  m.z = (0.0 - sr) / aspect;
+  m.w = cr;
+  return m;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {center = {0.5, 0.5}, min = {0.0, 0.0}, max = {1.0, 1.0}},
+    {amount = 0.45, min = 0.0, max = 1.0, description = "Shake Intensity"},
+    {size = 0.45, min = 0.0, max = 1.0, description = "Scale Overshoot"},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        opacity = 0.0,
+        ghostOpacity = 0.0,
+        blurStrength = 0.0,
+        center = {0.5, 0.5},
+        mMain = {1.0, 0.0, 0.0, 1.0},
+        mGhost = {1.0, 0.0, 0.0, 1.0},
+        mBlur0 = {1.0, 0.0, 0.0, 1.0},
+        mBlur1 = {1.0, 0.0, 0.0, 1.0},
+        mBlur2 = {1.0, 0.0, 0.0, 1.0},
+        mBlur3 = {1.0, 0.0, 0.0, 1.0},
+        mBlur4 = {1.0, 0.0, 0.0, 1.0},
+        mBlur5 = {1.0, 0.0, 0.0, 1.0},
+        mBlur6 = {1.0, 0.0, 0.0, 1.0},
+        mBlur7 = {1.0, 0.0, 0.0, 1.0},
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 shakeAmplitude = mix(0.1, 1.0, getParameterFloat('amount));
+  f32 overshoot = mix(1.05, 1.6, getParameterFloat('size));
+
+  # Scale phase: 0→0.33 ramps from 0 to overshoot, then eases back to 1.0
+  f32 scaleT = clamp(p / 0.33, 0.0, 1.0);
+  scaleT = pow(scaleT, 3.0);
+  f32 settleT = clamp((p - 0.33) / 0.25, 0.0, 1.0);
+  f32 scale = lerp(0.0, overshoot, scaleT);
+  scale = lerp(scale, 1.0, settleT);
+
+  # Shake phase: starts at p≈0.25, decays quickly
+  # rotation(t) = A * 2^(-d*t) * sin(w*t)
+  # rotation'(t) = A * 2^(-d*t) * (w*cos(w*t) - d*ln2*sin(w*t))
+  f32 shakeT = clamp((p - 0.25) / 0.75, 0.0, 1.0);
+  f32 rotation = 0.0;
+  f32 angularVelocity = 0.0;
+  if (p > 0.25) {
+    f32 envelope = pow(2.0, 0.0 - shakeDecay * shakeT);
+    f32 sinVal = sin(shakeFreq * shakeT);
+    f32 cosVal = cos(shakeFreq * shakeT);
+    rotation = shakeAmplitude * envelope * sinVal;
+    f32 ln2 = 0.6931;
+    angularVelocity = abs(shakeAmplitude * envelope * (shakeFreq * cosVal - shakeDecay * ln2 * sinVal));
+  }
+
+  # Normalize against fixed reference amplitude (0.5) so ghost/blur scale with amount
+  f32 peakVelocity = 0.5 * shakeFreq;
+  f32 normalizedVel = clamp(angularVelocity / peakVelocity, 0.0, 1.0);
+
+  # Ghost + blur driven by angular velocity — effects track actual motion speed
+  f32 ghostOpacity = normalizedVel * 0.8;
+  f32 ghostScaleVal = lerp(1.0, 1.2, normalizedVel);
+  f32 blurStrength = normalizedVel * 0.5;
+
+  f32 opacity = clamp(p * 10.0, 0.0, 1.0);
+
+  vec2 size = getTextureSize('default);
+  f32 aspect = size.x / size.y;
+
+  # Rotational motion blur: 8 nearby angles, t = i / 7 - 0.5, odd taps
+  # mirrored 8x to the other side.
+  setShaderUniform('composite, 'mBlur0, inverseTransform(scale, rotation + blurStrength * (0.0 / 7.0 - 0.5), aspect));
+  setShaderUniform('composite, 'mBlur1, inverseTransform(scale, rotation - 8.0 * blurStrength * (1.0 / 7.0 - 0.5), aspect));
+  setShaderUniform('composite, 'mBlur2, inverseTransform(scale, rotation + blurStrength * (2.0 / 7.0 - 0.5), aspect));
+  setShaderUniform('composite, 'mBlur3, inverseTransform(scale, rotation - 8.0 * blurStrength * (3.0 / 7.0 - 0.5), aspect));
+  setShaderUniform('composite, 'mBlur4, inverseTransform(scale, rotation + blurStrength * (4.0 / 7.0 - 0.5), aspect));
+  setShaderUniform('composite, 'mBlur5, inverseTransform(scale, rotation - 8.0 * blurStrength * (5.0 / 7.0 - 0.5), aspect));
+  setShaderUniform('composite, 'mBlur6, inverseTransform(scale, rotation + blurStrength * (6.0 / 7.0 - 0.5), aspect));
+  setShaderUniform('composite, 'mBlur7, inverseTransform(scale, rotation - 8.0 * blurStrength * (7.0 / 7.0 - 0.5), aspect));
+
+  setShaderUniform('composite, 'opacity, opacity);
+  setShaderUniform('composite, 'ghostOpacity, ghostOpacity);
+  setShaderUniform('composite, 'blurStrength, blurStrength);
+  setShaderUniform('composite, 'center, getParameterVec2('center));
+  setShaderUniform('composite, 'mMain, inverseTransform(scale, rotation, aspect));
+  setShaderUniform('composite, 'mGhost, inverseTransform(scale * ghostScaleVal, rotation, aspect));
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float opacity;
+uniform float ghostOpacity;
+uniform float blurStrength;
+uniform vec2 center;
+uniform vec4 mMain;
+uniform vec4 mGhost;
+uniform vec4 mBlur0;
+uniform vec4 mBlur1;
+uniform vec4 mBlur2;
+uniform vec4 mBlur3;
+uniform vec4 mBlur4;
+uniform vec4 mBlur5;
+uniform vec4 mBlur6;
+uniform vec4 mBlur7;
+
+// Clip B at the transformed position, zero outside [0,1].
+vec4 sampleB(vec4 m, vec2 q) {
+  vec2 buv = m.xy * q.x + m.zw * q.y + center;
+  float inside = step(0.0, buv.x) * step(buv.x, 1.0) * step(0.0, buv.y) * step(buv.y, 1.0);
+  return texture2D(s_texture1, buv) * inside;
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec2 q = uv - center;
+
+  // Main subject, with rotational motion blur while the shake is fast.
+  vec4 b;
+  if (blurStrength > 0.001) {
+    b = sampleB(mBlur0, q) + sampleB(mBlur1, q) + sampleB(mBlur2, q) + sampleB(mBlur3, q) +
+        sampleB(mBlur4, q) + sampleB(mBlur5, q) + sampleB(mBlur6, q) + sampleB(mBlur7, q);
+    b *= 0.125;
+  } else {
+    b = sampleB(mMain, q);
+  }
+
+  // Ghost duplicate behind: slightly larger scale, reduced opacity.
+  if (ghostOpacity > 0.0) {
+    b += sampleB(mGhost, q) * ghostOpacity * (1.0 - b.a);
+  }
+  b *= opacity;
+
+  // Clip B is premultiplied, so it goes over clip A without another multiply by b.a.
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

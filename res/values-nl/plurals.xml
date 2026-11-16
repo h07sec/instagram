@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d d geleden</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d u geleden</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d m geleden</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d browsertaken</item>
+        <item quantity="one">%1$d browsertaak</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Vervalt over %1$d uur</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Vervalt over %1$d minuten</item>
+        <item quantity="one">Vervalt over %1$d minuut</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d taken moeten worden beoordeeld</item>
+        <item quantity="one">Een taak moet worden beoordeeld</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d passagiers</item>
+        <item quantity="one">%1$d passagier</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d taken moeten worden beoordeeld</item>
+        <item quantity="one">%1$d taak moet worden beoordeeld</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d handbagageartikelen</item>
+        <item quantity="one">%1$d handbagageartikel</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d ingecheckte tassen</item>
+        <item quantity="one">%1$d ingecheckte tas</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">Opties %1$s</item>
+        <item quantity="one">Optie %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">%1$d afbeeldingen gebruiken</item>
+        <item quantity="one">%1$d afbeelding gebruiken</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">%1$d dagen gratis retourneren</item>
+        <item quantity="one">%1$d dag gratis retourneren</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">Retourneren binnen %1$d dagen</item>
+        <item quantity="one">Retourneren binnen %1$d dag</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Tijdelijke kaart vervalt over %1$d uur</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">Alle (%1$d) volgen</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">Volgen (%1$d)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Elke %1$d uur</item>
+        <item quantity="one">Elk %1$d uur</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">Elke %1$d minuten</item>
+        <item quantity="one">Elke %1$d minuut</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Elke %1$d seconden</item>
+        <item quantity="one">Elke %1$d seconde</item>
+    </plurals>
+</resources>

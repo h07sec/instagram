@@ -1,0 +1,158 @@
+[Filter TransitionMulticlipShutterBlend]
+
+# Multiclip Shutter Blend (AE: Edits_Transition_collect_01 / shutter_blend).
+# Clip B dissolves in over clip A through a soft luminance wipe (Gradient Wipe
+# on itself, inverted, Transition Completion 0.91 -> 0 over 0.85s-1.917s,
+# Softness 0.41), with both clips smeared by Echo (5 echoes 1/30s apart,
+# Blend): clip A carries the full trail and clip B's trail shortens from
+# 1.367s onward. Progress spans 0.85s-1.917s.
+#
+# Echo needs past frames; a feedback trail per clip (each pass blends in its
+# own previous output) approximates the 6-frame blend with an exponential
+# trail of the same mean lag.
+#
+# Ported from the Easel web tool's multiclip_shutter_blend.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  # Each trail pass reads its own previous frame.
+  makeHistoricalTexture('prevTrailA, 'trailA, 1.0);
+  makeHistoricalTexture('prevTrailB, 'trailB, 1.0);
+
+  filter.parameters = {
+    {softness = 0.41, min = 0.0, max = 1.0, description = "Transition Softness"},
+    {echoAmount = 1.0, min = 0.0, max = 1.0, description = "Echo Amount"},
+  };
+
+  filter.passes = {
+    {
+      name = 'trailA,
+      inputs = {'default, 'prevTrailA},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        keep = 0.0,
+      },
+      glslShader = trailGlsl,
+    },
+    {
+      name = 'bSource,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      glslShader = copyGlsl,
+    },
+    {
+      name = 'trailB,
+      inputs = {'bSource, 'prevTrailB},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        keep = 0.0,
+      },
+      glslShader = trailGlsl,
+    },
+    {
+      name = 'wipe,
+      inputs = {'trailA, 'trailB},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        completion = 1.0,
+        softness = 0.41,
+      },
+      glslShader = wipeGlsl,
+    },
+  };
+}
+
+f32 T0 = 0.85;
+f32 T1 = 1.917;
+# 5 echoes 1/30s apart blended evenly: mean lag 2.5 echo steps.
+f32 ECHO_LAG = 2.5;
+
+# Feedback weight giving an exponential trail with the given mean lag in frames.
+fun keepForLag(f32 lag) f32 {
+  return lag / (1.0 + lag);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 t = T0 + p * (T1 - T0);
+  f32 echo = getParameterFloat('echoAmount);
+
+  # Gradient Wipe completion, linear. AE starts at 0.91, which already lets
+  # clip B's darkest areas through; starting at 1.0 opens on pure clip A.
+  f32 completion = 1.0 - p;
+
+  # Clip B's echo time shrinks linearly to 0 between 1.367s and 2.65s.
+  f32 echoB = clamp(1.0 - (t - 1.367) / (2.65 - 1.367), 0.0, 1.0);
+  if (p >= 1.0) {
+    echoB = 0.0;
+  }
+  f32 echoA = 1.0;
+  if (p <= 0.0) {
+    echoA = 0.0;
+    echoB = 0.0;
+  }
+
+  setShaderUniform('trailA, 'keep, keepForLag(ECHO_LAG * echoA * echo));
+  setShaderUniform('trailB, 'keep, keepForLag(ECHO_LAG * echoB * echo));
+  setShaderUniform('wipe, 'completion, completion);
+  setShaderUniform('wipe, 'softness, getParameterFloat('softness));
+}
+
+string copyGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+
+void main() {
+  gl_FragColor = toOutputFormat(texture2D(s_texture1, sourceTextureCoordinate));
+}
+";
+
+string trailGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float keep;
+uniform bool hasHistory;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 cur = sampleInput(uv);
+  vec4 prev = texture2D(s_texture1, uv);
+  // No trail until the previous frame exists.
+  float k = hasHistory ? keep : 0.0;
+  gl_FragColor = toOutputFormat(mix(cur, prev, k));
+}
+";
+
+string wipeGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float completion;
+uniform float softness;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 b = texture2D(s_texture1, uv);
+
+  // Gradient Wipe on clip B with Invert Gradient: B's darkest areas arrive first.
+  float g = 1.0 - dot(b.rgb, vec3(0.299, 0.587, 0.114));
+  float s = max(softness, 1e-3);
+  float th = completion * (1.0 + s);
+  float m = smoothstep(th - s, th, g) * b.a;
+
+  float outA = m + a.a * (1.0 - m);
+  vec3 rgb = (b.rgb * m + a.rgb * a.a * (1.0 - m)) / max(outA, 1e-5);
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

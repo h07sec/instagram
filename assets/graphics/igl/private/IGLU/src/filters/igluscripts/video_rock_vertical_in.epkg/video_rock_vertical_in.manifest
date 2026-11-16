@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "B8D821EA-E090-4501-84B6-B11DCFAD2940",
+  "displayName": "Rock In Vertical",
+  "description": "[IG Edits] Effect name shown in the video effects picker. This is the user-facing label for a video effect.",
+  "iglu": {
+    "legacyId": 3900,
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 1280,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "direction",
+        "defaultSelection": "up",
+        "available": [
+          "up",
+          "down"
+        ],
+        "displayName": "Direction"
+      },
+      {
+        "name": "intensity",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "displayName": "Intensity"
+      },
+      {
+        "name": "duration",
+        "default": 1.28,
+        "min": 0.1,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayMethod": "time"
+      }
+    ]
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQBmqEZUs40D"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e9b7bf4",
+      "handle": "AQAHhrEryxtd",
+      "md5": "9d28dddc20e62ff1aeaad5a10485a9e3"
+    }
+  }
+}

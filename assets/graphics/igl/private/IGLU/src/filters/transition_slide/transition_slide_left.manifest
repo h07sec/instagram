@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "transition_slide_left",
+  "displayName": "Slide left",
+  "description": "Video transition selection. Chooses to apply slide left transition.",
+  "iglu": {
+    "behavior": {
+      "type": "transition",
+      "durationMs": 500,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 0.5,
+        "min": 0.1,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayMethod": "time"
+      }
+    ]
+  }
+}

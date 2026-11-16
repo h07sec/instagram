@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "337870191437892",
+  "displayName": "[SATURATED SCREEN]",
+  "description": "[IG Edits] Color filter name. With \"[SATURATED SCREEN]\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3367
+  },
+  "assets": [
+    {
+      "name": "saturated_screen_lut.png",
+      "assetHash": "0433e5df8350c6c3f4ff88e3107a7ba82d286d6ae60fc42fa1234ed84124067f",
+      "hubAssetId": "2121072108518624"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEDZXEHVEn"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c5ff612c",
+      "handle": "AQAF_oHnx1Ua",
+      "md5": "648a4975c878de79fdfc471671cf0107"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNBb2jTEbV8RzP0DAGrqYubJsAR5bhQoAAAD"
+    }
+  }
+}

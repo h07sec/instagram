@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1234843673353269",
+  "displayName": "Starry Night",
+  "description": "[IG Edits] Color filter name. With \"Starry Night\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3385
+  },
+  "assets": [
+    {
+      "name": "starry_night_lut.png",
+      "assetHash": "01d337a11404ab2562521ae6633f4869f21993f5cdc312c994cbff2ba8e3d70e",
+      "hubAssetId": "1433191855617619"
+    },
+    {
+      "name": "starry_night_sky.png",
+      "assetHash": "e6699069a4a651c84988ad9671c01a7170674e33518f052ab906ae571276f1d0",
+      "hubAssetId": "1431844791805848"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFsGJWGIjU"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "49899f7a",
+      "handle": "AQAFyVtqqp7Y",
+      "md5": "4379a99e8f5b523e4736905ef8ef301e"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJxd2jTKMZPbkfQDADOIdzIivJZvbhQoAAAD"
+    }
+  }
+}

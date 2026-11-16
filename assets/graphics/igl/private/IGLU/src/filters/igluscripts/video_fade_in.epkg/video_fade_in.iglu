@@ -1,0 +1,30 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript implementation of the C++ video_fade_in; pixel-identical (video_fade_in_quarter_progress screenshot case). C++ stays registered for factories without a script resource loader.
+[Filter VideoFadeInFilter]
+
+[Init]
+fun init(Filter filter) {
+  filter.passes = {{
+      name = 'fade, inputs = {'default},
+      uniforms = { progress = 0.0, inOutSwitch = 1.0 },
+      glslShader = glsl
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  setShaderUniform('fade, 'progress, getParameterFloat('progress));
+  setShaderUniform('fade, 'inOutSwitch, 1.0);
+}
+
+string glsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform float progress;
+uniform float inOutSwitch;
+
+void main() {
+  float progressDirection = inOutSwitch == 0.0 ? progress : 1.0 - progress;
+  gl_FragColor = toOutputFormat(sampleInput(sourceTextureCoordinate) * (1.0 - progressDirection));
+}
+";

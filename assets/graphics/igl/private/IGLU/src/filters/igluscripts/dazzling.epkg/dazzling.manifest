@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "211897864714650",
+  "displayName": "Dazzling",
+  "description": "[IG Edits] Color filter name. Vibrant lighting-focused LUT color grade with brightness control.",
+  "android": {
+    "previewAsset": {
+      "key": "432767bc",
+      "handle": "AQAE0PtfOoaI",
+      "md5": "0dfc09de1eae3e637a7f96f3a7bfae14"
+    }
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAE4wJJL8rf"
+    }
+  },
+  "iglu": {
+    "legacyId": 3186
+  },
+  "assets": [
+    {
+      "name": "dazzling_lut.png",
+      "assetHash": "d9a991860ee2cc3d486075808c231effc735868fea19b04d57c768f896466bc3",
+      "hubAssetId": "2987080281624852"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GM5aLTIfGShoAG0HAPesEneG0ks2bhQoAAAD"
+    }
+  }
+}

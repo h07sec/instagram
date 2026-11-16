@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "708BDE29-DDB5-42EA-AC2D-40B784AC641E",
+  "displayName": "Muybridge",
+  "description": "[IG Edits] Video effect name. With \"Muybridge\", the creator gets a 3x3 grid of camera copies, each a few frames later than the last, like a Muybridge motion study.",
+  "iglu": {
+    "legacyId": 3294
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGcnTdZH8D"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "864081c7",
+      "handle": "AQANQZ4cXEfS",
+      "md5": "ec926f3092076e8bad56a6fecfa0f460"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GAfOAzMEJpm9dswDAAgYYhI3tecpbhQoAAAD"
+    }
+  }
+}

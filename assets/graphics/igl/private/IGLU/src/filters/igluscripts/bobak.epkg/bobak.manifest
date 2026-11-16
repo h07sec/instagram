@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1403964216817485",
+  "displayName": "BOBAK",
+  "description": "[IG Edits] Color filter name. With \"BOBAK\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3375
+  },
+  "assets": [
+    {
+      "name": "bobak_lut.png",
+      "assetHash": "c2833078016d6d14a691d548f08c772249366b2b3e532084a5532d89bb7203a6",
+      "hubAssetId": "1667885721660649"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEDwyq7DF1"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "78e4114f",
+      "handle": "AQADZ8VQG01C",
+      "md5": "5f5a5a95b427322afc2bcb72671ad9f6"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPqSgzOs2BhxlR4EAOHfQ9TjrV0LbhQoAAAD"
+    }
+  }
+}

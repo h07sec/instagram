@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "5EC88E78-1224-4FEC-B114-52823DF3E607",
+  "displayName": "◈Flashwiiart",
+  "description": "[IG Edits] Video effect name. With \"Flashwiiart\", the creator gets a vivid color grade with strobing black shape masks flashing over the video.",
+  "iglu": {
+    "legacyId": 3237
+  },
+  "assets": [
+    {
+      "name": "flash_wii_art_lut.png",
+      "assetHash": "c693ca3600aea5bfad2eb08252cf7edf64630f5c60fd52216006dba1f518b7a6",
+      "hubAssetId": "1131365982724152"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF3b1x6dRP"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e079e70b",
+      "handle": "AQAD8pwMrdHG",
+      "md5": "ad9e9757c94de64cbc94f00019e622fc"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGaYEDMItIwDWl0DAPdSIQoQsMwqbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,234 @@
+[Filter HalationFilter]
+
+[Init]
+fun init(Filter filter) {
+
+  filter.parameters = {
+    {color = {1.0, 0.25, 0.05, 1.0}, description = "Primary halation tint"},
+    {size = 0.4, min = 0.01, max = 1.0, description = "Glow Size"},
+    {intensity = 1.0, min = 0.0, max = 1.0, description = "Intensity"},
+    {amount = 0.35, min = 0.0, max = 1.0, description = "Brightness cutoff level"},
+  };
+
+  filter.passes = {
+  {
+    name = 'threshold,
+    inputs = {'default},
+    # Nothing reads this at full resolution; the glow chain samples it at 0.25.
+    # Rendering it at 0.5 also gives that chain a real 2x2 downsample instead of
+    # a bilinear tap that saw 4 of every 16 full-res texels and dropped the rest
+    # of the highlight energy.
+    scale = {0.5, 0.5},
+    uniforms = {
+      threshold = 0.35,
+      feather = 0.15,
+    },
+    glslShader = thresholdGlsl,
+  },
+  # One chromatic glow chain. The three scatter radii are carried as three baked
+  # weight sets over one shared set of taps, so red comes out widest and blue
+  # tightest without three separate blurs.
+  {
+    name = 'glow_v,
+    inputs = {'threshold},
+    scale = {0.25, 0.25},
+    uniforms = {
+      axis = {0.0, 1.0},
+      outputSize = {1.0, 1.0},
+      blurStep = 1.0,
+    },
+    glslShader = glslChromaticBlur,
+  },
+  {
+    name = 'glow_h,
+    inputs = {'glow_v},
+    scale = {0.25, 0.25},
+    uniforms = {
+      axis = {1.0, 0.0},
+      outputSize = {1.0, 1.0},
+      blurStep = 1.0,
+    },
+    glslShader = glslChromaticBlur,
+  },
+  {
+    name = 'compose,
+    inputs = {'default, 'glow_h},
+    uniforms = {
+      opacity = 1.0,
+      glowTint = {0.9, 0.20625, 0.0375},
+    },
+    glslShader = composeGlsl,
+  }
+  };
+}
+
+# The glow chain renders at 0.25, so one of its texels spans this many full-res
+# pixels. Used to convert the sigma the parameter asks for into tap spacings.
+f32 kGlowStep = 4.0;
+
+# The baked kernel puts sigma_medium at this many tap spacings. Its ten pair
+# positions sit at +/-(k + 0.5) spacings, so the 9.5-spacing reach covers
+# 3.04 * sigma_wide.
+f32 kSigmaMediumInSpacings = 2.5;
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 size = getParameterFloat('size) * 25.0;
+
+  # The kernel's shape is fixed, so scaling the tap spacing scales all three
+  # sigmas with it and one uniform drives the whole chromatic triple.
+  # sigma_medium wants to be `size` full-res pixels; a glow texel is kGlowStep
+  # of those and the kernel puts sigma_medium at kSigmaMediumInSpacings texels.
+  f32 blurStep = size / (kGlowStep * kSigmaMediumInSpacings);
+  setShaderUniform('glow_v, 'blurStep, blurStep);
+  setShaderUniform('glow_h, 'blurStep, blurStep);
+
+  # --- Threshold ---
+  f32 th = getParameterFloat('amount);
+  th = 1.0 - th;
+  setShaderUniform('threshold, 'threshold, th);
+
+  # --- Compose ---
+  # warmth was frozen at 0.5, so the colour-temperature tint is the constant
+  # mix(coolShift, warmShift, 0.5) = {0.9, 0.825, 0.75}. Fold it into the
+  # halation colour here rather than re-deriving it in every fragment.
+  vec4 hcol = getParameterVec4('color);
+  vec3 glowTint = {hcol.r * 0.9, hcol.g * 0.825, hcol.b * 0.75};
+  setShaderUniform('compose, 'glowTint, glowTint);
+
+  f32 intensity = getParameterFloat('intensity);
+  setShaderUniform('compose, 'opacity, intensity);
+}
+
+# ==========================================================================
+# Chromatic separable blur — three radii in one pass
+#
+# Each line is one symmetric tap pair at +/-(k + 0.5) spacings, and its vec3 is
+# the weight that pair contributes to red, green and blue. The three weight sets
+# were generated for sigmas of 3.125, 2.5 and 1.875 spacings (wide, medium,
+# tight — the 1.25 / 1.0 / 0.75 dispersion the effect has always used), then
+# recombined the way the compose pass used to do it by hand:
+#
+#   w_r[k] = 0.5 * (G(x_k, 2.5) + G(x_k, 3.125))
+#   w_g[k] =        G(x_k, 2.5)
+#   w_b[k] = 0.5 * (G(x_k, 2.5) + G(x_k, 1.875))
+#
+# and each set normalized by 1 / (2 * sum(w)) so every channel has unit gain.
+# Regenerate all thirty constants together or the channel balance and the
+# brightness both shift. Truncation past the 9.5-spacing reach is 0.24% of the
+# red channel and less elsewhere.
+# ==========================================================================
+string glslChromaticBlur = "
+      precision mediump float;
+
+      varying highp vec2 sourceTextureCoordinate;
+      BaseUniformsOpenGL;
+
+      uniform vec2 axis;
+      // Target dimensions run past the largest integer fp16 holds exactly, so a
+      // mediump outputSize would put every tap on the wrong texel.
+      uniform highp vec2 outputSize;
+      uniform highp float blurStep;
+
+      void main() {
+
+        highp vec2 uv = sourceTextureCoordinate;
+
+        // Below this the whole kernel spans a fifth of a texel, so there is
+        // nothing to gather.
+        if (blurStep < 0.01) {
+          gl_FragColor = toOutputFormat(sampleInput(uv));
+          return;
+        }
+
+        // One tap spacing along this pass's axis, in its own target's texels.
+        // The host writes outputSize for every pass after [PreRender], so this
+        // tracks the pass's scale without the script having to know it.
+        highp vec2 o = axis * blurStep / outputSize;
+
+        vec3 accum = vec3(0.0);
+        accum += vec3(0.139644932, 0.156425935, 0.177388503) *
+            (sampleInput(uv - 0.5 * o).rgb + sampleInput(uv + 0.5 * o).rgb);
+        accum += vec3(0.122538015, 0.133297389, 0.142385447) *
+            (sampleInput(uv - 1.5 * o).rgb + sampleInput(uv + 1.5 * o).rgb);
+        accum += vec3(0.094588988, 0.096793771, 0.092798617) *
+            (sampleInput(uv - 2.5 * o).rgb + sampleInput(uv + 2.5 * o).rgb);
+        accum += vec3(0.064545795, 0.059894378, 0.050194664) *
+            (sampleInput(uv - 3.5 * o).rgb + sampleInput(uv + 3.5 * o).rgb);
+        accum += vec3(0.039213560, 0.031581852, 0.023165250) *
+            (sampleInput(uv - 4.5 * o).rgb + sampleInput(uv + 4.5 * o).rgb);
+        accum += vec3(0.021394063, 0.014190641, 0.009343308) *
+            (sampleInput(uv - 5.5 * o).rgb + sampleInput(uv + 5.5 * o).rgb);
+        accum += vec3(0.010575797, 0.005433495, 0.003328816) *
+            (sampleInput(uv - 6.5 * o).rgb + sampleInput(uv + 6.5 * o).rgb);
+        accum += vec3(0.004772729, 0.001772840, 0.001043617) *
+            (sampleInput(uv - 7.5 * o).rgb + sampleInput(uv + 7.5 * o).rgb);
+        accum += vec3(0.001975421, 0.000492916, 0.000284802) *
+            (sampleInput(uv - 8.5 * o).rgb + sampleInput(uv + 8.5 * o).rgb);
+        accum += vec3(0.000750699, 0.000116785, 0.000066976) *
+            (sampleInput(uv - 9.5 * o).rgb + sampleInput(uv + 9.5 * o).rgb);
+
+        gl_FragColor = toOutputFormat(vec4(accum, 1.0));
+      }";
+
+# ==========================================================================
+# Threshold shader — luma-based brightness mask
+# ==========================================================================
+string thresholdGlsl = "
+precision mediump float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform float threshold;
+uniform float feather;
+
+float luma(vec3 color) {
+  return dot(color, vec3(0.2126, 0.7152, 0.0722));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 color = sampleInput(uv);
+  float l = luma(color.xyz);
+  color.rgb *= smoothstep(threshold - feather, threshold + feather, l);
+  color.a = 1.0;
+  gl_FragColor = toOutputFormat(color);
+}
+";
+
+# ==========================================================================
+# Compose — chromatic halation with warmth tinting and streak blending
+# ==========================================================================
+string composeGlsl = "
+precision mediump float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+
+uniform float opacity;
+uniform vec3 glowTint;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 source = sampleInput(uv);
+
+  // Already chromatically recombined: the blur's baked weights put the widest
+  // scatter in red and the tightest in blue.
+  vec3 chromaGlow = texture2D(auxSampler1, uv).rgb;
+
+  // Inverse highlight mask: glow bleeds into shadows/midtones, not onto
+  // highlights. The edges are the frozen maskSoftness of 0.4 and the strength
+  // the frozen highlightProtect of 0.8.
+  float srcLuma = dot(source.rgb, vec3(0.2126, 0.7152, 0.0722));
+  float inverseMask = 1.0 - 0.8 * smoothstep(0.18, 0.58, srcLuma);
+
+  // Additive blend with mask. glowTint already carries halationColor * tempTint.
+  vec3 result = source.rgb + (chromaGlow * glowTint) * (inverseMask * opacity);
+  result = min(result, vec3(1.0));
+
+  gl_FragColor = toOutputFormat(vec4(result, 1.0));
+}
+";

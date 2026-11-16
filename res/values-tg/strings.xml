@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130003">Шаҳр</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Суроға</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Пӯшидани браузер</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s мехоҳад макони дастгоҳи шуморо истифода барад.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Иҷозат додан</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Манъ кардан</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Гузаштан ба вебсайт</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Баргаштан</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">Шаҳодатномаи амният, ки бо %1$s истифода мешавад, мушкиле дорад. Маълумоти шахсии шумо, ба монанди паролҳо ё рақами кортҳои қарзӣ ҳангоми мубодила кардан бо ин сомона метавонад эмин набошанд.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Ин сомонаи мазкур пайвасти бехатареро истифода намекунад</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Хатое ба миён омад</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Почтаи электронӣ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Сомонае, ки мебинед, кӯшиш мекунад барномаи берунаро кушояд. Мехоҳед идома диҳед?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Идома додан</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Шумо барномаи моро тарк мекунед</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Ин шояд аз сабаби хатогии техникие бошад, ки мо барои бартараф кардани он кор карда истодаем. Кӯшиш кунед ин саҳифаро аз нав бор кунед.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Таҷдид кардан</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Саҳифа дар айни ҳол дастрас нест</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Насаб</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Бор кардани саҳифа ғайриимкон аст</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Кушодан бо...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Кушодан дар %1$s</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">Имконоти бештар</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Ном</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Ҳоло шумо экрани пурраро мебинед. Барои баромадан ба тарафи чап кашед ё тугмаи қафоро ангушт занед.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Айни замон, ҳангоми танзим кардани %2$s бо забони %1$s мо бо мушкилиҳо дучор мешавем. Метавонед кӯшишро такрор кунед ё %2$s-ро бо забони англисӣ (ИМА) истифода баред.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Як лаҳза, мо ба %1$s танзим мекунем…</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Аз нав кӯшиш кардан</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Идомадиҳӣ бо забони англисӣ (ИМА)</string>
+</resources>

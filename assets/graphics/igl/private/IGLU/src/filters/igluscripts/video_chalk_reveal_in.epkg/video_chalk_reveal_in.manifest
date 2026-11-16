@@ -1,0 +1,66 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAFv3VPH_qc",
+      "key": "91de1e23",
+      "md5": "0e312ebf7c6594d997861f679ec5bb23"
+    }
+  },
+  "assets": [
+    {
+      "assetHash": "d8e80c0c328e9f4768abb9fc316c710a72fb324eeb1ba3f8a0bbf77aa9889d87",
+      "hubAssetId": "1655127689607744",
+      "name": "chalkTex.png"
+    }
+  ],
+  "dependencies": [
+    "video_chalk_reveal"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Chalk In\", the creator can reveal the subject as a sweeping chalk stroke paints it into view.",
+  "displayName": "Chalk In",
+  "identifier": "fd2a49ec-86a1-4daf-8193-620aa39a0df5",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 1500,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "down",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 1.5,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "default": 0.0,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect.",
+        "max": 1.0,
+        "min": 0.0,
+        "name": "size"
+      }
+    ],
+    "legacyId": 4008
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD6y_LEUPV"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

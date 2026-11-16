@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "312906926708192",
+  "displayName": "Blur -preset",
+  "description": "[IG Edits] Video effect name. With \"Blur -preset\", the creator can apply a Spark-ported soft horizontal blur with a warm orange grade and a lavender color wash.",
+  "iglu": {
+    "legacyId": 3394
+  },
+  "assets": [
+    {
+      "name": "blur_preset_lut.png",
+      "assetHash": "82ae9e1e5a796d3bc03c2368efbc22554440d36f0537e5a99d3bc12846cf5546",
+      "hubAssetId": "1776899650027105"
+    }
+  ]
+}

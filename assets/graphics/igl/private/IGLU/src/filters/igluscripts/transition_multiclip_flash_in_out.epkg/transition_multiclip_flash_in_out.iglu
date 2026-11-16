@@ -1,0 +1,203 @@
+[Filter TransitionMulticlipFlashStretch]
+
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 r = 1.0 - s;
+  return 3.0 * r * r * s * a + 3.0 * r * s * s * b + s * s * s;
+}
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = 0.0;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < u) { lo = s; } else { hi = s; }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+fun aeExposure(f32 t) f32 {
+  f32 v = 0.0;
+  if (t < 0.666666666667) { v = 0.0; }
+  else if (t < 0.733333333333) {
+    f32 u = clamp((t - 0.666666666667) / 0.0666666666667, 0.0, 1.0);
+    v = 0.0 + 0.85 * u;
+  }
+  else if (t < 2.13333333333) {
+    f32 u = clamp((t - 0.733333333333) / 1.4, 0.0, 1.0);
+    v = 0.85 + (0.0 - 0.85) * u;
+  }
+  else { v = 0.0; }
+  return v;
+}
+fun aeOffset(f32 t) f32 {
+  f32 v = 0.0;
+  if (t < 0.666666666667) { v = 0.0; }
+  else if (t < 0.733333333333) {
+    f32 u = clamp((t - 0.666666666667) / 0.0666666666667, 0.0, 1.0);
+    v = 0.0 + 0.54 * u;
+  }
+  else if (t < 0.766666666667) {
+    f32 u = clamp((t - 0.733333333333) / 0.0333333333333, 0.0, 1.0);
+    v = 0.54 + (0.0 - 0.05) * u;
+  }
+  else if (t < 1.05) {
+    f32 u = clamp((t - 0.766666666667) / 0.283333333333, 0.0, 1.0);
+    v = 0.49 + (0.0 - 0.49) * aeEase(u, 0.166666666667, 0.166666666667, 0.66666667, 1.0);
+  }
+  else { v = 0.0; }
+  return v;
+}
+fun aeScale(f32 t) f32 {
+  f32 v = 100.0;
+  if (t < 0.0166666666667) { v = 100.0; }
+  else if (t < 0.7) {
+    f32 u = clamp((t - 0.0166666666667) / 0.683333333333, 0.0, 1.0);
+    v = 100.0 + 67.0 * aeEase(u, 0.647129091562, 0.0, 0.530237619605, 1.0);
+  }
+  else if (t < 0.816666666667) {
+    v = 167.0;
+  }
+  else if (t < 2.15) {
+    f32 u = clamp((t - 0.816666666667) / 1.33333333333, 0.0, 1.0);
+    v = 167.0 + (0.0 - 67.0) * aeEase(u, 0.750079623754, 0.000003549323635, 0.43841987269, 0.999996928447);
+  }
+  else { v = 100.0; }
+  return v;
+}
+fun aeOpacityB(f32 t) f32 {
+  f32 v = 0.0;
+  if (t < 0.883333333333) { v = 0.0; }
+  else if (t < 1.26666666667) {
+    f32 u = clamp((t - 0.883333333333) / 0.383333333333, 0.0, 1.0);
+    v = 0.0 + 100.0 * u;
+  }
+  else { v = 100.0; }
+  return v;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.parameters = {
+    {duration = 2.13333333333, min = 0.1, max = 5.0, description = "Duration"},
+  };
+  filter.passes = {{
+    name = 'flash,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {progress = 0.0, opacityB = 0.0, exposureOn = 1.0, taps = 8.0,
+      gain = 1.0, offset = 0.0, scales0 = {1.0, 1.0, 1.0, 1.0}, scales1 = {1.0, 1.0, 1.0, 1.0}},
+    glslShader = glsl,
+  }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 t = 0.0166666666667 + clamp(p, 0.0, 1.0) * 2.13333333333;
+  f32 opacityB = 0.0;
+  if (t >= 0.766666666667) { opacityB = aeOpacityB(t) * 0.01; }
+  setShaderUniform('flash, 'progress, p);
+  setShaderUniform('flash, 'opacityB, opacityB);
+  f32 exposure = aeExposure(t);
+  f32 offset = aeOffset(t);
+  f32 exposureOn = 1.0;
+  if (exposure == 0.0 and offset == 0.0) { exposureOn = 0.0; }
+  setShaderUniform('flash, 'exposureOn, exposureOn);
+  setShaderUniform('flash, 'gain, pow(2.0, exposure));
+  setShaderUniform('flash, 'offset, offset);
+  f32 s0 = aeScale(t + 0.000520833333333) * 0.01;
+  f32 s1 = aeScale(t + 0.0015625) * 0.01;
+  f32 s2 = aeScale(t + 0.00260416666667) * 0.01;
+  f32 s3 = aeScale(t + 0.00364583333333) * 0.01;
+  f32 s4 = aeScale(t + 0.0046875) * 0.01;
+  f32 s5 = aeScale(t + 0.00572916666667) * 0.01;
+  f32 s6 = aeScale(t + 0.00677083333333) * 0.01;
+  f32 s7 = aeScale(t + 0.0078125) * 0.01;
+  # How far the shutter moves the frame corner, in 1080x1920 pixels; while the zoom
+  # is slow, fewer taps at the mean positions of sample groups cover it.
+  f32 lo = min(min(min(s0, s1), min(s2, s3)), min(min(s4, s5), min(s6, s7)));
+  f32 hi = max(max(max(s0, s1), max(s2, s3)), max(max(s4, s5), max(s6, s7)));
+  f32 spread = (1.0 / lo - 1.0 / hi) * 1101.45358504;
+  f32 taps = 8.0;
+  f32 g0 = s0;
+  f32 g1 = s1;
+  f32 g2 = s2;
+  f32 g3 = s3;
+  if (spread <= 0.25) {
+    taps = 1.0;
+    g0 = 8.0 / (1.0 / s0 + 1.0 / s1 + 1.0 / s2 + 1.0 / s3 + 1.0 / s4 + 1.0 / s5 + 1.0 / s6 + 1.0 / s7);
+  } else if (spread <= 0.5) {
+    taps = 2.0;
+    g0 = 4.0 / (1.0 / s0 + 1.0 / s1 + 1.0 / s2 + 1.0 / s3);
+    g1 = 4.0 / (1.0 / s4 + 1.0 / s5 + 1.0 / s6 + 1.0 / s7);
+  } else if (spread <= 1.0) {
+    taps = 4.0;
+    g0 = 2.0 / (1.0 / s0 + 1.0 / s1);
+    g1 = 2.0 / (1.0 / s2 + 1.0 / s3);
+    g2 = 2.0 / (1.0 / s4 + 1.0 / s5);
+    g3 = 2.0 / (1.0 / s6 + 1.0 / s7);
+  }
+  setShaderUniform('flash, 'taps, taps);
+  vec4 scales0 = {g0, g1, g2, g3};
+  vec4 scales1 = {s4, s5, s6, s7};
+  setShaderUniform('flash, 'scales0, scales0);
+  setShaderUniform('flash, 'scales1, scales1);
+}
+
+string glsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform sampler2D s_texture1;
+uniform float progress;
+uniform float opacityB;
+uniform float exposureOn;
+uniform float taps;
+uniform float gain;
+uniform float offset;
+uniform vec4 scales0;
+uniform vec4 scales1;
+
+vec3 mixAt(vec2 uv, float s) {
+  vec2 q = vec2(0.5) + (uv - vec2(0.5)) / s;
+  if (opacityB >= 1.0) return texture2D(s_texture1, q).rgb;
+  vec3 a = sampleInput(q).rgb;
+  if (opacityB <= 0.0) return a;
+  vec3 b = texture2D(s_texture1, q).rgb;
+  return mix(a, b, opacityB);
+}
+vec3 toLinear(vec3 c) {
+  return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
+vec3 toSRGB(vec3 c) {
+  c = max(c, 0.0);
+  return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));
+}
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  if (progress < 0.0) { gl_FragColor = toOutputFormat(sampleInput(uv)); return; }
+  if (progress >= 1.0) { gl_FragColor = toOutputFormat(texture2D(s_texture1, uv)); return; }
+  // Transform-effect motion blur: average the zoom over the shutter interval.
+  vec3 col;
+  if (taps < 1.5) {
+    col = mixAt(uv, scales0.x);
+  } else if (taps < 2.5) {
+    col = (mixAt(uv, scales0.x) + mixAt(uv, scales0.y)) * 0.5;
+  } else if (taps < 4.5) {
+    col = (mixAt(uv, scales0.x) + mixAt(uv, scales0.y) + mixAt(uv, scales0.z) + mixAt(uv, scales0.w)) * 0.25;
+  } else {
+    col = (mixAt(uv, scales0.x) + mixAt(uv, scales0.y) + mixAt(uv, scales0.z) + mixAt(uv, scales0.w)
+         + mixAt(uv, scales1.x) + mixAt(uv, scales1.y) + mixAt(uv, scales1.z) + mixAt(uv, scales1.w)) * 0.125;
+  }
+  col = clamp(col, 0.0, 1.0);
+  // AE Exposure (Bypass Linear Light Conversion off, gamma 1); identity when both are 0.
+  if (exposureOn > 0.5) {
+    col = clamp(toSRGB(toLinear(col) * gain + offset), 0.0, 1.0);
+  }
+  gl_FragColor = toOutputFormat(vec4(col, 1.0));
+}
+";

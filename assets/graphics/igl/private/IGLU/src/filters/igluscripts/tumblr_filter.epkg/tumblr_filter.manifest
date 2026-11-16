@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "907D354F-1F1C-4E6F-B539-A1FB14A31603",
+  "displayName": "tumblr filter",
+  "description": "[IG Edits] Color filter name. With \"tumblr filter\", the creator gets a warm, faded LUT color grade with a lifted film-grain texture.",
+  "iglu": {
+    "legacyId": 3264
+  },
+  "assets": [
+    {
+      "name": "tumblr_filter_lut.png",
+      "assetHash": "335967edc3b171f31875594a06ed22fff3ada58b4ea680a4d6c9546e7977e290",
+      "hubAssetId": "1590805602781413"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGWLk0EC1T"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "bb9fa9c8",
+      "handle": "AQAFv29tHd2t",
+      "md5": "a18614bb645b5e30ff93776d2e921619"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPTwgzOV5axrIC0NAIFE4qBvPxQdbhQoAAAD"
+    }
+  }
+}

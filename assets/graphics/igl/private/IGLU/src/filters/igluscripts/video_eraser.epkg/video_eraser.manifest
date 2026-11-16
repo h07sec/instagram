@@ -1,0 +1,56 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAIKxqb2crC",
+      "key": "f0c429ab",
+      "md5": "0a63abac27b295150d22cb50eec6ed10"
+    }
+  },
+  "description": "[IG Edits] Video effect name. With \"Eraser\", the creator can erase the subject with doodle-style lines that crumble away down the frame.",
+  "displayName": "Eraser",
+  "identifier": "8a07a145-c174-4fe3-8d22-027b60ef4c5c",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 1000,
+      "type": "fixedOutro"
+    },
+    "customization": [
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "down",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 1.0,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "default": 0.70588235,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect.",
+        "max": 1.0,
+        "min": 0.0,
+        "name": "size"
+      }
+    ],
+    "legacyId": 4016
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGlsHNypS3"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

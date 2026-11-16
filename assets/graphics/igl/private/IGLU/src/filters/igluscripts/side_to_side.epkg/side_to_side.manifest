@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "DE2D2EBB-326C-4641-AAD8-42644F55FB1D",
+  "displayName": "Side To Side",
+  "description": "[IG Edits] Color filter name. With \"Side To Side\", the creator gets a warm-graded camera photo in a white instant-film frame over an upside-down black-and-white background.",
+  "iglu": {
+    "legacyId": 3293
+  },
+  "assets": [
+    {
+      "name": "side_to_side_lut.png",
+      "assetHash": "34659d593b2485ff22eee06c0390589e6e4fcbfc38b671a2bb690f6fb346f185",
+      "hubAssetId": "1420576066891247"
+    },
+    {
+      "name": "side_to_side_photo_lut.png",
+      "assetHash": "7556c74ba2e50bd555af37e60f9aa06297f1537645b8e6a18d70915c7fc124ef",
+      "hubAssetId": "1509758044542955"
+    },
+    {
+      "name": "side_to_side_frame.png",
+      "assetHash": "dc46c69f7d53fc42867266582f577f8657a50693b6e321be987dd4fbcff50550",
+      "hubAssetId": "1381217070489607"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFqn-C-6aV"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "a8c9a36a",
+      "handle": "AQAECrUOGRZ-",
+      "md5": "1c07258bb88738c378c756fce2545e2d"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOFJRDOquJUbe70GAI3DiDR-66AXbhQoAAAD"
+    }
+  }
+}

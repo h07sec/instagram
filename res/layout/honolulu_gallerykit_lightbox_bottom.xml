@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@id/gallerykit_lightbox_bottom" android:visibility="invisible" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <include layout="@layout/honolulu_gallerykit_video_controls" />
+    <LinearLayout android:layout_gravity="bottom" android:orientation="horizontal" android:id="@id/gallerykit_lightbox_share_row" android:background="@color/black_85_transparent" android:layout_width="fill_parent" android:layout_height="@dimen/abc_list_item_height_material">
+        <FrameLayout android:id="@id/gallerykit_lightbox_share_stories" style="@style/GalleryKitBottomBarShareButton">
+            <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b5" android:drawableTop="@drawable/gallery_share_to_stories_button" style="@style/GalleryKitBottomBarShareLabel" />
+        </FrameLayout>
+        <FrameLayout android:id="@id/gallerykit_lightbox_share_reels" style="@style/GalleryKitBottomBarShareButton">
+            <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b4" android:drawableTop="@drawable/gallery_share_to_reels_button" style="@style/GalleryKitBottomBarShareLabel" />
+        </FrameLayout>
+        <FrameLayout android:id="@id/gallerykit_lightbox_share_post" style="@style/GalleryKitBottomBarShareButton">
+            <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b3" android:drawableTop="@drawable/gallery_share_to_feed_button" style="@style/GalleryKitBottomBarShareLabel" />
+        </FrameLayout>
+        <FrameLayout android:id="@id/gallerykit_lightbox_share_message" style="@style/GalleryKitBottomBarShareButton">
+            <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b2" android:drawableTop="@drawable/gallery_share_to_direct_button" style="@style/GalleryKitBottomBarShareLabel" />
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>

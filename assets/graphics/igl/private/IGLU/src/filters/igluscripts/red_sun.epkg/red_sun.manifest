@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "571681700240476",
+  "displayName": "Red Sun",
+  "description": "[IG Edits] Video effect name. With \"Red Sun\", the creator can apply a Spark-ported deep red monochrome grade with a vignette, an intro flash and a light pulse.",
+  "iglu": {
+    "legacyId": 3440
+  },
+  "assets": []
+}

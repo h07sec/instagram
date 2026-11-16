@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "661724108443919",
+  "displayName": "Chocolate",
+  "description": "[IG Edits] Color filter name. With \"Chocolate\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3364
+  },
+  "assets": [
+    {
+      "name": "chocolate_lut.png",
+      "assetHash": "04e94635e4120122d299ee52e9918336c3a692006ab2da9a0b900c0c3b59a830",
+      "hubAssetId": "1411630374468571"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD_n7MTiDT"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "1a4a421f",
+      "handle": "AQAD9BiviKu5",
+      "md5": "557b0cacb55a49513c417a9050ca00a0"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGxa2jTPVGHxaUMFAFSQMWzG_SIWbhQoAAAD"
+    }
+  }
+}

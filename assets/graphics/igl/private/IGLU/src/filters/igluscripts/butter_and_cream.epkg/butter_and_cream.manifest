@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "938244554356092",
+  "displayName": "butter+cream",
+  "description": "[IG Edits] Color filter name. With \"butter+cream\", the creator can apply a Spark-ported bright, creamy pink grade with a soft haze.",
+  "iglu": {
+    "legacyId": 3353
+  },
+  "assets": [
+    {
+      "name": "butter_and_cream_lut.png",
+      "assetHash": "20417cf52cc293e33e16d1036430ccc40c5b9067650d47f2219b18e3da4adfff",
+      "hubAssetId": "984879307991266"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFU8zKQ6kx"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "145cf185",
+      "handle": "AQAGJHr3wbyb",
+      "md5": "b4ee468f8e7d5fe33a774e96a2430b6e"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GCnA2jMdUvtIzLMGAIYYidQA3os4bhQoAAAD"
+    }
+  }
+}

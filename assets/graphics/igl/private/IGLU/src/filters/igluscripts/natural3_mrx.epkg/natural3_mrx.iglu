@@ -1,0 +1,68 @@
+[Filter Natural3Mrx]
+
+# Approved BATCH approximation: omit faint lips and same-grade face reprojection.
+# The declared 0.8 retouch material is unused; do not introduce smoothing.
+
+[Init]
+fun init(Filter filter)
+{
+    makeTexture('natural3_mrx_lut);
+    filter.parameters = {
+        {strength = 1.0, min = 0.0, max = 1.0, description = "Mix of the effect over the original image (1.0 = full effect)"},
+    };
+    filter.passes = {{
+        name = 'pass0,
+        inputs = {'default, 'natural3_mrx_lut},
+        uniforms = {strength = 1.0},
+        glslShader = glslLut,
+    }};
+}
+
+string lut_path = "lut_path";
+string natural3_mrx_lut_path = "natural3_mrx_lut_path";
+string lut_filename = "";
+
+[PreRender]
+fun preRender(Filter filter)
+{
+    f32 effect_strength = getParameterFloat('strength);
+    setShaderUniform('pass0, 'strength, effect_strength);
+    string lut_filename_parameter = getParameterString(lut_path);
+    if (lut_filename_parameter == "") {
+        lut_filename_parameter = getParameterString(natural3_mrx_lut_path);
+    }
+    if (lut_filename_parameter != "") {
+        string new_lut_filename = stringAppend("textureFilePath://", lut_filename_parameter);
+        if (new_lut_filename != lut_filename) {
+            lut_filename = new_lut_filename;
+            loadTexture('natural3_mrx_lut, lut_filename);
+        }
+    }
+}
+
+#### GLSL shader ####
+
+string glslLut = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+    uniform sampler2D auxSampler0;
+    uniform sampler2D auxSampler1;
+    uniform sampler2D auxSampler2;
+
+    void main() {
+        vec4 source = sampleInput(sourceTextureCoordinate);
+        // Bypass both the LUT and output clamp at zero, including extended-range input.
+        if (strength == 0.0) {
+            gl_FragColor = toOutputFormat(source);
+            return;
+        }
+        vec4 c = clamp(source, 0.0078125, 0.98438);
+        float row = floor(c.b * 8.0) / 8.0;
+        float col = floor((c.b - row) * 64.0) / 8.0;
+        vec2 lutUV = vec2(c.r / 8.0 + col, c.g / 8.0 + row);
+        vec4 retainedGrade = texture2D(auxSampler1, lutUV);
+        vec4 result = mix(source, retainedGrade, strength);
+        result = clamp(result, 0.0, 1.0);
+        gl_FragColor = toOutputFormat(result);
+    }
+";

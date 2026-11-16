@@ -1,0 +1,120 @@
+[Filter TransitionMulticlipSlowZoomFade]
+
+# Multiclip Slow Zoom Fade (AE: Edits_Transition_collect_01 / slow_zoom_fade).
+# Clip A pushes in (Scale 100% -> 200%, 0.4s-2.0s) while clip B, mirror-tiled
+# (CC RepeTile), fades in (0.767s-2.0s) and grows from 52% back to 100%
+# (0.767s-1.767s). Progress spans 0.4s-2.0s. Scales are relative to a clip
+# filling the frame (AE: 300% in the 4K comp).
+#
+# Ported from the Easel web tool's multiclip_slow_zoom_fade.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.passes = {{
+    name = 'zoomFade,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      invScaleA = 1.0,
+      invScaleB = 1.0,
+      opacityB = 0.0,
+      hasB = false,
+    },
+    glslShader = glsl,
+  }};
+}
+
+f32 T0 = 0.4;
+f32 T1 = 2.0;
+
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 is = 1.0 - s;
+  return 3.0 * is * is * s * a + 3.0 * is * s * s * b + s * s * s;
+}
+
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 uu = clamp(u, 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = uu;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < uu) {
+      lo = s;
+    } else {
+      hi = s;
+    }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+# One AE bezier keyframe segment (t0, v0) -> (t1, v1). io/so: out influence and
+# speed of the first key; ii/si: in influence and speed of the second key.
+fun aeSeg(f32 t, f32 t0, f32 v0, f32 t1, f32 v1, f32 io, f32 so, f32 ii, f32 si) f32 {
+  f32 dt = t1 - t0;
+  f32 dv = v1 - v0;
+  f32 r = v0;
+  if (t >= t1) {
+    r = v1;
+  } else if (t > t0) {
+    f32 y1 = io * so * dt / dv;
+    f32 y2 = 1.0 - ii * si * dt / dv;
+    r = v0 + dv * aeEase((t - t0) / dt, io, y1, 1.0 - ii, y2);
+  }
+  return r;
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 t = T0 + p * (T1 - T0);
+  # Speeds are AE %/s divided by 300 (full frame).
+  f32 scaleA = aeSeg(t, 0.4, 1.0, 2.0, 2.0, 0.58, 26.3 / 300.0, 0.33, 0.0);
+  f32 scaleB = aeSeg(t, 0.767, 0.52, 1.767, 1.0, 0.33, 0.0, 0.33, 0.0);
+  f32 opacityB = aeSeg(t, 0.767, 0.0, 2.0, 1.0, 0.33, 0.0, 0.33, 0.0);
+  if (p >= 1.0) {
+    scaleA = 2.0;
+    scaleB = 1.0;
+    opacityB = 1.0;
+  }
+  setShaderUniform('zoomFade, 'invScaleA, 1.0 / scaleA);
+  setShaderUniform('zoomFade, 'invScaleB, 1.0 / scaleB);
+  setShaderUniform('zoomFade, 'opacityB, opacityB);
+  setShaderUniform('zoomFade, 'hasB, opacityB != 0.0);
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float invScaleA;
+uniform float invScaleB;
+uniform float opacityB;
+uniform bool hasB;
+
+// CC RepeTile, mirrored tiles.
+vec2 mirrorTile(vec2 uv) {
+  vec2 m = mod(uv, 2.0);
+  return mix(m, 2.0 - m, step(1.0, m));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(0.5 + (uv - 0.5) * invScaleA);
+  vec4 b = vec4(0.0);
+  if (hasB) {
+    b = texture2D(s_texture1, mirrorTile(0.5 + (uv - 0.5) * invScaleB));
+  }
+
+  float m = opacityB * b.a;
+  float outA = m + a.a * (1.0 - m);
+  vec3 rgb = (b.rgb * m + a.rgb * a.a * (1.0 - m)) / max(outA, 1e-5);
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

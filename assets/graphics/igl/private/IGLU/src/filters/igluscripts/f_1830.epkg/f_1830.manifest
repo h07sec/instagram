@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "450717432949873",
+  "displayName": "1830",
+  "description": "[IG Edits] Video effect name. With \"1830\", the creator can apply a Spark-ported faded vintage film look with grain, a drifting orange light leak and a jittering film sprocket.",
+  "iglu": {
+    "legacyId": 3360
+  },
+  "assets": [
+    {
+      "name": "f_1830_lut.png",
+      "assetHash": "fd76ab144b79942ea99a3ddb151800be46831fcc68f4788a63c03052c9544e7e",
+      "hubAssetId": "2289544045230742"
+    },
+    {
+      "name": "f_1830_leak.png",
+      "assetHash": "7498b5fb16dd163f0e5c81d59fe4d1612e024ea80c7315bc1c08ec72ad348978",
+      "hubAssetId": "1114576711295520"
+    },
+    {
+      "name": "f_1830_dust.png",
+      "assetHash": "7129166310a371c15d44ec34ccbeefe9a579ec6dfc9432ff3d1c99627019b939",
+      "hubAssetId": "1473411474887938"
+    },
+    {
+      "name": "f_1830_film.png",
+      "assetHash": "d81d4ddee4cc8619e732e55fe703e9f9b60fe1da2f45a23691ffe4bbc0fe9d2e",
+      "hubAssetId": "1650865566689510"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGYsMzpYyr"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "9c5ffd4",
+      "handle": "AQAFKukhlHCH",
+      "md5": "f0ecd3d1c7ff2909d51c9333121230f0"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPuuYTPW9qXiwAAEAKL-78JmKEI_bhQoAAAD"
+    }
+  }
+}

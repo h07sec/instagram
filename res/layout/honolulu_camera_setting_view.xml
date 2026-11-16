@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="top" android:orientation="vertical" android:background="?android:windowBackground" android:padding="18.0dip" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.appcompat.widget.Toolbar android:id="@id/camera_settings_toolbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <TextView android:textSize="22.0sp" android:textStyle="bold" android:layout_gravity="start" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/APKTOOL_DUMMYVAL_0x7f130068" />
+        <TextView android:textSize="18.0sp" android:layout_gravity="end" android:id="@id/camera_settings_close_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/APKTOOL_DUMMYVAL_0x7f13004f" />
+    </androidx.appcompat.widget.Toolbar>
+    <Space android:layout_width="fill_parent" android:layout_height="16.0dip" />
+    <ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="vertical" android:id="@id/camera_settings_menu_item_container" android:paddingBottom="48.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <include layout="@layout/honolulu_camera_setting_default_camera_mode" />
+            <include layout="@layout/honolulu_camera_setting_gallery_type" />
+            <include layout="@layout/honolulu_camera_setting_gallery_open_transition" />
+            <include layout="@layout/honolulu_camera_setting_surface_type" />
+            <include layout="@layout/honolulu_camera_setting_jpeg_r" />
+            <include layout="@layout/honolulu_camera_setting_video_zoom" />
+            <include layout="@layout/honolulu_camera_setting_open_fade_in" />
+            <include layout="@layout/honolulu_camera_setting_volume_key_shutter" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

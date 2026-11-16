@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d hari yang lalu</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$dj yang lalu</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$dm yang lalu</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d tugasan pelayar</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Luput dalam masa %1$d jam</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Luput dalam %1$d minit</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d tugasan perlu disemak</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d penumpang</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d tugasan perlu disemak</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">%1$d item</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d penyambung</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d beg galas</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d beg yang disemak</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d hentian</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d hentian</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">Pilihan %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Gunakan %1$d imej</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">Pengembalian percuma selama %1$d hari</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">%1$d-hari pengembalian</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Kad sementara luput dalam masa %1$d jam</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">%1$d item</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">%1$d item</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">Ikut semua (%1$d)</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">Ikut (%1$d)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Setiap %1$d jam</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">Setiap %1$d minit</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Setiap %1$d saat</item>
+    </plurals>
+</resources>

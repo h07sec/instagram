@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "419511373267783",
+  "displayName": "low 2.0",
+  "description": "[IG Edits] Color filter name. With \"low 2.0\", the creator can apply a Spark-ported dark, desaturated, slightly cool color grade.",
+  "iglu": {
+    "legacyId": 3335
+  },
+  "assets": [
+    {
+      "name": "low_2_0_lut.png",
+      "assetHash": "957d3e8f69b30455ff071f9bc7b36469ad1caa9d7149fec00c460c51b477ca88",
+      "hubAssetId": "1426081559508440"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFIlUmuyFT"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "260215ad",
+      "handle": "AQAFYgl3XkmL",
+      "md5": "734a19bf6aa363516955792af9596d47"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GKWvvDNX9oRU9zIGAJHsqC7KW2k6bhQoAAAD"
+    }
+  }
+}

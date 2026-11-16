@@ -1,0 +1,203 @@
+[Filter VideoUnfold]
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('spriteTex);
+
+    filter.parameters = {
+        {keyThreshold = 0.733696, min = 0.0, max = 1.5, description = "keyThreshold"},
+        {keySmooth = 0.022717391304347825, min = 0.001, max = 1.0, description = "keySmooth"},
+        {threshold = 0.0652174, min = 0.0, max = 1.0, description = "threshold"},
+        {outro = 0.0, min = 0.0, max = 1.0, description = "outro"},
+    };
+
+    filter.passes = {
+        # Pass 0a: per-column bounding boxes of the subject from its alpha (32x1 output)
+        {
+            name = 'bbox_cols,
+            inputs = {'default},
+            uniforms = {
+                threshold = 0.1,
+            },
+            glslShader = glslBBoxCols,
+        },
+        # Pass 0b: reduce the column boxes to one bounding box (1x1 output)
+        {
+            name = 'bbox_calc,
+            inputs = {'default, 'bbox_cols},
+            glslShader = glslBBoxCalc,
+        },
+        # Pass 1: play the unfold sprite from the bbox centre and key it
+        {
+            name = 'pass0,
+            inputs = {'default, 'spriteTex, 'bbox_calc},
+            uniforms = {
+                progress = 0.0,
+                keyThreshold = 0.3,
+                keySmooth = 0.15,
+                outro = 0.0,
+                aspect = 0.5625,
+            },
+            glslShader = glsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    # One texel per sample-grid column, then a 1x1 reduction.
+    vec2 bboxColsSize = {32.0, 1.0};
+    setTextureSize('bbox_cols, bboxColsSize);
+    vec2 bboxSize = {1.0, 1.0};
+    setTextureSize('bbox_calc, bboxSize);
+    setShaderUniform('bbox_cols, 'threshold, getParameterFloat('threshold));
+
+    vec2 size = getTextureSize('default);
+    setShaderUniform('pass0, 'aspect, size.x / size.y);
+    setShaderUniform('pass0, 'keyThreshold, getParameterFloat('keyThreshold));
+    setShaderUniform('pass0, 'keySmooth, getParameterFloat('keySmooth));
+    setShaderUniform('pass0, 'outro, getParameterFloat('outro));
+}
+
+# Per-column bounding boxes (minX, minY, maxX, maxY) of the masked subject. The box edges are
+# cell centres (2k + 1) / 64, stored as (2k + 1) / 255 so the 8-bit target holds them exactly.
+string glslBBoxCols = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform float threshold;
+
+    void main() {
+        vec4 bbox = vec4(1.0, 1.0, 0.0, 0.0);
+
+        const int GRID_SIZE = 32;
+        float cellStep = 1.0 / float(GRID_SIZE);
+        float x = floor(sourceTextureCoordinate.x * float(GRID_SIZE));
+
+        for (int y = 0; y < GRID_SIZE; y++) {
+            vec2 sampleUV = vec2(
+                (x + 0.5) * cellStep,
+                (float(y) + 0.5) * cellStep
+            );
+            if (sampleInput(sampleUV).a > threshold) {
+                bbox.x = min(bbox.x, sampleUV.x);
+                bbox.y = min(bbox.y, sampleUV.y);
+                bbox.z = max(bbox.z, sampleUV.x);
+                bbox.w = max(bbox.w, sampleUV.y);
+            }
+        }
+
+        gl_FragColor = bbox * (64.0 / 255.0);
+    }
+";
+
+# Reduces the column boxes to the subject's bounding box (minX, minY, maxX, maxY)
+string glslBBoxCalc = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D auxSampler1;
+
+    void main() {
+        vec4 bbox = vec4(1.0, 1.0, 0.0, 0.0);
+
+        const int GRID_SIZE = 32;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            vec4 encoded = texture2D(auxSampler1, vec2((float(i) + 0.5) / float(GRID_SIZE), 0.5));
+            vec4 col = floor(encoded * 255.0 + 0.5) / 64.0;
+            bbox.xy = min(bbox.xy, col.xy);
+            bbox.zw = max(bbox.zw, col.zw);
+        }
+
+        gl_FragColor = toOutputFormat(bbox);
+    }
+";
+
+string glsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D auxSampler1;
+    uniform sampler2D auxSampler2;
+    uniform float progress;
+    uniform float keyThreshold;
+    uniform float keySmooth;
+    uniform float outro;
+    uniform float aspect;
+
+    // 3072x1024 sheet: 6 columns x 2 rows of 512x512 cells, 10 of the 12 used.
+    // TOTAL_STEPS adds one blank step in front of the sequence.
+    #define COLS 6.0
+    #define ROWS 2.0
+    #define SPRITE_FRAMES 10.0
+    #define TOTAL_STEPS 11.0
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        vec4 src = sampleInput(uv);
+
+        float t = mix(progress, 1.0 - progress, outro);
+
+        // Subject bounding box, reduced to a single texel by the bbox passes.
+        vec4 bbox = texture2D(auxSampler2, vec2(0.5));
+        bool bboxValid = bbox.x < bbox.z && bbox.y < bbox.w;
+        vec2 rawCenter = bboxValid ? (bbox.xy + bbox.zw) * 0.5 : vec2(0.5);
+
+        // The sprite math below assumes OpenGL orientation (screen top at
+        // y = 1). Flip y on Metal so both backends show the same frames.
+        vec2 guv = vec2(uv.x, max(DOWN, 0.0) + UP * uv.y);
+        vec2 center = vec2(rawCenter.x, max(DOWN, 0.0) + UP * rawCenter.y);
+
+        // Square sprite anchored on that centre, grown until it reaches
+        // whichever screen edge is furthest away. Taking the max of the two
+        // half-extents is what guarantees full coverage even when the subject
+        // sits right against one side of the frame.
+        float halfX = max(center.x, 1.0 - center.x) * aspect;
+        float halfY = max(center.y, 1.0 - center.y);
+        float halfSpan = max(halfX, halfY);
+
+        vec2 q = (guv - center) * vec2(aspect, 1.0);
+        vec2 spriteUV = q / (2.0 * halfSpan) + 0.5;
+
+        // Step through the sequence over the duration. Slot 0 is a blank
+        // frame held in front of the sprite, so the effect opens on nothing
+        // at all rather than on the sliver of paper in sprite frame 0.
+        float slot = clamp(floor(t * TOTAL_STEPS), 0.0, TOTAL_STEPS - 1.0);
+        float f = max(slot - 1.0, 0.0);
+        float notBlank = step(0.5, slot);
+
+        float col = mod(f, COLS);
+        float row = floor(f / COLS);
+
+        // Resource images are uploaded without a Y flip, so PNG row 0 sits at
+        // v = 0 while screen top is uv.y = 1. Flipping the local y keeps the
+        // sprite upright and puts sheet row 0 on the first six frames.
+        vec2 local = vec2(spriteUV.x, 1.0 - spriteUV.y);
+        vec2 cellUV = clamp(local, 0.0, 1.0);
+        vec2 tc = (vec2(col, row) + cellUV) / vec2(COLS, ROWS);
+
+        vec4 sprite = texture2D(auxSampler1, tc);
+
+        // Clamping above would smear the cell edges outwards, so anything
+        // outside the sprite square is explicitly emptied instead.
+        float inside = step(0.0, local.x) * step(local.x, 1.0)
+                     * step(0.0, local.y) * step(local.y, 1.0);
+        sprite = sprite * inside * notBlank;
+
+        // Colour key: where the sprite is pure green the source shows through,
+        // everywhere else the sprite's own colour wins. keyThreshold is how
+        // far from green still counts as keyed, and keySmooth is the width of
+        // the blend that starts there - so a tiny keySmooth is a hard cut.
+        float keyDist = length(sprite.rgb - vec3(0.0, 1.0, 0.0));
+        float keyMask = smoothstep(keyThreshold, keyThreshold + max(keySmooth, 0.001), keyDist);
+
+        vec3 paperRgb = sprite.rgb * src.a;
+        vec3 rgb = mix(src.rgb, paperRgb, keyMask) * sprite.a;
+        float a = sprite.a * src.a;
+
+        // Across the final frame's slot, dissolve whatever paper is left into
+        // the plain source, so progress 1 is exactly the untouched image.
+        float tail = smoothstep(1.0 - 1.0 / TOTAL_STEPS, 1.0, t);
+        rgb = mix(rgb, src.rgb, tail);
+        a = mix(a, src.a, tail);
+
+        gl_FragColor = toOutputFormat(vec4(rgb, a));
+    }
+";

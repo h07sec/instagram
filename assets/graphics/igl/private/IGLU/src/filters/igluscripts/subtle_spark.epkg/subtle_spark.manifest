@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "A2E65309-DF4F-497F-A2C0-5DE39A43FBAA",
+  "displayName": "Subtle",
+  "description": "[IG Edits] Color filter name. With \"Subtle\", the creator gets a gentle, warm LUT color grade applied to the camera image.",
+  "iglu": {
+    "legacyId": 3285
+  },
+  "assets": [
+    {
+      "name": "subtle_spark_lut.png",
+      "assetHash": "0cf307832a62edc1bb51d8f1a89d6a9878d38ee020def7e5149554e96b0f57a0",
+      "hubAssetId": "1455751273188849"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEAl-3Bp-G"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "48415241",
+      "handle": "AQAEAaJ2BoXL",
+      "md5": "8f23ff327f52b918b72c65b126aafd61"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GLo7ZTMCnuXGq9UHAGN0qyqCGSAVbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "234871828164970",
+  "displayName": "VHS ll",
+  "description": "[IG Edits] Color filter name. With \"VHS ll\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3378
+  },
+  "assets": [
+    {
+      "name": "vhs_ii_lut.png",
+      "assetHash": "e629976cd6f095428c3323238b3ca06155302819ad8d3ec698d9ed4148125e1e",
+      "hubAssetId": "1138195149165938"
+    },
+    {
+      "name": "vhs_ii_play.png",
+      "assetHash": "1186a272e4eabbb522a3f0fd1ab634171d186a1917117761873a6ff214cd6b3a",
+      "hubAssetId": "1638729841056725"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAH_bd6q_8P"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "334bba51",
+      "handle": "AQAFZuJtVlTD",
+      "md5": "faa94ddc14568c657fdbfc5ac9f24eac"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIZSwjS1kXRNkhgEACf-FG3Y-poqbhQoAAAD"
+    }
+  }
+}

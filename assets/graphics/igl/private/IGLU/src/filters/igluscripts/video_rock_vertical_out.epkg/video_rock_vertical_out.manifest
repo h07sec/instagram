@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "0D3FFFB6-5FE1-4E70-98F6-6847CB81EA26",
+  "displayName": "Rock Out Vertical",
+  "description": "[IG Edits] Effect name shown in the video effects picker. This is the user-facing label for a video effect.",
+  "iglu": {
+    "legacyId": 3901,
+    "behavior": {
+      "type": "fixedOutro",
+      "durationMs": 1280,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "direction",
+        "defaultSelection": "up",
+        "available": [
+          "up",
+          "down"
+        ],
+        "displayName": "Direction"
+      },
+      {
+        "name": "intensity",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "displayName": "Intensity"
+      },
+      {
+        "name": "duration",
+        "default": 1.28,
+        "min": 0.1,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayMethod": "time"
+      }
+    ]
+  },
+  "dependencies": [
+    "video_rock_vertical_in"
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGqhFfHOxs"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "84d28d15",
+      "handle": "AQAFtrYugCV3",
+      "md5": "fa9d284f679413381a3da8b186f9fc7b"
+    }
+  }
+}

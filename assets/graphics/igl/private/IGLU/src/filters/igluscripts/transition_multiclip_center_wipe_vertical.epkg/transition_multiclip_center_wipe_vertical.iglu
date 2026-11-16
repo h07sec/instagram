@@ -1,0 +1,78 @@
+[Filter TransitionMulticlipCenterWipeVertical]
+
+# Clip B wipes in from the vertical center line (the Center Wipe In effect) over an
+# untouched clip A.
+#
+# Ported from the Easel web tool's multiclip_center_wipe_vertical.iglu.
+# Easel eases progress by its [AnimationCurve quadraticInOut] tag before the
+# script sees it; the transition host passes linear progress, so the curve is
+# applied in [PreRender] instead.
+#
+# The video_center_wipe_vertical mask and the over-composite run in one pass
+# that reads both clips.
+
+fun easeInOutQuadratic(f32 t) f32 {
+  if (t < 0.5) {
+    return 2.0 * t * t;
+  }
+  return 4.0 * t - 2.0 * t * t - 1.0;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {amount = 0.1, min = 0.0, max = 0.5, description = "Edge smoothness"},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        edgeOuter = 0.0,
+        edgeInner = 0.0,
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = easeInOutQuadratic(max(getParameterFloat('progress), getParameterFloat('transition_progress)));
+  # keep amount off 0 so the smoothstep edge doesn't collapse
+  f32 amount = max(0.001, getParameterFloat('amount));
+  f32 edge = mix(0.0 - amount, 0.5 + amount, p);
+  setShaderUniform('composite, 'edgeOuter, edge + amount);
+  setShaderUniform('composite, 'edgeInner, edge - amount);
+}
+
+string glsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float edgeOuter;
+uniform float edgeInner;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 b = texture2D(s_texture1, uv);
+
+  b.a *= smoothstep(edgeOuter, edgeInner, abs(uv.x - 0.5));
+  b.rgb *= b.a;
+
+  // Clip B is premultiplied by its mask, so it goes over clip A without another
+  // multiply by b.a.
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

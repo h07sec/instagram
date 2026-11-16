@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "198110665724571",
+  "displayName": "Videotape ✧",
+  "description": "[IG Edits] Video effect name. With \"Videotape ✧\", the creator can apply a Spark-ported letterboxed VHS camcorder look with a date overlay and tape counter.",
+  "iglu": {
+    "legacyId": 3412
+  },
+  "assets": [
+    {
+      "name": "videotape_lut.png",
+      "assetHash": "5e0b5013cd0042cff7b117bc807a1a2910b7345abacded191532d054d0f79652",
+      "hubAssetId": "1880068372992223"
+    },
+    {
+      "name": "videotape_lut_sharp.png",
+      "assetHash": "a19b03eb1fa8fba19e88082c8f5e8e81d4210cfa06873b3e2115d6c4a7d18b3c",
+      "hubAssetId": "1631189775153400"
+    },
+    {
+      "name": "videotape_vhs.png",
+      "assetHash": "6b3843f2de88d850c124c0cd865c622a07ab2e5f6fe8d180abbe161cbe88eace",
+      "hubAssetId": "1578594594041109"
+    },
+    {
+      "name": "videotape_overlay_rgb.png",
+      "assetHash": "265da35704aff767829138aedbedfc1a774e229190730223acd9c92f4443922a",
+      "hubAssetId": "1153418967221761"
+    },
+    {
+      "name": "videotape_overlay_alpha.png",
+      "assetHash": "61ad1d7c7e540cb3597a4b4728785dcd48d1af48cf77fc7b39a576f09682dfb8",
+      "hubAssetId": "3068466036830692"
+    },
+    {
+      "name": "videotape_counter.png",
+      "assetHash": "5aa6470b93e78f3e9370014a428a21807352791e1b67b24ec296bbf48d4f9899",
+      "hubAssetId": "1447868270141493"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAECHMnPg7w"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5fbd63ac",
+      "handle": "AQAHtAK2PYx0",
+      "md5": "bb7991d8eccc70d7829c55d3fe7f68a1"
+    }
+  }
+}

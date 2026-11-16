@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130003">ເມືອງ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130008">ຕື່ມໃສ່ອັດຕະໂນມັດດ້ວຍບັດຈາກບັນຊີໂຄສະນາຂອງທ່ານບໍ?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">ປິດໂປຣແກຣມທ່ອງເວັບ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">%1$s ຕ້ອງການໃຊ້ກ້ອງຖ່າຍຮູບຂອງອຸປະກອນ.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s ຕ້ອງການໃຊ້ສະຖານທີ່ຂອງອຸປະກອນຂອງທ່ານ.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">ອະນຸຍາດ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">ບລັອກ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">ສືບຕໍ່ໄປຍັງເວັບໄຊ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">ກັບຄືນ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">ເກີດບັນຫາກັບໃບຮັບຮອງຄວາມປອດໄພທີ່ໃຊ້ໂດຍ %1$s. ຂໍ້​ມູນ​ສ່ວນ​ຕົວ​ຂອງ​ທ່ານ​ ເຊັ່ນ​: ລະ​ຫັດ​ຜ່ານ​ ຫຼື ​ເລກ​ບັດ​ເຄຣ​ດິດ​, ອາດ​ຈະ​ບໍ່​ປອດ​ໄພເມື່ອ​ແບ່ງ​ປັນ​ກັບ​ເວັບ​ໄຊ​​ນີ້​.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">ເວັບໄຊນີ້ບໍ່ໄດ້ໃຊ້ການເຊື່ອມຕໍ່ທີ່ປອດໄພ.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">ເກີດບາງຢ່າງຜິດພາດຂຶ້ນ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009e">ປິດໄວ້</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">ອີເມວ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">ເວັບໄຊທ໌ທີ່ທ່ານກໍາລັງເບິ່ງແມ່ນພະຍາຍາມເປີດແອັບພາຍນອກ. ທ່ານຕ້ອງການດໍາເນີນຕໍ່ບໍ?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">ດຳເນີນການຕໍ່</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">ທ່ານກຳລັງອອກຈາກແອັບຂອງພວກເຮົາ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">ສິ່ງນີ້ອາດຈະເປັນຍ້ອນຄວາມຜິດພາດທາງເຕັກນິກທີ່ພວກເຮົາກໍາລັງເຮັດວຽກເພື່ອແກ້ໄຂ. ລອງໂຫຼດເພຈນີ້ຄືນໃໝ່.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">ໂຫຼດໃໝ່</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">ເພຈບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">ນາມສະກຸນ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">ບໍ່ສາມາດໂຫຼດເພຈໄດ້</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">ເປີດດ້ວຍ...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">ເປີດໃນ %1$s</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">ຕົວເລືອກເພີ່ມເຕີມ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">ຊື່</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">ຕອນນີ້ທ່ານກຳລັງເບິ່ງແບບເຕັມຈໍ. ປັດໄປທາງຊ້າຍ ຫຼືແຕະປຸ່ມຢ້ອນກັບເພື່ອອອກ.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">ພວກເຮົາກຳລັງມີບັນຫາໃນການຕັ້ງຄ່າ %2$s ໃນ %1$s ໃນຂະນະນີ້. ທ່ານສາມາດລອງໃໝ່ອີກຄັ້ງ, ຫຼື ໃຊ້ %2$s ທີ່ເປັນພາສາອັງກິດ (ສະຫະລັດ ອາເມລິກາ) ໄດ້ໃນຕອນນີ້.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">ຄາວໜຶ່ງ​ໃນ​ຂະ​ນະ​ທີ່​ພວກ​ເຮົາ​ຕັ້ງ​ຄ່າ %1$s…</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">ລອງໃໝ່ອີກຄັ້ງ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">ສືບຕໍ່ເປັນພາສາອັງກິດ (ສະຫະລັດ)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">ຍົກເລີກ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f6">ປິດ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010a">ແຕະເພື່ອເພີ່ມບັດ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010d">ລະຫັດໄປສະນີ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13013b">ເຊື່ອມຕໍ່ແວ່ນຕາຂອງທ່ານແລ້ວ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1301ce">ໂທລະສັບ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13020f">ຕັ້ງເວລາ</string>
+</resources>

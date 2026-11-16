@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "C441B886-A8E0-4580-B0A9-57C67A5F789E",
+  "displayName": "Saturei",
+  "description": "[IG Edits] Color filter name. With \"Saturei\", the creator gets a vivid, high-saturation LUT color grade with bright highlights and skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3309
+  },
+  "assets": [
+    {
+      "name": "saturei_lut.png",
+      "assetHash": "b050cb0d9b931c3e3b83fbba880b2cbe65ce4880dd92a85da5f7757ca7dd8519",
+      "hubAssetId": "2317003809089197"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAG0EAiHu7P"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b3cce7b",
+      "handle": "AQAD_uhyulGF",
+      "md5": "798eb8e559f6581a5f5c7fd14ee38079"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNCUfTPrXMkPmegDANfOzEdVVjMXbhQoAAAD"
+    }
+  }
+}

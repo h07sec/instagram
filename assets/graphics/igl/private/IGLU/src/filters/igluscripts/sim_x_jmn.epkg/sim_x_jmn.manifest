@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "3AD4D19D-B280-48CC-AE28-9F181B599CB1",
+  "displayName": "SIM x JMN",
+  "description": "[IG Edits] Video effect name. With \"SIM x JMN\", the creator gets a soft lavender color grade with a dreamy, tinted motion blur around the edges of the frame.",
+  "iglu": {
+    "legacyId": 3265
+  },
+  "assets": [
+    {
+      "name": "sim_x_jmn_lut.png",
+      "assetHash": "dfcf5db6967d920416c9097890c1a0f729504b027fef5c10fe9083b0b5893510",
+      "hubAssetId": "1212628408304117"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFETLyy6Nd"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "6138d6ff",
+      "handle": "AQAD7It_bELj",
+      "md5": "fd077f3b9064caa2c0151a806ab9cfa3"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJ_hXDMWvjYB5GcGAJOBixsicUpLbhQoAAAD"
+    }
+  }
+}

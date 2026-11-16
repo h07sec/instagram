@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "iglu": {
+    "customization": [
+      {
+        "name": "layerAge0",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 0
+          }
+        }
+      },
+      {
+        "name": "layerAge1",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 1
+          }
+        }
+      },
+      {
+        "name": "layerAge2",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 2
+          }
+        }
+      },
+      {
+        "name": "layerAge3",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 3
+          }
+        }
+      },
+      {
+        "name": "layerAge4",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 4
+          }
+        }
+      },
+      {
+        "name": "layerAge5",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 5
+          }
+        }
+      },
+      {
+        "name": "layerAge6",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 6
+          }
+        }
+      },
+      {
+        "name": "layerAge7",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 7
+          }
+        }
+      },
+      {
+        "name": "layerAge8",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 8
+          }
+        }
+      },
+      {
+        "name": "layerAge9",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 9
+          }
+        }
+      },
+      {
+        "name": "layerAge10",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 10
+          }
+        }
+      },
+      {
+        "name": "layerAge11",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 11
+          }
+        }
+      },
+      {
+        "name": "layerAge12",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 12
+          }
+        }
+      },
+      {
+        "name": "layerAge13",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 13
+          }
+        }
+      },
+      {
+        "name": "layerAge14",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 14
+          }
+        }
+      },
+      {
+        "name": "layerAge15",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 15
+          }
+        }
+      },
+      {
+        "name": "layerAge16",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 16
+          }
+        }
+      },
+      {
+        "name": "layerAge17",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 17
+          }
+        }
+      },
+      {
+        "name": "layerAge18",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 18
+          }
+        }
+      },
+      {
+        "name": "layerAge19",
+        "default": -1.0,
+        "min": -1.0,
+        "max": 3600.0,
+        "beatReactive": {
+          "mode": "step",
+          "layerAge": {
+            "layerIndex": 19
+          }
+        }
+      }
+    ]
+  }
+}

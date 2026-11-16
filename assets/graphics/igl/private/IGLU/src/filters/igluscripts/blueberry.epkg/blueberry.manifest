@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "31F69E32-7CED-4617-944D-5619DCD16931",
+  "displayName": "Blueberry",
+  "description": "[IG Edits] Color filter name. With \"Blueberry\", the creator gets a cool, neutral LUT color grade with a soft dark vignette.",
+  "iglu": {
+    "legacyId": 3245
+  },
+  "assets": [
+    {
+      "name": "blueberry_lut.png",
+      "assetHash": "64a8068d28dd41c17667fd2b1f6a41cc0f879d6d0b8f79fd4b0fc76d8dd58355",
+      "hubAssetId": "1657343166040608"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD9Thjxylr"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f5cbfad8",
+      "handle": "AQAFCYHMu7Jb",
+      "md5": "99647eb3cc703e33edf3b4d15921154b"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMMBAzNQ-IbOKboDANkEr9zkJ2oVbhQoAAAD"
+    }
+  }
+}

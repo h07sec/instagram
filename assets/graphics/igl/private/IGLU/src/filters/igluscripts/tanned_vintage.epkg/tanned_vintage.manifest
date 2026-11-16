@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2595309367287982",
+  "displayName": "Tanned Vintage",
+  "description": "[IG Edits] Color filter name. With \"Tanned Vintage\", the creator can apply a Spark-ported warm, tanned vintage colour grade.",
+  "iglu": {
+    "legacyId": 3444
+  },
+  "assets": [
+    {
+      "name": "tanned_vintage_lut.png",
+      "assetHash": "c6c554d3f019de7f0e4bb2410d7dbff61f72775a1b1f25fc9234b96db7e65fa2",
+      "hubAssetId": "1556207403200218"
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+# IGLUSCRIPTCOLLISION_BYPASS: Intentional replacement of C++ native effect - IGLUScript takes precedence on Android/iOS; C++ filter retained as fallback for direct C++ callers (sample app, server tools).
+
+[Filter VideoGlitch]
+# Analogue-tape glitch: block-noise displacement, an RGB split, a three-line interlace mask and
+# dropout, all read off a scrolling perlin lookup.
+#
+# Without beats the scroll position and the two noise thresholds run off the clock, sweeping
+# continuously. With `useBeats` true the beat step counter replaces the clock: each beat picks one
+# scroll position and both thresholds hold at a fixed level, so the frame breaks on the beat instead
+# of drifting.
+#
+# BeatReactiveController writes `useBeats` when a manifest declares beatReactive; otherwise nothing
+# writes it and the false default selects the clock.
+
+# Beat-mode threshold ranges. These are gates: a block glitches only while `abs(id) <= threshold`,
+# so the threshold sets both how many blocks move and how far. Each beat draws one value from these
+# ranges, which is what makes some beats break the frame harder than others. The floors sit above
+# zero because at zero no block passes the gate, which reads as a missed beat.
+f32 rgbIntensityBeatMin = 0.06;
+f32 rgbIntensityBeatMax = 0.2;
+f32 displaceIntensityBeatMin = 0.1;
+f32 displaceIntensityBeatMax = 0.5;
+
+[Init]
+fun init(Filter filter) {
+    loadTexture('noiseTex, 'texture://TextEffectsSharedAssets/PerlinNoise);
+
+    filter.parameters = {
+        {intensity = 0.00428571, min = 0.0, max = 1.0, description = "RGB split strength"},
+        {size = 0.45454545, min = 0.0, max = 1.0, description = "Displacement block size"},
+        {speed = 0.3333, min = 0.0, max = 1.0, description = "Clock rate; unread in beat mode"},
+        {beatStep = 0.0, min = 0.0, max = 997.0, description = "Beat step seed"},
+        {useBeats = false, description = "True while the beat system is driving this effect"},
+    };
+
+    filter.passes = {
+        {
+            name = 'glitch,
+            inputs = {'default, 'noiseTex},
+            uniforms = {
+                glitchStrength = 3.0,
+                noiseScale = 15.0,
+                scaledTime = 0.0,
+                stepSeed = 0.0,
+                beatMode = 0.0,
+                rgbIntensityBeat = 0.13,
+                displaceIntensityBeat = 0.3,
+                outputSize = {1080.0, 1920.0},
+            },
+            glslShader = glslGlitch,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    f32 intensity = getParameterFloat('intensity);
+
+    # VideoGlitchFilter.cpp:176-179 computes 3 + 22t, so the manifest default 0.45454545 resolves
+    # to 13. The setter's comment there claims 25..3; the code is authoritative.
+    setShaderUniform('glitch, 'noiseScale, 3.0 + getParameterFloat('size) * 22.0);
+
+    # VideoGlitchFilter.cpp:185-188. The shader's `st`, so the speed slider stays live on the clock.
+    setShaderUniform('glitch, 'scaledTime,
+                     getParameterFloat('time_sec) * mix(0.5, 2.0, getParameterFloat('speed)));
+
+    f32 glitchStrength = intensity * 700.0;
+    f32 beatMode = 0.0;
+    f32 stepSeed = 0.0;
+    f32 rgbIntensityBeat = rgbIntensityBeatMin;
+    f32 displaceIntensityBeat = displaceIntensityBeatMin;
+    if (getParameterBoolean('useBeats)) {
+        beatMode = 1.0;
+        stepSeed = getParameterFloat('beatStep);
+
+        # One draw per beat, so beats vary in size. The offset decorrelates this from the
+        # per-block hashes, which also consume stepSeed. `fract` is vector-only in IGLUScript,
+        # hence the explicit subtraction.
+        f32 hashed = sin(stepSeed + 7.13) * 43758.5453123;
+        f32 beatVariation = hashed - floor(hashed);
+        rgbIntensityBeat = mix(rgbIntensityBeatMin, rgbIntensityBeatMax, beatVariation);
+        displaceIntensityBeat =
+            mix(displaceIntensityBeatMin, displaceIntensityBeatMax, beatVariation);
+    }
+    setShaderUniform('glitch, 'glitchStrength, glitchStrength);
+    setShaderUniform('glitch, 'beatMode, beatMode);
+    setShaderUniform('glitch, 'stepSeed, stepSeed);
+
+    setShaderUniform('glitch, 'rgbIntensityBeat, rgbIntensityBeat);
+    setShaderUniform('glitch, 'displaceIntensityBeat, displaceIntensityBeat);
+
+    # Written every frame: a vec2 does not pick up its [Init] pass-uniform default.
+    setShaderUniform('glitch, 'outputSize, getTextureSize('default));
+}
+
+#### Single pass: displacement + RGB split + interlace mask + dropout ####
+# `auxSampler1` is 'noiseTex -- aux inputs bind by their index in `inputs`, not by name.
+#
+# `scroll` and `noiseSeed` are threaded through as arguments rather than resolved in [PreRender],
+# because `displaceIntensity` cannot be: the clock path's pow(sin(...), 5.0) takes a negative base
+# for half the cycle, where GLSL leaves the result undefined and C++ powf does not. Computing it
+# host-side would silently re-tune the shipped non-beat look.
+
+string glslGlitch = "
+    precision highp float;
+
+    varying vec2 sourceTextureCoordinate;
+
+    BaseUniformsOpenGL;
+
+    uniform sampler2D auxSampler1;
+    uniform float glitchStrength;
+    uniform float noiseScale;
+    uniform float scaledTime;
+    uniform float stepSeed;
+    uniform float beatMode;
+    uniform float rgbIntensityBeat;
+    uniform float displaceIntensityBeat;
+    uniform vec2 outputSize;
+
+    float rand(float n) { return fract(sin(n) * 43758.5453123); }
+
+    float noise(float p) {
+      float fl = floor(p);
+      float fc = fract(p);
+      return mix(rand(fl), rand(fl + 1.0), fc);
+    }
+
+    float blockNoise(vec2 uv, float threshold, float scale, float seed, float scroll) {
+      vec2 noiseUV = uv.yy / scale + vec2(scroll);
+      float noise2 = texture2D(auxSampler1, fract(noiseUV)).r;
+
+      float id = floor(noise2 * 20.0);
+      id = noise(id + seed) - 0.5;
+
+      if (abs(id) > threshold)
+        id = 0.0;
+
+      return id;
+    }
+
+    void main() {
+      vec2 fragCoord = sourceTextureCoordinate * outputSize;
+      vec2 uv = sourceTextureCoordinate;
+
+      float st = scaledTime;
+
+      float scroll = floor(st + sin(11.0 * st) + sin(st)) * 0.77;
+      float noiseSeed = st;
+      float rgbIntensity = 0.1 + 0.1 * sin(st * 3.7);
+      float displaceIntensity = 0.2 + 0.3 * pow(sin(st * 1.2), 5.0);
+      float interlaceIntensity = 0.01;
+      float dropoutIntensity = 0.1;
+
+      if (beatMode > 0.5) {
+        // One scroll position and two held thresholds per beat, per video_glitch_beat.iglu. The
+        // seed is unbounded there; here it arrives as one of 32 scattered values from stepValues.
+        scroll = stepSeed * 0.77;
+        noiseSeed = stepSeed;
+        rgbIntensity = rgbIntensityBeat;
+        displaceIntensity = displaceIntensityBeat;
+      }
+
+      float displace = blockNoise(uv + vec2(uv.y, 0.0), displaceIntensity, noiseScale, 66.6, scroll);
+      displace *= blockNoise(uv.yx + vec2(0.0, uv.x), displaceIntensity, 111.0, 13.7, scroll);
+
+      uv.x += displace;
+
+      vec2 offs = 0.1 *
+                  vec2(blockNoise(uv.xy + vec2(uv.y, 0.0), rgbIntensity, 65.0, 341.0, scroll), 0.0) *
+                  glitchStrength;
+
+      float colr = sampleInput(uv - offs).r;
+      float colg = sampleInput(uv).g;
+      float colb = sampleInput(uv + offs).b;
+
+      float line = fract(fragCoord.y / 3.0);
+      vec3 mask = vec3(3.0, 0.0, 0.0);
+      if (line > 0.333)
+        mask = vec3(0.0, 3.0, 0.0);
+      if (line > 0.666)
+        mask = vec3(0.0, 0.0, 3.0);
+
+      float maskNoise = blockNoise(uv, interlaceIntensity, 90.0, noiseSeed, scroll) * max(displace, offs.x);
+
+      maskNoise = 1.0 - maskNoise;
+      if (maskNoise == 1.0)
+        mask = vec3(1.0);
+
+      float dropout = blockNoise(uv, dropoutIntensity, 11.0, noiseSeed, scroll) *
+                      blockNoise(uv.yx, dropoutIntensity, 90.0, noiseSeed, scroll);
+      mask *= (1.0 - 5.0 * dropout);
+
+      vec4 color = vec4(mask * vec3(colr, colg, colb), 1.0);
+
+      gl_FragColor = toOutputFormat(color);
+    }
+";

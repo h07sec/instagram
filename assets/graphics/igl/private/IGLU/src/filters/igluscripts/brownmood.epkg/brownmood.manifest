@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "920233392024817",
+  "displayName": "brownmood",
+  "description": "[IG Edits] Color filter name. With \"brownmood\", the creator can apply a Spark-ported faded brown grade with a soft horizontal smear.",
+  "iglu": {
+    "legacyId": 3398
+  },
+  "assets": [
+    {
+      "name": "brownmood_lut.png",
+      "assetHash": "005c39e20ee2c602a039ffd433694db156bce9afa369d57fa80ca5e2e7abc779",
+      "hubAssetId": "1596858885577499"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHoMM6AfgX"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5484a202",
+      "handle": "AQAGmbCLkv5y",
+      "md5": "ad6db5ff518094751f7c50d5eae44baf"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "6743049C-0F2C-46A8-85EE-7FBD81863C3B",
+  "displayName": "Aesthetic Selfie ✦",
+  "description": "[IG Edits] Video effect name. With \"Aesthetic Selfie ✦\", the creator gets a sticker collage: outlined cut-outs of the person at angles over rotated copies of the video.",
+  "iglu": {
+    "legacyId": 3296,
+    "subject": {
+      "enabled": true,
+      "fullFrameEnabled": true,
+      "typeSuggestions": [
+        "person"
+      ]
+    }
+  },
+  "assets": [
+    {
+      "name": "aesthetic_selfie_lut.png",
+      "assetHash": "1d210772785c4546c03e35e9077390ff4153739505a074ba1634a8a51f83a70d",
+      "hubAssetId": "1633940871811533"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GEbIYTM2h4f6Iw8EAJNFVitt5HENbhQoAAAD"
+    }
+  }
+}

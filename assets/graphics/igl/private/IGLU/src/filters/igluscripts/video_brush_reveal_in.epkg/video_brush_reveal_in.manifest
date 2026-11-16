@@ -1,0 +1,66 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAFf2dqn40Z",
+      "key": "56ce5f6",
+      "md5": "8bbaec52981668e8e34834958127eee4"
+    }
+  },
+  "assets": [
+    {
+      "assetHash": "fc02e18c4b89e56365e6fba75dee5b9bf6e6795465bd55811ae416852e465b78",
+      "hubAssetId": "2104621856813108",
+      "name": "brushTex.png"
+    }
+  ],
+  "dependencies": [
+    "video_brush_reveal"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Brush In\", the creator can reveal the subject as a sweeping brush stroke paints it into view.",
+  "displayName": "Brush In",
+  "identifier": "3a987a63-f613-405e-b414-4deebf88c7b6",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 1500,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "down",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 1.5,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "default": 0.0,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect.",
+        "max": 1.0,
+        "min": 0.0,
+        "name": "size"
+      }
+    ],
+    "legacyId": 4005
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF1apwm2I6"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

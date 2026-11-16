@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "517730056194021",
+  "displayName": "natural",
+  "description": "[IG Edits] Color filter name. With \"natural\", the creator can apply a Spark-ported soft pastel colour grade with light skin smoothing.",
+  "iglu": {
+    "legacyId": 3419
+  },
+  "assets": [
+    {
+      "name": "natural_lut.png",
+      "assetHash": "cc3c8a705777367597686e5cbbb415580b2b51c3ea4cb2f22a89e235cd71b99b",
+      "hubAssetId": "1142514701970988"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEA8W-GiPI"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3d0997c9",
+      "handle": "AQAG-K-JiYR6",
+      "md5": "344345f15047a38edc157f74bc12dcf0"
+    }
+  }
+}

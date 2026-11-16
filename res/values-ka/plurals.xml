@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Expires in %1$d hours</item>
+        <item quantity="one">ვადა გასდის %1$d საათში</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">ვადა გასდის %1$d წუთში</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d ამოცანა განხილვას საჭიროებს</item>
+        <item quantity="one">A task needs review</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d passengers</item>
+        <item quantity="one">%1$d მგზავრი</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d ამოცანა განხილვას საჭიროებს</item>
+        <item quantity="one">%1$d task needs review</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d დამაკავშირებელი</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d ხელბარგი</item>
+        <item quantity="one">%1$d carry-on bag</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d checked bags</item>
+        <item quantity="one">%1$d რეგისტრირებული ბარგი</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d stops</item>
+        <item quantity="one">%1$d გადაჯდომა</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Use %1$d images</item>
+        <item quantity="one">%1$d გამოსახულების გამოყენება</item>
+    </plurals>
+</resources>

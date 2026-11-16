@@ -1,0 +1,103 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAE0hJj1VYt",
+      "key": "41c7b01",
+      "md5": "10772b47034f9416e670e5138832e9f7"
+    }
+  },
+  "dependencies": [
+    "video_particles"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Sparkles Wipe In\", the creator can reveal the subject with a shimmering wipe of golden sparkles.",
+  "displayName": "Sparkles Wipe In",
+  "identifier": "af1a6510-265d-42dd-bae0-aeb00d92bba9",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 3000,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "name": "color",
+        "defaultSelection": "#FFE89A",
+        "available": [
+          "#FFE89A",
+          "#FFFFFF",
+          "#000000",
+          "#FFD600",
+          "#FF7A00",
+          "#FE1D37",
+          "#FF0169",
+          "#D300C5",
+          "#7638FA",
+          "#37038B",
+          "#1CD164",
+          "#0095F6",
+          "#AD88FC",
+          "#FDD5FD",
+          "#FFABE1",
+          "#FFC584",
+          "#FFF8C2",
+          "#09FF00",
+          "#FFFF00",
+          "#5AFAC7",
+          "#0000FF"
+        ],
+        "displayName": "Color",
+        "displayNameDescription": "[IG Edits] Color picker label. The user selects a color used by the video effect (e.g., glow tint, outline color, sparkle color); available palette varies per effect."
+      },
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "up",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 3.0,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "name": "amount",
+        "default": 0.206522,
+        "min": 0.0,
+        "max": 1.0,
+        "displayName": "Amount",
+        "displayNameDescription": "[IG Edits] Slider label controlling the magnitude or quantity of a video effect. Generic across many effects; exact range varies per effect."
+      },
+      {
+        "name": "size",
+        "default": 6.0,
+        "min": 4.0,
+        "max": 8.0,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect."
+      }
+    ],
+    "legacyId": 4023
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFfX96jS09"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "assets": [
+    {
+      "name": "particles_all.png",
+      "assetHash": "cdf344b5c3fad4da88e8ff75b5fc50e5b87773ba46590e1cad7747fe1c20688b",
+      "hubAssetId": "1426924909460606"
+    }
+  ]
+}

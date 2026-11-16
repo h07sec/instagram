@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d ថ្ងៃមុន</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d ម៉ោងមុន</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d នាទីមុន</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">កិច្ចការកម្មវិធី​រុករក​តាមអ៊ីនធឺណិត %1$d</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">ផុតកំណត់​ក្នុង​រយៈពេល %1$d ម៉ោង</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">ផុត​កំណត់​ក្នុង​រយៈពេល %1$d នាទី</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">កិច្ចការ %1$d ត្រូវការ​ការពិនិត្យមើល</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">អ្នកដំណើរ %1$d នាក់</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">កិច្ចការ %1$d ត្រូវការ​ការពិនិត្យមើល</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">ឧបករណ៍ភ្ជាប់ចំនួន %1$d</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">កាបូបយួរដៃ %1$d</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">អីវ៉ាន់ផ្ញើចំនួន %1$d</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d ចំណត</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">ការឈប់ %1$d ដង</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">ជម្រើស %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">ប្រើប្រាស់​រូបភាព %1$d</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">ការ​បញ្ជូន​ទំនិញ​មកវិញឥតគិតថ្លៃរយៈពេល %1$d ថ្ងៃ</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">ការ​បញ្ជូន​ទំនិញ​មកវិញក្នុងរយៈពេល %1$d ថ្ងៃ</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">កាតបណ្ដោះអាសន្នផុតកំណត់ក្នុងរយៈពេល %1$d ម៉ោង</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">ទំនិញ %1$d មុខ</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">ទំនិញ %1$d មុខ</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">រៀងរាល់ %1$d ម៉ោង</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">រៀងរាល់ %1$d នាទី</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">រៀងរាល់ %1$d វិនាទី</item>
+    </plurals>
+</resources>

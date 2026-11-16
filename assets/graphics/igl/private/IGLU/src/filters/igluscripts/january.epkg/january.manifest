@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "628049631856270",
+  "displayName": "January",
+  "description": "[IG Edits] Color filter name. With \"January\", the creator can apply a Spark-ported pale pink-lavender grade with soft skin.",
+  "iglu": {
+    "legacyId": 3350
+  },
+  "assets": [
+    {
+      "name": "january_lut.png",
+      "assetHash": "38fadb40705df547136af305a23986d9d617985e056a39868a761a5e31fd9f6d",
+      "hubAssetId": "4443656825907503"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHWXqFqw18"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "1cb8c374",
+      "handle": "AQAFukbjsMUa",
+      "md5": "a279eb125f3aab5a2766df71d92787ce"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GE8ZrjPhkFBwdAsEAJiqcCK7Sr0BbhQoAAAD"
+    }
+  }
+}

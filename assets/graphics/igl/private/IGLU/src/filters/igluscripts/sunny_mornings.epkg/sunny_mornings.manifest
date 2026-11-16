@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "7B630FA2-E53B-4D71-BD62-F1F77F5890C7",
+  "displayName": "sᴜɴɴʏ ᴍᴏʀɴɪɴɢs",
+  "description": "[IG Edits] Color filter name. With \"sᴜɴɴʏ ᴍᴏʀɴɪɴɢs\", the creator gets a soft, warm LUT color grade with window-blind shadow stripes and skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3290
+  },
+  "assets": [
+    {
+      "name": "sunny_mornings_lut.png",
+      "assetHash": "44ef0c023db9452d46cc4dcca48c2aa55ea42cefdc9688f3f36b718f1af3d0e7",
+      "hubAssetId": "1140699911882823"
+    },
+    {
+      "name": "sunny_mornings_blinds.png",
+      "assetHash": "abfd760d34fa7c15921941482bdc7091f59d132dd85525af51c5cc37c28194ae",
+      "hubAssetId": "1647608030107559"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEBdYo-49V"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "630901e0",
+      "handle": "AQAIfDjoWvjh",
+      "md5": "31e6bcadf3a45b987a5105f5453222fe"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GM5RjTOx5ZeoljoFAP3F3ao3yxY9bhQoAAAD"
+    }
+  }
+}

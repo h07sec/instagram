@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "9aea8a60-6ca6-4a18-b481-a5cc60759fc9",
+  "displayName": "Particles",
+  "description": "[IG Edits] Video effect name. With \"Particles\", the creator can sweep the subject in or out with a procedural particle wipe engine shared by the wipe variants.",
+  "iglu": {
+    "legacyId": 4018,
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 2500,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 3.0,
+        "min": 0.5,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "name": "particles_all.png",
+      "assetHash": "cdf344b5c3fad4da88e8ff75b5fc50e5b87773ba46590e1cad7747fe1c20688b",
+      "hubAssetId": "1426924909460606"
+    }
+  ]
+}

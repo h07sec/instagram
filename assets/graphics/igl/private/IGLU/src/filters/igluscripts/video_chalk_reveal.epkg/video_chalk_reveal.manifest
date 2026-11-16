@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "8c5d4140-ba84-4260-9364-9825c09ccc1e",
+  "displayName": "Chalk Reveal",
+  "description": "[IG Edits] Video effect name. With \"Chalk Reveal\", the creator can reveal the subject with a sweeping chalk stroke that paints it into view.",
+  "iglu": {
+    "legacyId": 4007,
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 2000,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 3.0,
+        "min": 0.5,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "name": "brushTex.png"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "4474AE39-8670-41C1-B280-B58549800005",
+  "displayName": "HOME",
+  "description": "[IG Edits] Color filter name. With \"HOME\", the creator gets a light, warm, faded film grade with a slight color fringe, fine grain, dust specks and occasional orange light washes.",
+  "iglu": {
+    "legacyId": 3326
+  },
+  "assets": [
+    {
+      "name": "home_spark_lut.png",
+      "assetHash": "a55c1ae9cda6d37de537e37bf2a80f77a90f0bb14716100b16ab84e89407bfb6",
+      "hubAssetId": "2007478929923169"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFOWBg3SL5"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "4d6eacef",
+      "handle": "AQAHucdhJcym",
+      "md5": "2c2b16331eda915221a32d52f1a57c08"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGrFgzMakjr98IsGAEdgEQAPlMBZbhQoAAAD"
+    }
+  }
+}

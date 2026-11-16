@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "93CEBAAF-64E6-40E8-8361-E166DD90A67A",
+  "displayName": "Fresh Beauty",
+  "description": "[IG Edits] Color filter name. With \"Fresh Beauty\", the creator gets a warm, glowing skin-tone color grade with soft skin smoothing.",
+  "iglu": {
+    "legacyId": 3266
+  },
+  "assets": [
+    {
+      "name": "fresh_beauty_lut.png",
+      "assetHash": "d8ed8f342af6ecc9a9cf6d374464971d3aaacdc5cf27c24e46bf1845f25e2268",
+      "hubAssetId": "1099172242945108"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGho4NuanZ"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f048be56",
+      "handle": "AQAF4StzA2cb",
+      "md5": "9cfd149c4add7b276dff0046940cd951"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GK49LzQboJC5mjEJAG4mscCAvnZpbhQoAAAD"
+    }
+  }
+}

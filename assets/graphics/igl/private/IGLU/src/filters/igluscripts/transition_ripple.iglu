@@ -1,0 +1,89 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_ripple, QE-selectable for A/B vs TransitionRippleFilter.
+[Filter TransitionRipple]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'ripple,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      aspect = 1.0,
+      phase = 0.0,
+      freqPi = 0.0,
+      distortAmt = 0.0,
+      transitionAlpha = 0.0,
+    },
+    glslShader = glsl,
+  }};
+
+  filter.parameters = {
+    {distortion = 0.4, min = 0.0, max = 2.0, description = "Ripple distortion amount"},
+    {speed = 0.6, min = 0.0, max = 4.0, description = "Ripple travel speed"},
+    {frequency = 10.0, min = 0.0, max = 50.0, description = "Ripple frequency"},
+    {duration = 0.5, min = 0.0, max = 4.0, description = "Ripple duration"},
+  };
+}
+
+# GLSL smoothstep(edge0, edge1, x) with the interpolant precomputed by the caller.
+# IGLUScript only registers smoothstep for vector types, not f32.
+fun smoothstep01(f32 t) f32 {
+  f32 v = clamp(t, 0.0, 1.0);
+  return v * v * (3.0 - 2.0 * v);
+}
+
+fun easeOutCubic(f32 t) f32 {
+  f32 u = 1.0 - t;
+  return 1.0 - u * u * u;
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = getParameterFloat('progress);
+  f32 progress = easeOutCubic(p);
+
+  vec2 size = getTextureSize('default);
+  setShaderUniform('ripple, 'aspect, size.x / size.y);
+
+  setShaderUniform('ripple, 'phase, p * getParameterFloat('speed) * getParameterFloat('duration));
+  setShaderUniform('ripple, 'freqPi, getParameterFloat('frequency) * 3.14159265358979);
+
+  # trianglePulse(progress) * distortion
+  f32 midPoint = 1.0 - abs(progress - 0.5) * 2.0;
+  setShaderUniform('ripple, 'distortAmt, getParameterFloat('distortion) * midPoint);
+
+  setShaderUniform('ripple, 'transitionAlpha, smoothstep01((progress - 0.333) / (0.666 - 0.333)));
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform float aspect;
+  uniform float phase;
+  uniform float freqPi;
+  uniform float distortAmt;
+  uniform float transitionAlpha;
+  vec2 mirrorUV(vec2 uv) {
+    uv = fract(uv * 0.5) * 2.0;
+    return 1.0 - abs(1.0 - uv);
+  }
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    vec2 rippleUV = uv;
+    rippleUV.x = rippleUV.x - 0.5;
+    rippleUV.x = rippleUV.x * aspect;
+    rippleUV.x = rippleUV.x + 0.5;
+    vec2 dir = rippleUV - 0.5;
+    float len = length(dir);
+    float rippleDir = sin((len - phase) * freqPi);
+    rippleDir = rippleDir * smoothstep(0.0, 0.1, len);
+    vec2 rippleOffset = normalize(dir + vec2(0.0001)) * rippleDir;
+    vec2 distortionUV = mirrorUV(uv + rippleOffset * distortAmt);
+    vec4 texA = sampleInput(distortionUV);
+    vec4 texB = texture2D(s_texture1, distortionUV);
+    vec4 color = mix(texA, texB, transitionAlpha);
+    gl_FragColor = toOutputFormat(color);
+  }
+";

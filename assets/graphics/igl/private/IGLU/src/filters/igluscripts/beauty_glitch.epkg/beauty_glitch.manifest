@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "D482DEA3-F5F9-494F-9AB6-2CF3560CB8F4",
+  "displayName": "Beauty Glitch",
+  "description": "[IG Edits] Video effect name. With \"Beauty Glitch\", the creator gets a soft color grade with flickering old-film dust, hairline scratches and light flashes.",
+  "iglu": {
+    "legacyId": 3269
+  },
+  "assets": [
+    {
+      "name": "beauty_glitch_lut.png",
+      "assetHash": "50bd6185cd25949a31cc910d8ba130760beb852a5f2d143e6b474164995cd4cf",
+      "hubAssetId": "3711029229055832"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD-2PFQ9sc"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "986c12de",
+      "handle": "AQAIFLYHhPtF",
+      "md5": "1b1f192d6384e45d61e497947f543926"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GBAKojTyDZvYnH0EAOiFgzLwwA8tbhQoAAAD"
+    }
+  }
+}

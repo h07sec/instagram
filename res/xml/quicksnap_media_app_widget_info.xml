@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider android:minWidth="@dimen/hatch_jollybot_bubble_min_width" android:minHeight="@dimen/hatch_jollybot_bubble_min_width" android:updatePeriodMillis="360000" android:initialLayout="@layout/quicksnap_media_app_widget" android:previewImage="@mipmap/quicksnap_widget_preview" android:resizeMode="horizontal|vertical" android:minResizeWidth="@dimen/hatch_jollybot_bubble_min_width" android:minResizeHeight="@dimen/hatch_jollybot_bubble_min_width" android:widgetCategory="home_screen" android:maxResizeWidth="@dimen/alt_text_carousel_card_width" android:maxResizeHeight="@dimen/alt_text_carousel_card_width" android:targetCellWidth="2" android:targetCellHeight="2"
+  xmlns:android="http://schemas.android.com/apk/res/android" />

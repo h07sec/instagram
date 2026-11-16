@@ -1,0 +1,698 @@
+[Filter VideoParticles]
+
+# Port of the Easel InOutV2VideoParticlesProceduralVertex filter.
+#
+# Each visible particle is evaluated once, in the vertex stage of a quads
+# pass, and drawn as a sprite into a premultiplied layer that the composite
+# pass adds over the wipe (see demo_vertex_particles_fireflies.iglu for the
+# quad path).
+#
+# Particle population: sparsity sets how many are visible,
+# MAX_PARTICLES * (1 - sparsity), with MAX_PARTICLES defined in vsParticles.
+# Origins follow the R2 low-discrepancy sequence with a small jitter, so any
+# count covers the frame evenly; particleSize only sets sprite size. All
+# per-particle randomness is hashed from the particle id.
+#
+# Pipeline; all but noise, particles, wipe and composite run at 0.25x:
+#   maskDown -> dilateH -> dilateV -> blurH -> blurV   subject mask
+#   noise (0.5x)                                       wipe-edge fbm
+#   wipe -> composite <- particles (vertex)
+#
+# The mask only feeds the per-particle originAlpha lookup, so it is built at
+# quarter res: maskDown keeps the max alpha of each 4x4 block, and the square
+# dilate runs as two separable max passes at radius / 4.
+#
+# Geometry (wipe direction, particle layout and drift) runs in OpenGL
+# orientation, screen top at y = 1, and is mapped to native texture
+# coordinates through UP. Vertex shaders are not given UP, so the noise pass
+# stores it for vsParticles.
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('particles_all);
+
+    filter.parameters = {
+        {bandWidth = 0.25, min = 0.01, max = 0.5, description = "Band Width"},
+        {alphaBandWidth = 0.25, min = 0.01, max = 0.5, description = "Alpha Band Width"},
+        {glowEdgeOffset = 0.3, min = 0.01, max = 1.0, description = "Glow Edge Offset"},
+        {glowColor = {1.0, 1.0, 1.0}, description = "Glow Color"},
+        {glowBrightness = 5.0, min = 0.0, max = 50.0, description = "Glow Brightness"},
+        {particleBrightness = 1.0, min = 0.0, max = 2.0, description = "Particle Brightness"},
+        {radius = 4.89, min = 0.0, max = 25.0, description = "Dilate Radius"},
+        {blurSize = 3.5, min = 0.0, max = 10.0, description = "Blur Size"},
+        {wipeDirection = {1.0, -0.15}, min = {-1.0, -1.0}, max = {1.0, 1.0}, description = "Wipe Direction"},
+        {outro = 0.0, min = 0.0, max = 1.0, description = "0 = In, 1 = Out"},
+        {progressPadding = 0.1, min = 0.0, max = 0.25, description = "Progress Padding"},
+        {wipeScale = 0.8, min = 0.1, max = 1.0, description = "Wipe Scale (wipe done at this fraction of duration)"},
+        {distortion = 0.0, min = 0.0, max = 1.0, description = "Distortion"},
+        {glowTrail = 0.0, min = 0.0, max = 1.0, description = "Glow Trail"},
+        {overallExposure = 0.0, min = 0.0, max = 10.0, description = "Overall Exposure"},
+        {particleExposure = 0.0, min = 0.0, max = 10.0, description = "Particle Exposure"},
+        {particleSize = 18.0, min = 4.0, max = 50.0, description = "Particle Size"},
+        {particleFadeInStart = 0.15, min = 0.0, max = 0.5, description = "Particle Fade In Start"},
+        {particleSpeed = 0.3, min = 0.0, max = 2.0, description = "Particle Speed"},
+        {particleGlow = 0.5, min = 0.0, max = 1.0, description = "Particle Glow"},
+        {particleOffset = 0.1, min = -0.1, max = 0.1, description = "Particle Offset"},
+        {sparsity = 0.9, min = 0.0, max = 1.0, description = "Sparsity"},
+        {particleRotationSpeed = 0.0, min = -10.0, max = 10.0, description = "Particle Rotation Speed"},
+        {particleRotationRandomness = 0.0, min = 0.0, max = 1.0, description = "Particle Rotation Randomness"},
+        {particleScale = 1.0, min = 0.1, max = 10.0, description = "Particle Scale"},
+        {particleScaleWindow = {0.7, 1.0}, min = {0.0, 0.0}, max = {1.0, 1.0}, description = "Particle Scale Window"},
+        {directionRandomness = 0.0, min = 0.0, max = 1.0, description = "Direction Randomness"},
+        {particleColor = {1.0, 1.0, 1.0}, description = "Particle Color"},
+        {useCustomColor = 0.0, min = 0.0, max = 1.0, description = "Use Custom Color"},
+        {directionBias = {0.0, 0.5}, min = {-1.0, -1.0}, max = {1.0, 1.0}, description = "Direction Bias"},
+        {particleIndex = 1.0, min = 0.0, max = 3.0, description = "Particle Index (0=glow, 1=heart, 2=spark, 3=sparkle)"},
+        {mirrorY = 0.0, min = 0.0, max = 1.0, description = "1 = mirror the wipe and particle layout vertically"},
+    };
+
+    filter.passes = {
+        {
+            name = 'maskDown,
+            inputs = {'default},
+            scale = {0.25, 0.25},
+            uniforms = {
+                inputTexel = {0.00052, 0.00093},
+            },
+            glslShader = maskDownGlsl,
+        },
+        {
+            name = 'dilateH,
+            inputs = {'maskDown},
+            scale = {0.25, 0.25},
+            uniforms = {
+                radius = 4.89,
+                texelSize = {0.00208, 0.0037},
+            },
+            glslShader = dilateHGlsl,
+        },
+        {
+            name = 'dilateV,
+            inputs = {'dilateH},
+            scale = {0.25, 0.25},
+            uniforms = {
+                radius = 4.89,
+                texelSize = {0.00208, 0.0037},
+            },
+            glslShader = dilateVGlsl,
+        },
+        {
+            name = 'blurH,
+            inputs = {'dilateV},
+            scale = {0.25, 0.25},
+            uniforms = {
+                blurSize = 3.5,
+                texelSize = {0.00208, 0.0037},
+            },
+            glslShader = blurHGlsl,
+        },
+        {
+            name = 'blurV,
+            inputs = {'blurH},
+            scale = {0.25, 0.25},
+            uniforms = {
+                blurSize = 3.5,
+                texelSize = {0.00208, 0.0037},
+            },
+            glslShader = blurVGlsl,
+        },
+        {
+            name = 'noise,
+            inputs = {'default},
+            scale = {0.5, 0.5},
+            uniforms = { mirrorY = 0.0 },
+            glslShader = noiseGlsl,
+        },
+        {
+            name = 'particles,
+            inputs = {'default, 'blurV, 'noise, 'particles_all},
+            # Must be >= MAX_PARTICLES in vsParticles; quads past the active
+            # count are culled before any simulation runs.
+            geometry = {type = 'quads, count = 256.0},
+            blendMode = 'premultiplied,
+            clearBeforeDraw = true,
+            uniforms = {
+                particleIndex = 1.0,
+                outputSize = {1920.0, 1080.0},
+                progress = 0.0,
+                progressPadding = 0.1,
+                wipeScale = 0.8,
+                alphaBandWidth = 0.25,
+                wipeDirection = {1.0, -0.15},
+                particleFadeInStart = 0.15,
+                directionBias = {0.0, 0.5},
+                particleColor = {1.0, 1.0, 1.0},
+                particleSpeed = 0.3,
+                particleSize = 18.0,
+                particleGlow = 0.5,
+                particleOffset = 0.1,
+                sparsity = 0.9,
+                particleRotationSpeed = 0.0,
+                particleRotationRandomness = 0.0,
+                particleScale = 1.0,
+                particleScaleWindow = {0.7, 1.0},
+                directionRandomness = 0.0,
+                time = 0.0,
+                mirrorY = 0.0,
+            },
+            glslVertexShader = vsParticles,
+            glslShader = fsParticles,
+        },
+        {
+            name = 'wipe,
+            inputs = {'default, 'noise},
+            uniforms = {
+                progress = 0.0,
+                progressPadding = 0.1,
+                wipeScale = 0.8,
+                bandWidth = 0.25,
+                alphaBandWidth = 0.25,
+                glowEdgeOffset = 0.3,
+                glowColor = {1.0, 1.0, 1.0},
+                glowBrightness = 5.0,
+                outro = 0.0,
+                wipeDirection = {1.0, -0.15},
+                distortion = 0.0,
+                glowTrail = 0.0,
+                overallExposure = 0.0,
+                mirrorY = 0.0,
+            },
+            glslShader = wipeGlsl,
+        },
+        {
+            name = 'composite,
+            inputs = {'wipe, 'particles},
+            uniforms = {
+                particleBrightness = 1.0,
+                glowColor = {1.0, 1.0, 1.0},
+                particleExposureGain = 1.0,
+            },
+            glslShader = compositeGlsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    vec2 size = getTextureSize('default);
+    f32 blurSizeParam = getParameterFloat('blurSize);
+    f32 radiusParam = getParameterFloat('radius);
+
+    setShaderUniform('particles, 'outputSize, size);
+
+    # Mask and blur FBOs are 0.25x, so their texel is 1/(size*0.25).
+    f32 blurScale = 0.25;
+    vec2 blurTexel = {1.0 / (size.x * blurScale), 1.0 / (size.y * blurScale)};
+    vec2 inputTexel = {1.0 / size.x, 1.0 / size.y};
+    setShaderUniform('maskDown, 'inputTexel, inputTexel);
+    setShaderUniform('dilateH, 'texelSize, blurTexel);
+    setShaderUniform('dilateV, 'texelSize, blurTexel);
+    setShaderUniform('dilateH, 'radius, radiusParam);
+    setShaderUniform('dilateV, 'radius, radiusParam);
+    setShaderUniform('blurH, 'texelSize, blurTexel);
+    setShaderUniform('blurV, 'texelSize, blurTexel);
+    setShaderUniform('blurH, 'blurSize, blurSizeParam);
+    setShaderUniform('blurV, 'blurSize, blurSizeParam);
+
+    # Same progress curve as the wipe pass exposure, with its own amount.
+    f32 p = getParameterFloat('progress);
+    f32 pad = getParameterFloat('progressPadding);
+    f32 cp = clamp(p * (1.0 + 2.0 * pad) - pad, 0.0, 1.0);
+    f32 icp = 1.0 - cp;
+    f32 exposureProgress = icp * icp * icp * icp;
+    if (getParameterFloat('outro) > 0.5) {
+        exposureProgress = 1.0 - exposureProgress;
+    }
+    f32 exposure = getParameterFloat('particleExposure) * exposureProgress;
+    setShaderUniform('composite, 'particleExposureGain, pow(2.0, exposure));
+
+    f32 mirrorY = getParameterFloat('mirrorY);
+    setShaderUniform('noise, 'mirrorY, mirrorY);
+    setShaderUniform('particles, 'mirrorY, mirrorY);
+    setShaderUniform('wipe, 'mirrorY, mirrorY);
+
+    # Rotation is measured in host-controlled media seconds.
+    f32 t = getParameterFloat('time_sec);
+    setShaderUniform('particles, 'time, t);
+}
+
+# =========================================================================
+# Mask chain (0.25x). Only alpha is used downstream.
+# =========================================================================
+
+# Max alpha of the 4x4 full-res block under each quarter-res pixel. The
+# offsets land on texel centers, so every tap is an exact texel.
+string maskDownGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+uniform vec2 inputTexel;
+
+void main() {
+    float a = 0.0;
+    for (int y = 0; y < 4; ++y) {
+        for (int x = 0; x < 4; ++x) {
+            vec2 o = (vec2(float(x), float(y)) - 1.5) * inputTexel;
+            a = max(a, sampleInput(sourceTextureCoordinate + o).a);
+        }
+    }
+    gl_FragColor = toOutputFormat(vec4(a));
+}
+";
+
+# Separable square dilate. radius is in full-res pixels, so the quarter-res
+# reach is radius / 4: MAX_TAPS 7 covers the parameter max of 25.
+string dilateHGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+uniform float radius;
+uniform vec2 texelSize;
+
+#define MAX_TAPS 7
+
+void main() {
+    float reach = floor(radius) * 0.25;
+    float a = 0.0;
+    // Taps run from -floor(reach) to floor(reach); stop after the last one.
+    float first = -floor(reach);
+    for (int i = 0; i <= 2 * MAX_TAPS; ++i) {
+        float fi = first + float(i);
+        if (fi > reach) break;
+        a = max(a, sampleInput(sourceTextureCoordinate + vec2(fi * texelSize.x, 0.0)).a);
+    }
+    gl_FragColor = toOutputFormat(vec4(a));
+}
+";
+
+string dilateVGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+uniform float radius;
+uniform vec2 texelSize;
+
+#define MAX_TAPS 7
+
+void main() {
+    float reach = floor(radius) * 0.25;
+    float a = 0.0;
+    // Taps run from -floor(reach) to floor(reach); stop after the last one.
+    float first = -floor(reach);
+    for (int i = 0; i <= 2 * MAX_TAPS; ++i) {
+        float fi = first + float(i);
+        if (fi > reach) break;
+        a = max(a, sampleInput(sourceTextureCoordinate + vec2(0.0, fi * texelSize.y)).a);
+    }
+    gl_FragColor = toOutputFormat(vec4(a));
+}
+";
+
+# =========================================================================
+# Horizontal 9-tap gaussian blur (ported from GaussianBlurPassInfo)
+# =========================================================================
+string blurHGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+uniform float blurSize;
+uniform vec2 texelSize;
+
+void main() {
+    vec4 sum = vec4(0.0);
+    sum += sampleInput(sourceTextureCoordinate + vec2(-4.0 * texelSize.x * blurSize, 0.0)) * 0.051;
+    sum += sampleInput(sourceTextureCoordinate + vec2(-3.0 * texelSize.x * blurSize, 0.0)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(-2.0 * texelSize.x * blurSize, 0.0)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(-1.0 * texelSize.x * blurSize, 0.0)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate) * 0.1633;
+    sum += sampleInput(sourceTextureCoordinate + vec2(1.0 * texelSize.x * blurSize, 0.0)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate + vec2(2.0 * texelSize.x * blurSize, 0.0)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(3.0 * texelSize.x * blurSize, 0.0)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(4.0 * texelSize.x * blurSize, 0.0)) * 0.051;
+    gl_FragColor = toOutputFormat(sum);
+}
+";
+
+# =========================================================================
+# Vertical 9-tap gaussian blur (ported from GaussianBlurPassInfo)
+# =========================================================================
+string blurVGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+uniform float blurSize;
+uniform vec2 texelSize;
+
+void main() {
+    vec4 sum = vec4(0.0);
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -4.0 * texelSize.y * blurSize)) * 0.051;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -3.0 * texelSize.y * blurSize)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -2.0 * texelSize.y * blurSize)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -1.0 * texelSize.y * blurSize)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate) * 0.1633;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 1.0 * texelSize.y * blurSize)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 2.0 * texelSize.y * blurSize)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 3.0 * texelSize.y * blurSize)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 4.0 * texelSize.y * blurSize)) * 0.051;
+    gl_FragColor = toOutputFormat(sum);
+}
+";
+
+# =========================================================================
+# Wipe-edge fbm noise (0.5x). It depends only on the geometry uv, so it is
+# evaluated at half res instead of per full-res pixel. Stored as fbm
+# (0..0.94) in red; blue is 1 where UP > 0 and 0 otherwise, for vsParticles.
+# =========================================================================
+string noiseGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform float mirrorY;
+
+float hashVal(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+float noise2D(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hashVal(i);
+    float b = hashVal(i + vec2(1.0, 0.0));
+    float c = hashVal(i + vec2(0.0, 1.0));
+    float d = hashVal(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbmNoise(vec2 p) {
+    float val = 0.0;
+    float amp = 0.5;
+    float freq = 3.0;
+    for (int i = 0; i < 4; i++) {
+        val += noise2D(p * freq) * amp;
+        freq *= 2.0;
+        amp *= 0.5;
+    }
+    return val;
+}
+
+void main() {
+    vec2 uv = sourceTextureCoordinate;
+    float gy = max(DOWN, 0.0) + UP * uv.y;
+    if (mirrorY > 0.5) {
+        gy = 1.0 - gy;
+    }
+    // Read the input so its sampler stays bound; only the noise and UP are stored.
+    vec4 src = sampleInput(uv);
+    gl_FragColor = vec4(fbmNoise(vec2(uv.x, gy) * 4.0), src.g, max(UP, 0.0), 1.0);
+}
+";
+
+# =========================================================================
+# Particle simulation, one quad per particle
+# =========================================================================
+string vsParticles = "
+// Upper bound on simulated particles. The 'particles pass geometry count must
+// be at least this.
+#define MAX_PARTICLES 256
+
+attribute float a_particleId;
+attribute vec2 a_cornerOffset;
+
+// Unused here, declared first as in fsParticles. On Metal both stages read one
+// uniform buffer, so the fragment stage's uniform must sit at the same offset.
+uniform float particleIndex;
+
+// blurV: the dilated, blurred input. Its alpha gates particles to the subject.
+uniform sampler2D auxSampler1;
+// noise: blue carries UP, which vertex shaders are not given.
+uniform sampler2D auxSampler2;
+
+uniform vec2 outputSize;
+uniform float progress;
+uniform float progressPadding;
+uniform float wipeScale;
+uniform float alphaBandWidth;
+uniform vec2 wipeDirection;
+uniform float particleFadeInStart;
+uniform vec2 directionBias;
+uniform vec3 particleColor;
+uniform float particleSpeed;
+uniform float particleSize;
+uniform float particleGlow;
+uniform float particleOffset;
+uniform float sparsity;
+uniform float particleRotationSpeed;
+uniform float particleRotationRandomness;
+uniform float particleScale;
+uniform vec2 particleScaleWindow;
+uniform float directionRandomness;
+uniform float time;
+uniform float mirrorY;
+
+varying vec2 vUv;
+varying vec4 vColor;
+
+vec4 hash41(float p) {
+    vec4 p4 = fract(vec4(p) * vec4(0.1031, 0.1030, 0.0973, 0.1099));
+    p4 += dot(p4, p4.wzxy + 33.33);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+
+// Maps the layout y to the screen geometry y (top at 1), flipped vertically
+// when mirrorY is set. It is its own inverse.
+float mirrorGeometryY(float y) {
+    if (mirrorY > 0.5) {
+        return 1.0 - y;
+    }
+    return y;
+}
+
+void decodeTrajectory(vec4 lutData, out vec2 dir, out float speed, out float sizeVar) {
+    dir = lutData.rg * 2.0 - 1.0;
+    dir += directionBias * 2.0;
+    dir = normalize(dir);
+    speed = mix(0.2, 0.6, lutData.g) * particleSpeed;
+    sizeVar = mix(0.25, 1.5, lutData.b);
+}
+
+void main() {
+    // Culled unless it survives every test below. Outputs can only be written
+    // from main(), so the early returns keep these.
+    gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+    vUv = vec2(0.0);
+    vColor = vec4(0.0);
+
+    float pid = a_particleId;
+    float aspect = outputSize.x / outputSize.y;
+    float count = floor(float(MAX_PARTICLES) * (1.0 - sparsity) + 0.5);
+    if (pid >= count) {
+        return;
+    }
+
+    vec4 lutData = hash41(pid);
+    vec4 rnd = hash41(pid + 4096.0);
+
+    // R2 low-discrepancy sequence spreads any count evenly over the frame; a
+    // jitter of up to half the mean spacing breaks up its diagonal pattern.
+    vec2 origin = fract(0.5 + (pid + 1.0) * vec2(0.7548776662, 0.5698402910));
+    float spacing = sqrt(aspect / count);
+    origin += (rnd.zw - 0.5) * spacing * vec2(1.0 / aspect, 1.0);
+
+    vec2 wDir = normalize(wipeDirection);
+    float minProj = min(0.0, wDir.x) + min(0.0, wDir.y);
+    float maxProj = max(0.0, wDir.x) + max(0.0, wDir.y);
+    float paddedProgress = progress * (1.0 + 2.0 * progressPadding) - progressPadding;
+
+    float originProj = (dot(origin, wDir) - minProj) / (maxProj - minProj);
+    float spawnFront = (originProj + alphaBandWidth * 0.5) / (1.0 + alphaBandWidth);
+    float spawnProgress = wipeScale * (spawnFront + progressPadding) - progressPadding + particleOffset;
+    float life = paddedProgress - spawnProgress;
+    if (life <= 0.0 || life > 0.6) {
+        return;
+    }
+    float t = life / 0.5;
+
+    // Native texture y = rawBase + up * geometry y.
+    float up = step(0.5, texture2D(auxSampler2, vec2(0.5)).b) * 2.0 - 1.0;
+    float rawBase = max(-up, 0.0);
+    vec2 rawOrigin = vec2(origin.x, rawBase + up * mirrorGeometryY(origin.y));
+    float originAlpha = texture2D(auxSampler1, rawOrigin).a;
+    if (originAlpha <= 0.0) {
+        return;
+    }
+
+    vec2 dir;
+    float speed;
+    float sizeVar;
+    decodeTrajectory(lutData, dir, speed, sizeVar);
+
+    float dirAngle = (rnd.x * 2.0 - 1.0) * directionRandomness * 3.14159265;
+    float dcs = cos(dirAngle);
+    float dsn = sin(dirAngle);
+    dir = vec2(dir.x * dcs - dir.y * dsn, dir.x * dsn + dir.y * dcs);
+
+    float easedT = t * (2.0 - t);
+    vec2 currentPos = origin + dir * easedT * speed * 0.3;
+
+    float progressScale = 1.0 - smoothstep(particleScaleWindow.x, particleScaleWindow.y, paddedProgress);
+    float radius = particleSize * 0.0005 * sizeVar * particleScale * progressScale;
+    if (radius <= 0.0) {
+        return;
+    }
+
+    float rotOffset = (lutData.a * 2.0 - 1.0) * 6.2831853 * particleRotationRandomness;
+    float rotSpeedVar = 1.0 + (rnd.y * 2.0 - 1.0) * particleRotationRandomness;
+    float angle = time * particleRotationSpeed * rotSpeedVar + rotOffset;
+    float cs = cos(angle);
+    float sn = sin(angle);
+
+    // The quad corner is the sprite-space offset: rotate it back and undo the
+    // aspect correction to get the UV offset. It is added after mirrorY so
+    // sprites stay upright when the layout is mirrored.
+    vec2 rotDiff = a_cornerOffset * 2.0 * radius;
+    vec2 diff = vec2(rotDiff.x * cs + rotDiff.y * sn, rotDiff.y * cs - rotDiff.x * sn);
+    vec2 pos = vec2(currentPos.x, mirrorGeometryY(currentPos.y)) + vec2(diff.x / aspect, diff.y);
+
+    gl_Position = vec4(pos.x * 2.0 - 1.0, (rawBase + up * pos.y) * 2.0 - 1.0, 0.0, 1.0);
+    vUv = vec2(a_cornerOffset.x + 0.5, 0.5 - a_cornerOffset.y);
+
+    float fadeIn = smoothstep(0.0, particleFadeInStart, t);
+    float fadeOut = 1.0 - smoothstep(0.3, 1.0, t);
+    vColor = vec4(particleColor * (1.0 + particleGlow), fadeIn * fadeOut * originAlpha);
+}
+";
+
+string fsParticles = "
+precision highp float;
+
+varying vec2 vUv;
+varying vec4 vColor;
+
+uniform float particleIndex;
+uniform sampler2D auxSampler3;
+
+void main() {
+    vec2 atlasUV = vec2((particleIndex + vUv.x) * 0.25, vUv.y);
+    vec4 sprite = texture2D(auxSampler3, atlasUV);
+    float a = sprite.a * vColor.a;
+    if (a <= 0.0) {
+        discard;
+    }
+    // The layer is 8-bit, and lit sprites reach 2.0 (particleGlow), so it
+    // stores half the premultiplied color; the composite pass doubles it back.
+    gl_FragColor = vec4(sprite.rgb * vColor.rgb * a * 0.5, a);
+}
+";
+
+# =========================================================================
+# Wipe + glow
+# =========================================================================
+string wipeGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+uniform float progress;
+uniform float progressPadding;
+uniform float wipeScale;
+uniform float bandWidth;
+uniform float alphaBandWidth;
+uniform float glowEdgeOffset;
+uniform vec3 glowColor;
+uniform float glowBrightness;
+uniform float outro;
+uniform vec2 wipeDirection;
+uniform sampler2D auxSampler1;
+uniform float distortion;
+uniform float glowTrail;
+uniform float overallExposure;
+uniform float mirrorY;
+
+vec3 exposureFn(vec3 color, float amount) {
+    return color * pow(2.0, amount);
+}
+
+void main() {
+    vec2 uv = sourceTextureCoordinate;
+    // Geometry runs in OpenGL orientation (screen top at y = 1); texture reads
+    // keep the native uv.
+    vec2 guv = vec2(uv.x, max(DOWN, 0.0) + UP * uv.y);
+    if (mirrorY > 0.5) {
+        guv.y = 1.0 - guv.y;
+    }
+
+    float paddedProgress = progress * (1.0 + 2.0 * progressPadding) - progressPadding;
+    float clampedProgress = clamp(paddedProgress, 0.0, 1.0);
+
+    float wipeProgress = clamp(progress / max(wipeScale, 0.001), 0.0, 1.0);
+    wipeProgress = wipeProgress * (1.0 + 2.0 * progressPadding) - progressPadding;
+
+    vec2 wDir = normalize(wipeDirection);
+    float minProj = min(0.0, wDir.x) + min(0.0, wDir.y);
+    float maxProj = max(0.0, wDir.x) + max(0.0, wDir.y);
+    float uvProj = (dot(guv, wDir) - minProj) / (maxProj - minProj);
+
+    float noiseOffset = texture2D(auxSampler1, uv).r * 0.5 - 0.25;
+    float distortedProj = uvProj + noiseOffset;
+    uvProj = mix(uvProj, distortedProj, distortion);
+
+    float wipeFront = wipeProgress * (1.0 + bandWidth);
+    float origAlpha = 1.0 - smoothstep(wipeFront - bandWidth, wipeFront, uvProj);
+
+    vec4 originalColor = sampleInput(uv);
+
+    float glowWipeFront = (wipeFront + glowEdgeOffset) - bandWidth * 0.5;
+
+    float bandMask2 = smoothstep(glowWipeFront - bandWidth, glowWipeFront + bandWidth, uvProj)
+        * (1.0 - step(glowWipeFront + bandWidth, uvProj));
+
+    float glowMask = mix(bandMask2,
+        1.0 - smoothstep(glowWipeFront-bandWidth, glowWipeFront, uvProj)
+    , outro);
+
+    wipeFront = wipeProgress * (1.0 + alphaBandWidth);
+    origAlpha = 1.0 - smoothstep(wipeFront - alphaBandWidth, wipeFront, uvProj);
+
+    bandMask2 = smoothstep(wipeFront - alphaBandWidth, wipeFront + alphaBandWidth, uvProj);
+    bandMask2 = mix(bandMask2, 1.0 - bandMask2, outro);
+    bandMask2 = clamp(bandMask2, 0.0, 1.0);
+
+    vec4 result = originalColor;
+
+    float newAlpha = mix(origAlpha, 1.0 - origAlpha, step(0.5, outro));
+
+    float noiseBright = noiseOffset + 0.5;
+    noiseBright = noiseBright * noiseBright * noiseBright * noiseBright * 2.0;
+    result.xyz += glowColor * glowBrightness * bandMask2 * newAlpha * mix(1.0, noiseBright, distortion) * result.a;
+
+    // Ease out: most of the exposure change happens early, then settles.
+    float invClamped = 1.0 - clampedProgress;
+    float exposureProgress = invClamped * invClamped * invClamped * invClamped;
+    exposureProgress = mix(exposureProgress, 1.0 - exposureProgress, outro);
+    result.xyz = exposureFn(result.xyz, overallExposure * exposureProgress);
+
+    result.xyz += (glowMask * glowMask * glowMask) * glowColor * 50.0 * glowTrail * result.a;
+
+    result *= newAlpha;
+
+    gl_FragColor = toOutputFormat(result);
+}
+";
+
+# =========================================================================
+# Alpha composite of the premultiplied particle layer over the wipe
+# =========================================================================
+string compositeGlsl = "
+precision highp float;
+uniform sampler2D auxSampler1;
+varying vec2 sourceTextureCoordinate;
+uniform float particleBrightness;
+uniform vec3 glowColor;
+uniform float particleExposureGain;
+
+void main() {
+    vec4 c = sampleInput(sourceTextureCoordinate);
+    // The particle layer stores half its color; see fsParticles.
+    vec4 particles = texture2D(auxSampler1, sourceTextureCoordinate);
+    vec3 particleRgb = particles.rgb * 2.0 * particleBrightness * glowColor * particleExposureGain;
+
+    // Both layers are premultiplied: particles over the wipe.
+    float pa = clamp(particles.a, 0.0, 1.0);
+    gl_FragColor = toOutputFormat(vec4(c.rgb * (1.0 - pa) + particleRgb, c.a * (1.0 - pa) + pa));
+}
+";

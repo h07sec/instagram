@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector android:drawable="@drawable/$ig_splash_pulse_animation_only__0"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <target android:name="_R_G_L_2_G" android:animation="@drawable/$ig_splash_pulse_animation_only__1" />
+    <target android:name="_R_G_L_1_G" android:animation="@drawable/$ig_splash_pulse_animation_only__2" />
+    <target android:name="_R_G_L_1_G_N_3_T_0" android:animation="@drawable/$ig_splash_pulse_animation_only__3" />
+    <target android:name="_R_G_L_0_G" android:animation="@drawable/$ig_splash_pulse_animation_only__4" />
+</animated-vector>

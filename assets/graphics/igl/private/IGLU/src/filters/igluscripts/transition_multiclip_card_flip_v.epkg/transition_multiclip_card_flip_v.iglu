@@ -1,0 +1,256 @@
+[Filter TransitionMulticlipCardFlipV]
+
+# Multiclip Card Flip V (AE: Edits_Transition_collect_01 / card_flip_V).
+# Clip A and clip B are the two faces of one 3D card that flips about the
+# vertical axis: a 3D null's Y Rotation goes 0 -> 180 over 0.683s-1.6s, with a
+# wind-up and overshoot from the keyframe speeds. Clip B replaces clip A at
+# 1.183s. In the AE comp clip B is NOT pre-flipped, so it lands mirrored; this
+# port flips it so clip B reads upright (the card_flip_H comp does pre-flip).
+# AE's default comp camera
+# (50mm preset: focal length 1.389x comp width) supplies the perspective, and
+# layer motion blur (180 degree shutter at 60fps) is approximated with
+# sub-frame samples.
+#
+# Vertex stage: the card is a real quad, rotated and perspective-projected in
+# the vertex shader (clip-space w gives perspective-correct texturing), so each
+# pixel costs one texture read per drawn copy instead of a per-pixel ray cast.
+#   1. face - copies the visible face (clip A, or clip B from 1.183s) through a
+#             fragment pass, so the card samples a plain RGBA pass output with
+#             the host's format and orientation handling already applied.
+#   2. card - quad 0 is an opaque black backdrop; quads 1..8 are motion-blur
+#             copies of the card spread across the shutter, each adding
+#             1/n of its colour. Only as many copies as the frame's angular
+#             spread needs are drawn (about one per degree); the rest collapse
+#             to nothing, so a slow or still frame draws the card once.
+#             float16 so the copies add up without 8-bit rounding.
+#   3. present - converts the card from IGLU's working colour space to the
+#             host's output format. The card accumulates its blur copies with
+#             additive blending, which only adds up in the working space, so
+#             toOutputFormat() runs once on the finished card rather than on
+#             each copy. Writing the card straight to the host would put
+#             working-space values into an HDR (HLG/PQ) output.
+#
+# Ported from the Easel web tool's multiclip_card_flip_v.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {motionBlur = 1.0, min = 0.0, max = 1.0, description = "Motion Blur"},
+  };
+
+  filter.passes = {
+    {
+      name = 'face,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        showB = 0.0,
+      },
+      glslShader = faceGlsl,
+    },
+    {
+      name = 'card,
+      inputs = {'default, 'face},
+      shaderInputNames = {'default, 's_face},
+      # Coupled to MAX_SAMPLES in cardVs: count = 1 backdrop + MAX_SAMPLES.
+      geometry = {type = 'quads, count = 9.0},
+      blendMode = 'additive,
+      clearBeforeDraw = true,
+      bufferType = 'float16,
+      uniforms = {
+        angle0 = 0.0,
+        angle1 = 0.0,
+        showB = 0.0,
+        axis = 1.0,
+        focal = 1.3889,
+        aspect = 1.7778,
+      },
+      glslVertexShader = cardVs,
+      glslShader = cardFs,
+    },
+    {
+      name = 'present,
+      inputs = {'card},
+      glslShader = presentGlsl,
+    },
+  };
+}
+
+# AE timing (comp seconds). Progress 0..1 spans T0..T1.
+f32 T0 = 0.683;
+f32 T1 = 1.6;
+f32 T_B = 1.183;
+# 180 degree shutter at 60fps: +-1/240s around the frame.
+f32 SHUTTER = 0.0041667;
+
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 is = 1.0 - s;
+  return 3.0 * is * is * s * a + 3.0 * is * s * s * b + s * s * s;
+}
+
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 uu = clamp(u, 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = uu;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < uu) {
+      lo = s;
+    } else {
+      hi = s;
+    }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+# One AE bezier keyframe segment (t0, v0) -> (t1, v1). io/so: out influence and
+# speed of the first key; ii/si: in influence and speed of the second key.
+fun aeSeg(f32 t, f32 t0, f32 v0, f32 t1, f32 v1, f32 io, f32 so, f32 ii, f32 si) f32 {
+  f32 dt = t1 - t0;
+  f32 dv = v1 - v0;
+  f32 r = v0;
+  if (t >= t1) {
+    r = v1;
+  } else if (t > t0) {
+    f32 y1 = io * so * dt / dv;
+    f32 y2 = 1.0 - ii * si * dt / dv;
+    r = v0 + dv * aeEase((t - t0) / dt, io, y1, 1.0 - ii, y2);
+  }
+  return r;
+}
+
+# Null Y Rotation in degrees.
+fun angleAt(f32 t) f32 {
+  return aeSeg(t, T0, 0.0, T1, 180.0, 0.74, 0.0 - 143.0, 0.67, 0.0 - 103.0);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 t = T0 + p * (T1 - T0);
+  f32 mb = SHUTTER * getParameterFloat('motionBlur);
+  vec2 size = getTextureSize('default);
+  f32 showB = 0.0;
+  if (t >= T_B) {
+    showB = 1.0;
+  }
+  setShaderUniform('face, 'showB, showB);
+  setShaderUniform('card, 'showB, showB);
+  setShaderUniform('card, 'angle0, radians(angleAt(t - mb)));
+  setShaderUniform('card, 'angle1, radians(angleAt(t + mb)));
+  setShaderUniform('card, 'aspect, size.y / max(size.x, 1.0));
+}
+
+string faceGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float showB;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 col = showB > 0.5 ? texture2D(s_texture1, uv) : sampleInput(uv);
+  gl_FragColor = toOutputFormat(col);
+}
+";
+
+string cardVs = "
+attribute float a_particleId;
+attribute vec2 a_cornerOffset;
+
+uniform float angle0;
+uniform float angle1;
+uniform float showB;
+uniform float axis;
+uniform float focal;
+uniform float aspect;
+
+varying vec2 vUv;
+varying float vWeight;
+
+// Coupled to the pass's geometry count (1 backdrop + MAX_SAMPLES).
+const float MAX_SAMPLES = 8.0;
+// Angular spacing of blur copies: about one per degree of rotation.
+const float SAMPLE_STEP = 0.0175;
+
+void main() {
+  vec2 corner = a_cornerOffset + 0.5;
+
+  // Quad 0: the comp's black background, full frame.
+  if (a_particleId < 0.5) {
+    gl_Position = vec4(a_cornerOffset * 2.0, 0.0, 1.0);
+    vUv = corner;
+    vWeight = -1.0;
+    return;
+  }
+
+  float n = clamp(ceil(abs(angle1 - angle0) / SAMPLE_STEP), 1.0, MAX_SAMPLES);
+  float k = a_particleId - 1.0;
+  if (k >= n) {
+    // Unused copy: every corner on one point, so it rasterizes nothing.
+    gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+    vUv = corner;
+    vWeight = 0.0;
+    return;
+  }
+  float ang = mix(angle0, angle1, (k + 0.5) / n);
+  float c = cos(ang);
+  float s = sin(ang);
+
+  // Card plane in comp units: width 1, origin at the comp centre, y up.
+  vec2 q = vec2(corner.x - 0.5, (0.5 - corner.y) * aspect);
+  // Rotate about X (axis 0) or Y (axis 1); z points away from the camera.
+  vec3 p = axis < 0.5
+    ? vec3(q.x, c * q.y, s * q.y)
+    : vec3(c * q.x, q.y, -s * q.x);
+
+  // Camera at z = -focal looking down +z; the z = 0 plane maps 1:1 to the
+  // frame. Writing w lets the divide do the projection, which also makes the
+  // texture coordinates perspective-correct.
+  float w = (p.z + focal) / focal;
+  gl_Position = vec4(2.0 * p.x, -2.0 * p.y / aspect, 0.0, w);
+
+  // Clip B is pre-flipped 180 degrees so it reads upright once the card lands.
+  vec2 uv = corner;
+  if (showB > 0.5) {
+    uv = axis < 0.5 ? vec2(uv.x, 1.0 - uv.y) : vec2(1.0 - uv.x, uv.y);
+  }
+  vUv = uv;
+  vWeight = 1.0 / n;
+}
+";
+
+string cardFs = "
+uniform sampler2D s_face;
+
+varying vec2 vUv;
+varying float vWeight;
+
+void main() {
+  if (vWeight < 0.0) {
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    return;
+  }
+  // Additive blending: each copy adds its share of the card's colour and no
+  // alpha, so the backdrop's alpha of 1 stands.
+  vec4 col = texture2D(s_face, vUv);
+  gl_FragColor = vec4(col.rgb * col.a * vWeight, 0.0);
+}
+";
+
+string presentGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+void main() {
+  gl_FragColor = toOutputFormat(sampleInput(sourceTextureCoordinate));
+}
+";

@@ -1,0 +1,149 @@
+# IGLUSCRIPTCOLLISION_BYPASS: Intentional IGLUScript implementation of the C++ transition_cube effect, selected per-user via QE for A/B against CubeTransitionFilter.
+[Filter TransitionCube]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  # 'default = clip A (outgoing); 'transition = host-supplied clip B (incoming).
+  # iOS binds the aux sampler by name, so 'transition maps to GLSL 's_texture1.
+  filter.passes = {{
+    name = 'cube,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      outputSize = {1024.0, 1024.0},
+      halfSize = {512.0, 512.0},
+      uz = 0.0,
+      prog = 1.0,
+      invProg = 0.0,
+      perspFrom = 0.0,
+      perspTo = 0.7,
+      rad = 0.0,
+    },
+    glslShader = glsl,
+  }};
+
+  filter.parameters = {
+    {persp = 0.7, min = 0.0, max = 1.0, description = "Perspective amount"},
+    {unzoom = 0.0, min = 0.0, max = 1.0, description = "Zoom-out amount"},
+    {cornerRadius = 40.0, min = 0.0, max = 200.0, description = "Cube edge corner radius (px at 1080)"},
+  };
+}
+
+# easeInOutQuartic — matches CubeTransitionFilter::updateUniforms (C++ pre-eases progress).
+fun easeInOutQuartic(f32 t) f32 {
+  if (t < 0.5) {
+    return 8.0 * t * t * t * t;
+  } else {
+    f32 f = -2.0 * t + 2.0;
+    return 1.0 - pow(f, 4.0) / 2.0;
+  }
+}
+
+# GLSL smoothstep(edge0, edge1, x) with the interpolant precomputed by the caller.
+# IGLUScript only registers smoothstep for vector types, not f32.
+fun smoothstep01(f32 t) f32 {
+  f32 v = clamp(t, 0.0, 1.0);
+  return v * v * (3.0 - 2.0 * v);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  # Forward eased progress each frame (else the shader freezes on clip A).
+  f32 tp = easeInOutQuartic(getParameterFloat('progress));
+
+  # outputSize from the default input; cornerRadius scaled by min(w,h)/1080 (C++ getSizeScale()).
+  vec2 size = getTextureSize('default);
+  setShaderUniform('cube, 'outputSize, size);
+  setShaderUniform('cube, 'halfSize, size * 0.5);
+
+  f32 persp = getParameterFloat('persp);
+  setShaderUniform('cube, 'uz, getParameterFloat('unzoom) * 2.0 * (0.5 - abs(0.5 - tp)));
+
+  f32 prog = 1.0 - tp;
+  setShaderUniform('cube, 'prog, prog);
+  setShaderUniform('cube, 'invProg, 1.0 - prog);
+
+  # xskew() perspective arguments -- GLSL mix(x, y, a) is x*(1-a) + y*a.
+  setShaderUniform('cube, 'perspFrom, 1.0 - (prog * (1.0 - persp) + 0.0 * persp));
+  f32 progSq = prog * prog;
+  setShaderUniform('cube, 'perspTo, progSq * (1.0 - persp) + 1.0 * persp);
+
+  f32 sizeScale = min(size.x, size.y) / 1080.0;
+  f32 scaledRadius = getParameterFloat('cornerRadius) * sizeScale;
+  f32 absHalf = abs(tp - 0.5);
+  setShaderUniform('cube, 'rad, scaledRadius * smoothstep01((absHalf - 0.5) / (0.45 - 0.5)));
+}
+
+# Ported from CubeTransitionFilter::fragShaderCubeGL(): aux sampler second_input ->
+# s_texture1 (iOS name binding), inBounds() without all()/lessThan() (shaderc-unsupported).
+string glsl = "
+  precision highp float;
+
+  varying vec2 sourceTextureCoordinate;
+
+  BaseUniformsOpenGL;
+
+  uniform vec2 outputSize;
+  uniform vec2 halfSize;
+  uniform sampler2D s_texture1;
+  uniform float uz;
+  uniform float prog;
+  uniform float invProg;
+  uniform float perspFrom;
+  uniform float perspTo;
+  uniform float rad;
+
+  // adapted from https://gl-transitions.com/editor/cube
+  // explicit comparisons (not all(lessThan(...))): shaderc/SkSL lacks those builtins.
+  bool inBounds(vec2 p) { return p.x > 0.0 && p.y > 0.0 && p.x < 1.0 && p.y < 1.0; }
+
+  // xskew() specialized for its two literal call sites, center = 0.0 and center = 1.0.
+  // Both collapse the recentre/mirror terms to identity, so the branches disappear.
+  vec2 xskewFrom(vec2 p, float persp) {
+    float x = p.x;
+    return vec2(x, (p.y - 0.5 * (1.0 - persp) * x) / (1.0 + (persp - 1.0) * x));
+  }
+
+  vec2 xskewTo(vec2 p, float persp) {
+    float x = 1.0 - p.x;
+    return vec2(1.0 - x, (p.y - 0.5 * (1.0 - persp) * x) / (1.0 + (persp - 1.0) * x));
+  }
+
+  // Scalar radius (simplified from gl-transitions' vec4-per-corner): avoids writing
+  // to a function param, which shaderc's transpiled Metal can't compile (const-by-value).
+  float sdRoundBox(vec2 p, vec2 b, float r) {
+    vec2 q = abs(p) - b + r;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+  }
+
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+
+    vec2 p = -uz * 0.5 + (1.0 + uz) * uv;
+
+    vec2 uvFrom = xskewFrom((p - vec2(prog, 0.0)) / vec2(invProg, 1.0), perspFrom);
+    vec2 uvTo = xskewTo(p / vec2(prog, 1.0), perspTo);
+
+    const float feather = 1.0;
+    vec2 stFrom = uvFrom * outputSize;
+    float dFrom = sdRoundBox(stFrom - halfSize, halfSize, rad);
+    float frameFrom = 1.0 - smoothstep(0.0 - feather, 1.0 + feather, dFrom);
+
+    vec2 stTo = uvTo * outputSize;
+    float dTo = sdRoundBox(stTo - halfSize, halfSize, rad);
+    float frameTo = 1.0 - smoothstep(0.0 - feather, 1.0 + feather, dTo);
+
+    // TODO: remove branching
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+    if (inBounds(uvFrom)) {
+      color = texture2D(s_texture1, uvFrom);
+      color.rgb *= frameFrom;
+    } else if (inBounds(uvTo)) {
+      color = sampleInput(uvTo);
+      color.rgb *= frameTo;
+    }
+
+    gl_FragColor = toOutputFormat(color);
+  }
+";

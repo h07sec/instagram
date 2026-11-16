@@ -1,0 +1,48 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAFudoi81C_",
+      "key": "ce5c158f",
+      "md5": "8cba4a306b32cf9fe2d4cc5bd211a113"
+    }
+  },
+  "assets": [
+    {
+      "assetHash": "3e52f21aa96d1cf649c00466685d048d79f1ccb8f565f1b0efd56ee127cca2df",
+      "hubAssetId": "1668176594910566",
+      "name": "spriteTex.png"
+    }
+  ],
+  "dependencies": [
+    "video_unfold"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Unfold In\", the creator can reveal the subject as unfolding paper blooms into view.",
+  "displayName": "Unfold In",
+  "identifier": "30f7dce9-ff77-40eb-afd2-4fe1918121f8",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 1600,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "default": 3.0,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      }
+    ],
+    "legacyId": 4014
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAKMjFc33jV"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "zoom_blur",
+  "displayName": "Zoom Blur",
+  "description": "Filter name for a radial zoom-blur effect",
+  "iglu": {
+    "legacyId": 1105,
+    "customization": [
+      {
+        "name": "resolution_scale",
+        "default": 1.0,
+        "min": 0.001,
+        "max": 4.0
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset android:insetTop="60.870003%"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <shape android:shape="rectangle">
+        <gradient android:startColor="@color/bds_transparent" android:endColor="@color/bds_black_50_transparent" android:angle="270.0" android:type="linear" android:centerY="0.7" android:centerColor="@color/bds_black_50_transparent" />
+    </shape>
+</inset>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set android:ordering="together" xmlns:aapt="http://schemas.android.com/aapt"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__0" android:duration="50" android:startOffset="0" android:valueFrom="1.00431" android:valueTo="1.00431" android:valueType="floatType" android:propertyName="scaleX" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__1" android:duration="50" android:startOffset="0" android:valueFrom="1.00431" android:valueTo="1.00431" android:valueType="floatType" android:propertyName="scaleY" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__2" android:duration="150" android:startOffset="50" android:valueFrom="1.00431" android:valueTo="0" android:valueType="floatType" android:propertyName="scaleX" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__3" android:duration="150" android:startOffset="50" android:valueFrom="1.00431" android:valueTo="0" android:valueType="floatType" android:propertyName="scaleY" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__4" android:duration="233" android:startOffset="200" android:valueFrom="0" android:valueTo="0" android:valueType="floatType" android:propertyName="scaleX" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__5" android:duration="233" android:startOffset="200" android:valueFrom="0" android:valueTo="0" android:valueType="floatType" android:propertyName="scaleY" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__6" android:duration="167" android:startOffset="433" android:valueFrom="0" android:valueTo="1.10474" android:valueType="floatType" android:propertyName="scaleX" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__7" android:duration="167" android:startOffset="433" android:valueFrom="0" android:valueTo="1.10474" android:valueType="floatType" android:propertyName="scaleY" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__8" android:duration="150" android:startOffset="600" android:valueFrom="1.10474" android:valueTo="1.00431" android:valueType="floatType" android:propertyName="scaleX" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__5__9" android:duration="150" android:startOffset="600" android:valueFrom="1.10474" android:valueTo="1.00431" android:valueType="floatType" android:propertyName="scaleY" />
+</set>

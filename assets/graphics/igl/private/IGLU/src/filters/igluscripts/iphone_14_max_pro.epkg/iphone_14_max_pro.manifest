@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "41ABCD65-FCF7-4517-A725-7E95FBF80245",
+  "displayName": "iphone 14 max pro 🌟",
+  "description": "[IG Edits] Color filter name. With \"iphone 14 max pro\", the creator gets a bright red and white LUT color grade with soft, glowy skin smoothing.",
+  "iglu": {
+    "legacyId": 3261
+  },
+  "assets": [
+    {
+      "name": "iphone_14_max_pro_lut.png",
+      "assetHash": "08d75416af16ad5e413fd41c64ab918a18aec5853a99b8a932d622771b76f23b",
+      "hubAssetId": "4533926046889145"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD9Uw7UOgk"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "2053839a",
+      "handle": "AQAFWBzbTDDm",
+      "md5": "fba471ca3373bea7dd0e1fc3bcbe2627"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GArFcDOIz9H3LTUHAEhfA_7Oy9BgbhQoAAAD"
+    }
+  }
+}

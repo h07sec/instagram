@@ -1,0 +1,68 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_scanner, QE-selectable for A/B vs TransitionScannerFilter.
+[Filter TransitionScanner]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'scanner,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      slide = 0.0,
+      edgeLight = 0.5,
+      halfEdge = 0.25,
+      brightness = 1.2,
+      outerColor = {0.9803921569, 0.003921568627, 0.4470588235, 1.0},
+      innerColor = {1.0, 0.4274509804, 0.0470588235, 1.0},
+    },
+    glslShader = glsl,
+  }};
+
+  filter.parameters = {
+    {width = 1.0, min = 0.0, max = 2.0, description = "Scanner band width"},
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progress = getParameterFloat('progress);
+
+  # slideDirection is the constant {1.0, 0.0}, so isVertical is false: aspectAdj is 1.0,
+  # the UP/DOWN terms drop out, and dot(slideDirection, v) collapses to v.x.
+  f32 aspectWidth = getParameterFloat('width);
+  f32 halfWidth = aspectWidth * 0.5;
+
+  # toRange(progress, -0.5 - halfWidth, 0.5 + halfWidth)
+  f32 lo = -0.5 - halfWidth;
+  f32 hi = 0.5 + halfWidth;
+  setShaderUniform('scanner, 'slide, progress * (hi - lo) + lo);
+
+  setShaderUniform('scanner, 'edgeLight, 1.0 - aspectWidth * 0.5);
+  setShaderUniform('scanner, 'halfEdge, halfWidth * 0.5);
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform float slide;
+  uniform float edgeLight;
+  uniform float halfEdge;
+  uniform float brightness;
+  uniform vec4 outerColor;
+  uniform vec4 innerColor;
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    float v = uv.x - 0.5 - slide;
+    float d = 1.0 - abs(v);
+    float light = smoothstep(edgeLight, 1.0, d) * brightness;
+    float alpha = 1.0 - smoothstep(-halfEdge, halfEdge, v);
+    vec4 mixed = mix(sampleInput(uv), texture2D(s_texture1, uv), alpha);
+    vec4 mixedLight = pow(light + 1.0, brightness) * mixed;
+    vec4 lightGradient = mix(outerColor, innerColor, light);
+    vec4 coloredLight = lightGradient * smoothstep(0.4, 1.2, light) * brightness;
+    vec4 color = vec4(mixedLight.rgb + coloredLight.rgb, 1.0);
+    gl_FragColor = toOutputFormat(color);
+  }
+";

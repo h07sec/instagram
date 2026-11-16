@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "545435750630741",
+  "displayName": "Colours Overlay",
+  "description": "[IG Edits] Color filter name. With \"Colours Overlay\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3371
+  },
+  "assets": [
+    {
+      "name": "colours_overlay_lut.png",
+      "assetHash": "5f4593902b91dbd3f01ad4a45dfb1a353740001034549dfb16d2bf1706f199e9",
+      "hubAssetId": "1077359398639574"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF23Uo35DX"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "21272e0d",
+      "handle": "AQAE8m0eC_Ty",
+      "md5": "7f45d0f8d4b5a911a230668148dca3b1"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GBStpTS_BYYpdN0HAB_ic63k9-UWbhQoAAAD"
+    }
+  }
+}

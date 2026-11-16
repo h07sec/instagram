@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Baigs galioti po %1$d min.</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">Reikia peržiūrėti %1$d užduočių</item>
+        <item quantity="one">Reikia peržiūrėti %1$d užduotį</item>
+        <item quantity="few">Reikia peržiūrėti %1$d užduotis</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">Reikia peržiūrėti %1$d užduočių</item>
+        <item quantity="one">Reikia peržiūrėti %1$d užduotį</item>
+        <item quantity="few">Reikia peržiūrėti %1$d užduotis</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d jungčių</item>
+        <item quantity="one">%1$d jungtis</item>
+        <item quantity="few">%1$d jungtys</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d rankinio bagažo krepšių</item>
+        <item quantity="one">%1$d rankinio bagažo krepšys</item>
+        <item quantity="few">%1$d rankinio bagažo krepšiai</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d sustojimų</item>
+        <item quantity="one">%1$d sustojimas</item>
+        <item quantity="few">%1$d sustojimai</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Laikina kortelė baigs galioti po %1$d val.</item>
+    </plurals>
+</resources>

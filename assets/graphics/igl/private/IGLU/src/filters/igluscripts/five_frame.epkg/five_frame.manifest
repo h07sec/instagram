@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "299705803967260",
+  "displayName": "Five Frame",
+  "description": "[IG Edits] Video effect name. With \"Five Frame\", the creator can apply a Spark-ported five-panel collage where each panel shows the video a few frames later than the last, with a blur-in intro.",
+  "iglu": {
+    "legacyId": 3443
+  },
+  "assets": [
+    {
+      "name": "five_frame_background.png",
+      "assetHash": "8bf6fcc32b1e5c053b62ed283e70556ae1fed80e842926e85260a2cbaff7d713",
+      "hubAssetId": "2078827009500659"
+    },
+    {
+      "name": "five_frame_grid.png",
+      "assetHash": "3fb028fc7d02fb36448cbcb4dd89908a4e308bb3a7b3dae47ce04376b4b9640f",
+      "hubAssetId": "1438253048431748"
+    }
+  ]
+}

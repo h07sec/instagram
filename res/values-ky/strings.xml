@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130002">Штат/Облус</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130003">Шаар</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Дарек</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130006">Батир/имарат (милдеттүү эмес)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Браузерди жабуу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">%1$s түзмөгүңүздүн камерасын колдонгусу келет.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s сиздин түрмөгүңүздүн жайгашкан жерлерин колдонгону жатат.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Уруксат берүү</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Бөгөттөө</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130038">Бул сайттын коопсуздук сертификаты боюнча маселелер келип чыкты</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">ВЕБСАЙТТА УЛАНТУУ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Артка</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">%1$s колдонгон коопсуздук тастыктамасы боюнча маселе келип чыкты. Бул вебсайт ичинде сырсөздөр же кредиттик карта номерлери сыяктуу жеке маалыматыңыз киргизилсе, кооптуу болушу мүмкүн.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Бул сайт коопсуз туташууну колдонбойт</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Коопсуздук катасы</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003e">Кандайдыр бир катачылык кетти</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Электрондук почта дареги</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Сиз көрүп жаткан вебсайт тышкы колдонмону ачууга аракет кылып жатат. Улантууну каалайсызбы?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Улантуу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Сиз биздин колдонмодон чыгып жатасыз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Бул биз чечип жаткан техникалык көйгөйдөн улам болуп жатат окшойт. Баракчаны кайра жүктөп көрүңүз.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Жаңылоо</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Баракча учурда жеткиликтүү эмес</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Фамилияңыз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Баракча жүктөлбөй жатат.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">...жардамы менен ачуу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">%1$s ачуу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">Кошумча параметрлер</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Атыңыз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Сиз азыр толук экранда көрүп жатасыз. Чыгуу үчүн солго серпиңиз же артка баскычын басыңыз.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Учурда %2$s колдонмосун %1$s тилде орнотууда кыйынчылыктар болуп жатат. Кайра аракет кылып көрүңүз же азырынча %2$s колдонмосун англис тилинде иштетип туруңуз.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Бир аз күтө туруңуз. Тил орнотулууда: %1$s...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Кайра аракет кылыңыз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Англис тилинде (US) улантуу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">Почта индекси</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">Убакыт коюу</string>
+</resources>

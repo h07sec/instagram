@@ -1,0 +1,53 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_exposure, QE-selectable for A/B vs TransitionExposureFilter.
+[Filter TransitionExposure]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'exposure,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      blend = 0.0,
+      exposureGain = 1.0,
+    },
+    glslShader = glsl,
+  }};
+}
+
+# GLSL smoothstep(edge0, edge1, x) with the interpolant precomputed by the caller.
+# IGLUScript only registers smoothstep for vector types, not f32.
+fun smoothstep01(f32 t) f32 {
+  f32 v = clamp(t, 0.0, 1.0);
+  return v * v * (3.0 - 2.0 * v);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progress = getParameterFloat('progress);
+
+  # crossfade(a, b, 0.4, progress): smoothstep(0.5 - 0.2, 0.5 + 0.2, progress)
+  f32 halfRatio = 0.4 * 0.5;
+  f32 edge0 = 0.5 - halfRatio;
+  f32 edge1 = 0.5 + halfRatio;
+  setShaderUniform('exposure, 'blend, smoothstep01((progress - edge0) / (edge1 - edge0)));
+
+  f32 exposureAmt = (1.0 - abs(0.5 - progress) * 2.0) * 3.6;
+  setShaderUniform('exposure, 'exposureGain, pow(2.0, exposureAmt));
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform float blend;
+  uniform float exposureGain;
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    vec4 a = sampleInput(uv);
+    vec4 b = texture2D(s_texture1, uv);
+    vec3 color = mix(a, b, blend).rgb;
+    gl_FragColor = toOutputFormat(vec4(color * exposureGain, 1.0));
+  }
+";

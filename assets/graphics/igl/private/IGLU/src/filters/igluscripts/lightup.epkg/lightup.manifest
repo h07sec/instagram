@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1198932477588004",
+  "displayName": "𝕷𝖎𝖌𝖍𝖙𝖚𝖕",
+  "description": "[IG Edits] Color filter name. With \"𝕷𝖎𝖌𝖍𝖙𝖚𝖕\", the creator can apply a Spark-ported bright, soft, warm colour grade.",
+  "iglu": {
+    "legacyId": 3438
+  },
+  "assets": [
+    {
+      "name": "lightup_lut.png",
+      "assetHash": "17073230e9551fbe83262678872377ef8c4841a4ef692628a0c3f8a8ac4533bb",
+      "hubAssetId": "1971943690912655"
+    }
+  ]
+}

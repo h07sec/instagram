@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "805021830984489",
+  "displayName": "Desfoque Retrato",
+  "description": "[IG Edits] Video effect name. With \"Desfoque Retrato\", the creator can apply a Spark-ported portrait-mode look: the person stays sharp, the background is blurred and the frame gets a warm grade.",
+  "iglu": {
+    "legacyId": 3393,
+    "subject": {
+      "enabled": true,
+      "fullFrameEnabled": true,
+      "typeSuggestions": [
+        "person"
+      ]
+    }
+  },
+  "assets": [
+    {
+      "name": "desfoque_retrato_lut.png",
+      "assetHash": "fa67986afb12c2126ee595fbc0832b2fd1372aebf7335c1886c79d52797a0207",
+      "hubAssetId": "1109238415051315"
+    }
+  ]
+}

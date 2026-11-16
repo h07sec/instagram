@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1392319134589261",
+  "displayName": "Dill💚.MrX🌈",
+  "description": "[IG Edits] Color filter name. With \"Dill💚.MrX🌈\", the creator can apply a Spark-ported soft, muted colour grade.",
+  "iglu": {
+    "legacyId": 3435
+  },
+  "assets": [
+    {
+      "name": "dill_mrx_lut.png",
+      "assetHash": "26f08eb4ba763df2bea487339ff6cda73a05517bdc6912385bf36ad098596bec",
+      "hubAssetId": "4832935316938893"
+    }
+  ]
+}

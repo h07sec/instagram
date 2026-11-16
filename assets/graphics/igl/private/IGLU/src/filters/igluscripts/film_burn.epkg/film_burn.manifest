@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "746751314171293",
+  "displayName": "Film Burn",
+  "description": "[IG Edits] Video effect name. With \"Film Burn\", the creator can apply a Spark-ported warm film grade with drifting film-burn light leaks.",
+  "iglu": {
+    "legacyId": 3421
+  },
+  "assets": [
+    {
+      "name": "film_burn_lut_tone.png",
+      "assetHash": "846891f3d0acea0262bbaf82a6068545b239d706aa142b5fbb3d97a813bc05a2",
+      "hubAssetId": "1002215812249624"
+    },
+    {
+      "name": "film_burn_lut_base.png",
+      "assetHash": "37b04b026e841fb9baebeeb7ae7f868df108858143c8bd8737809249122aae27",
+      "hubAssetId": "29517827631134708"
+    },
+    {
+      "name": "film_burn_burn_a.png",
+      "assetHash": "7796f04ca24679607cc9d1d9b74270d081c48ea2f883e5e2b531bdacf787ba06",
+      "hubAssetId": "1128113866625805"
+    },
+    {
+      "name": "film_burn_burn_b.png",
+      "assetHash": "66fb7128acfbd947c772e44b19ac85ab434ea948bd7749ad1b9a08ac58739e39",
+      "hubAssetId": "2381076346035689"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEE5-nRSea"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "4010ea37",
+      "handle": "AQBpRZYHBQxj",
+      "md5": "bc104f2a6ec8e6d1c6057fdabdf0c596"
+    }
+  }
+}

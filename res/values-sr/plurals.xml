@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">Пре %1$d д.</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">Пре %1$d ч.</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">Пре %1$d мин.</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d задатака у прегледачу</item>
+        <item quantity="one">%1$d задатак у прегледачу</item>
+        <item quantity="few">%1$d задатка у прегледачу</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Истиче за %1$d сати</item>
+        <item quantity="one">Истиче за %1$d сат</item>
+        <item quantity="few">Истиче за %1$d сата</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Истиче за %1$d минута</item>
+        <item quantity="one">Истиче за %1$d минут</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d задатака чека на проверу</item>
+        <item quantity="one">%1$d задатак чека на проверу</item>
+        <item quantity="few">%1$d задатка чекају на проверу</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d путника</item>
+        <item quantity="one">%1$d путник</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d задатака чека на проверу</item>
+        <item quantity="one">%1$d задатак чека на проверу</item>
+        <item quantity="few">%1$d задатка чекају на проверу</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">%1$d артикала</item>
+        <item quantity="one">%1$d артикал</item>
+        <item quantity="few">%1$d артикла</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d конектора</item>
+        <item quantity="one">%1$d конектор</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d ручних пртљага</item>
+        <item quantity="one">%1$d ручни пртљаг</item>
+        <item quantity="few">%1$d ручна пртљага</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d проверених кофера</item>
+        <item quantity="one">%1$d проверен кофер</item>
+        <item quantity="few">%1$d проверена кофера</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d заустављања</item>
+        <item quantity="one">%1$d заустављање</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d преседања</item>
+        <item quantity="one">%1$d преседање</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">Опције %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Користи %1$d слика</item>
+        <item quantity="one">Користи %1$d слику</item>
+        <item quantity="few">Користи %1$d слике</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">Бесплатно враћање у року од %1$d дана</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">Повраћај у року од %1$d дана</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Привремена картица истиче за %1$d ч.</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">%1$d артикала</item>
+        <item quantity="one">%1$d артикал</item>
+        <item quantity="few">%1$d артикла</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">%1$d артикала</item>
+        <item quantity="one">%1$d артикал</item>
+        <item quantity="few">%1$d артикла</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">Прати све (%1$d)</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">Прати (%1$d)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Сваких %1$d сати</item>
+        <item quantity="one">Сваког %1$d сата</item>
+        <item quantity="few">Свака %1$d сата</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">Сваких %1$d минута</item>
+        <item quantity="one">Сваки %1$d минут</item>
+        <item quantity="few">Свака %1$d минута</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Сваких %1$d секунди</item>
+        <item quantity="one">Сваког %1$d секунда</item>
+        <item quantity="few">Сваке %1$d секунде</item>
+    </plurals>
+</resources>

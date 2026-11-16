@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$dदिवसापूर्वी</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d तासांपूर्वी</item>
+        <item quantity="one">%1$dतासापूर्वी</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d मिनिटांपूर्वी</item>
+        <item quantity="one">%1$d मिनिटापूर्वी</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d ब्राउझर टास्क</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">%1$d तासांमध्ये कालबाह्य होईल</item>
+        <item quantity="one">%1$d तासात कालबाह्य होईल</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">%1$d मिनिटांमध्ये कालबाह्य होईल</item>
+        <item quantity="one">%1$d मिनिटात कालबाह्य होईल</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d टास्कचा रिव्ह्यू करणे आवश्यक आहे</item>
+        <item quantity="one">टास्कचा रिव्ह्यू करणे आवश्यक आहे</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d प्रवासी</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d टास्कचा रिव्ह्यू करणे आवश्यक आहे</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">%1$d आयटम</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d कनेक्टर</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d कॅरी-ऑन बॅग</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d चेक केलेल्या बॅग</item>
+        <item quantity="one">%1$d चेक केलेली बॅग</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d थांबे</item>
+        <item quantity="one">%1$d थांबा</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d थांबे</item>
+        <item quantity="one">%1$d थांबा</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">पर्याय %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">%1$d इमेज वापरा</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">%1$d दिवसांसाठी विनामूल्य रिटर्न</item>
+        <item quantity="one">%1$d दिवसासाठी विनामूल्य रिटर्न</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">%1$d-दिवस रिटर्न</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">तात्पुरते कार्ड %1$d तासांनी कालबाह्य होते</item>
+        <item quantity="one">तात्पुरते कार्ड %1$d तासात कालबाह्य होते</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">%1$d आयटम</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">%1$d आयटम</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">सर्व (%1$d) फॉलो करा</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">(%1$d) फॉलो करा</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">दर %1$d तासांनी</item>
+        <item quantity="one">दर %1$d तासानी</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">दर %1$d मिनिटांनी</item>
+        <item quantity="one">प्रति %1$d मिनिटाने</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">प्रति %1$d सेकंदांनी</item>
+        <item quantity="one">दर %1$d सेकंदांनी</item>
+    </plurals>
+</resources>

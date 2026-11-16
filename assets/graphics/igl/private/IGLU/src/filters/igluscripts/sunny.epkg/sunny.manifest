@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "790801092522187",
+  "displayName": "sunny",
+  "description": "[IG Edits] Color filter name. With \"sunny\", the creator can apply a Spark-ported vivid, saturated color grade with softened skin and a rosy touch.",
+  "iglu": {
+    "legacyId": 3341
+  },
+  "assets": [
+    {
+      "name": "sunny_lut.png",
+      "assetHash": "5a171efb4fb949afa08766fa2a4805bf58d79f188574f3e1ca0918d42a9f8a91",
+      "hubAssetId": "2036321006861642"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF_6I7_thD"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e79565d4",
+      "handle": "AQAF8dzLMxp4",
+      "md5": "bf0ac7874ca0289884d06005ce769636"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GM9o0jPIMMzPR3oFAJU4cnGcl-AubhQoAAAD"
+    }
+  }
+}

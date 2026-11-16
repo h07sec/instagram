@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "971616446983425",
+  "displayName": "𝘽𝙇𝙐𝙀 𝙄𝘾𝙀 🥶",
+  "description": "[IG Edits] Color filter name. With \"𝘽𝙇𝙐𝙀 𝙄𝘾𝙀 🥶\", the creator can apply a Spark-ported cool, icy blue color grade.",
+  "iglu": {
+    "legacyId": 3332
+  },
+  "assets": [
+    {
+      "name": "blue_ice_lut.png",
+      "assetHash": "db4b5c667684a4196db320b5ef41094a8b52bfc77d7b5c6f617b86ce211a71df",
+      "hubAssetId": "2415570269250764"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQBnsAbLEZza"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "d8a2b1ca",
+      "handle": "AQAPytaguwEo",
+      "md5": "2e0d42d91646f386b110c107e79e46a1"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIFK5TNPLaWDg-MDAGzCm64V_sxzbhQoAAAD"
+    }
+  }
+}

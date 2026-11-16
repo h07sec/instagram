@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "D1B8C450-7089-4447-9063-89E54B6BC6D2",
+  "displayName": "Low Exposure IOS",
+  "description": "[IG Edits] Color filter name. With \"Low Exposure IOS\", the creator gets a soft, low-exposure teal LUT color grade with skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3286
+  },
+  "assets": [
+    {
+      "name": "low_exposure_ios_lut.png",
+      "assetHash": "31462822ffa7e14a735bf933f9ae42cb03bbaca14702dabaa862e84a867db5a6",
+      "hubAssetId": "2483802228811485"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHWnvKm8tc"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "d512c1d1",
+      "handle": "AQAEG2zIcNl7",
+      "md5": "69e00eaaa578b4aaf51336bba39edd97"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GAovszNkC0a6cIgFAEKrfIQm-VIGbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "transition_morph_flow_static",
+  "displayName": "Morph Flow",
+  "description": "Video transition selection. Chooses to apply morph flow transition.",
+  "attribution": "@ishanimitraa",
+  "iglu": {
+    "behavior": {
+      "type": "transition",
+      "durationMs": 500,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 0.5,
+        "min": 0.1,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayMethod": "time"
+      }
+    ]
+  }
+}

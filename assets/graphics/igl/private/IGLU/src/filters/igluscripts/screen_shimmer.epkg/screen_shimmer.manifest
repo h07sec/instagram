@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "bfc1cb31-f605-4c2b-bbaa-a7f1ff3dea91",
+  "displayName": "Screen Shimmer",
+  "description": "[IG Visual Discovery] Full-frame loading effect name. With \"Screen Shimmer\", a soft edge-aware band of light sweeps across the paused reel while Context Layer results load.",
+  "iglu": {
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 2200,
+      "curve": "quadraticInOut"
+    },
+    "customization": [
+      {"name": "waveWidth", "default": 0.22, "min": 0.05, "max": 2},
+      {"name": "opacity", "default": 0.2, "min": 0, "max": 1},
+      {"name": "type", "default": 0, "min": 0, "max": 1},
+      {"name": "easeIn", "default": 0, "min": 0, "max": 1},
+      {"name": "easeOut", "default": 0.15, "min": 0, "max": 1},
+      {"name": "dipAmount", "default": 0.04, "min": 0, "max": 1},
+      {"name": "dipSlope", "default": 0.25, "min": 0.25, "max": 6},
+      {"name": "edgeGain", "default": 5.2, "min": 0, "max": 16},
+      {"name": "edgeBlur", "default": 2, "min": 0, "max": 8},
+      {"name": "edgeAmount", "default": 0.75, "min": 0, "max": 1}
+    ]
+  }
+}

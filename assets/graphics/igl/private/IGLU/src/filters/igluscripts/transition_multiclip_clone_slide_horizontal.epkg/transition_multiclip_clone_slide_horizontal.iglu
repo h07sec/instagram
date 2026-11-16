@@ -1,0 +1,332 @@
+[Filter TransitionMulticlipCloneSlideHorizontal]
+
+# Clip B clone-slides in horizontally (the Clone Slide In effect) over an untouched
+# clip A.
+#
+# Ported from the Easel web tool's multiclip_clone_slide_horizontal.iglu.
+#
+# Runs video_clone_slide (as video_clone_slide_horizontal_in drives it) on clip B
+# directly: slideFx reads clip B, and the final pass runs dirBlur and the
+# over-composite onto clip A together.
+#
+# Clones cross at a fixed rate in real seconds (crossingRate), so the number of
+# passes follows the transition's length: 5 at the 0.5s default, 1 (just the
+# settle) at 0.1s, 30 at 3s. `duration` is the transition length in seconds,
+# the name of the manifest's `duration` customization.
+
+# Hermite smoothstep -- ease-in-out
+fun smoothstep(f32 t) f32 {
+  return t * t * (3.0 - 2.0 * t);
+}
+
+# Ease-out cubic -- decelerates into rest
+fun easeOut(f32 t) f32 {
+  f32 inv = 1.0 - t;
+  return 1.0 - inv * inv * inv;
+}
+
+f32 directionX = -1.0;
+f32 directionY = 0.0;
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {duration = 0.5, min = 0.1, max = 5.0, description = "Transition length (seconds)"},
+    {crossingRate = 10.0, min = 1.0, max = 30.0, description = "Clone passes per second"},
+  };
+
+  # slideFx renders the clone/ghost trail at half res because its nine taps are
+  # the expensive ones; the final pass reconstructs the settled frame from the
+  # full-res clip B, so the half-res detail only shows while the clone is
+  # crossing and already heavily smeared.
+  filter.passes = {
+    {
+      name = 'slideFx,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      scale = {0.5, 0.5},
+      uniforms = {
+        position = {0.0, 0.0},
+        ghostSpread = 0.0,
+        axis = {1.0, 0.0},
+        stepUV = {0.0, 0.0},
+        stepM = 0.0,
+        reach = 0.0,
+      },
+      glslShader = slideGlsl,
+    },
+    {
+      name = 'composite,
+      inputs = {'default, 'transition, 'slideFx},
+      shaderInputNames = {'default, 's_texture1, 's_slide},
+      uniforms = {
+        position = {0.0, 0.0},
+        blurMix = 0.0,
+        axis = {1.0, 0.0},
+        stepUV = {0.0, 0.0},
+        stepM = 0.0,
+        posM = 0.0,
+        pad = 0.0,
+      },
+      glslShader = compositeGlsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 duration = max(getParameterFloat('duration), 0.01);
+  # Whole passes only: the last pass is the settle.
+  f32 iters = clamp(floor(duration * getParameterFloat('crossingRate) + 0.5), 1.0, 60.0);
+
+  f32 eased = smoothstep(p);
+
+  # Both shaders hoist the cross-axis half of their edge feather out of the
+  # nine-tap loop, which only holds while the taps move along a single axis.
+  f32 dirX = directionX;
+  f32 dirY = directionY;
+  if (abs(dirX) >= abs(dirY)) {
+    dirY = 0.0;
+  } else {
+    dirX = 0.0;
+  }
+  vec2 dir = {dirX, dirY};
+
+  # Divide animation into phases:
+  # Phases 0..N-2: full crossings (position goes -1 to +1)
+  # Phase N-1: final settle (position goes -1 to 0, with ease-out)
+  f32 totalPhases = iters;
+  f32 scaledP = eased * totalPhases;
+
+  # Clamp to prevent overflow at p=1
+  f32 phase = floor(clamp(scaledP, 0.0, totalPhases - 0.001));
+  f32 phaseP = scaledP - phase;
+
+  f32 offset = 0.0;
+  if (phase < totalPhases - 1.0) {
+    # Crossing phase: offset sweeps from -1 to +1 (full pass-through)
+    offset = 0.0 - 1.0 + phaseP * 2.0;
+  } else {
+    # Final settle: ease-out for smooth deceleration into rest
+    f32 settleP = easeOut(phaseP);
+    offset = 0.0 - 1.0 + settleP;
+  }
+
+  # Apply offset along direction axis
+  vec2 pos = {dir.x * offset, dir.y * offset};
+
+  # Tangent of movement curve drives ghosting
+  # d(smoothstep)/dp = 6p(1-p), scaled by phases and phase multiplier
+  f32 dpdt = 6.0 * p * (1.0 - p);
+  f32 phaseMul = 2.0;
+  if (phase >= totalPhases - 1.0) {
+    # Settle phase: blend phaseMul down smoothly based on settle progress
+    f32 settleBlend = 1.0 - phaseP;
+    phaseMul = 1.0 + settleBlend;
+  }
+  f32 tangent = phaseMul * totalPhases * dpdt;
+
+  # Normalize tangent to 0-1 (max tangent = 3 * totalPhases at p=0.5 crossing)
+  f32 maxTangent = 3.0 * totalPhases;
+  f32 tangentNorm = clamp(tangent / maxTangent, 0.0, 1.0);
+
+  # Ghost spread: 0 to 2 texels per step, in UV space
+  vec2 size = getTextureSize('default);
+  f32 texelSize = abs(dir.x) / size.x + abs(dir.y) / size.y;
+  f32 ghostSpread = tangentNorm * 10.0 * texelSize;
+
+  # Spread measured in texels of the slide axis. Below a quarter texel all nine
+  # taps land on the same pixel, so pin the spread to exactly 0 and let the
+  # shaders take their single-tap paths. slideFx runs at half the spread, so the
+  # two cross the threshold at different times and each needs its own pin.
+  f32 axisSize = size.y;
+  if (abs(dir.x) > 0.0) { axisSize = size.x; }
+  f32 blurSpread = ghostSpread;
+  if (ghostSpread * axisSize < 0.25) { blurSpread = 0.0; }
+  f32 slideSpread = ghostSpread * 0.5;
+  if (slideSpread * axisSize < 0.25) { slideSpread = 0.0; }
+
+  # Crossfade between the sharp full-res reconstruction and the half-res clone
+  # composite. Below a quarter texel of spread the blur is a no-op, so blurMix
+  # goes to exactly 0 and the final pass reads only the full-res clip B.
+  f32 blurMix = clamp((ghostSpread * axisSize - 0.25) / 0.75, 0.0, 1.0);
+
+  # The taps move along one axis. Fall back to y when the direction is zero: the
+  # step is zero there anyway, so either choice yields the same feather.
+  vec2 axis = {0.0, 1.0};
+  f32 posM = pos.y;
+  f32 axisTexel = 1.0 / max(size.y, 1.0);
+  if (abs(dir.x) > 0.0) {
+    axis.x = 1.0;
+    axis.y = 0.0;
+    posM = pos.x;
+    axisTexel = 1.0 / max(size.x, 1.0);
+  }
+  vec2 slideStep = {dir.x * slideSpread, dir.y * slideSpread};
+  f32 slideStepM = slideStep.x * axis.x + slideStep.y * axis.y;
+  vec2 blurStep = {dir.x * blurSpread, dir.y * blurSpread};
+  f32 blurStepM = blurStep.x * axis.x + blurStep.y * axis.y;
+
+  setShaderUniform('slideFx, 'position, pos);
+  setShaderUniform('slideFx, 'ghostSpread, slideSpread);
+  setShaderUniform('slideFx, 'axis, axis);
+  setShaderUniform('slideFx, 'stepUV, slideStep);
+  setShaderUniform('slideFx, 'stepM, slideStepM);
+  setShaderUniform('slideFx, 'reach, 4.0 * abs(slideStepM));
+
+  setShaderUniform('composite, 'position, pos);
+  setShaderUniform('composite, 'blurMix, blurMix);
+  setShaderUniform('composite, 'axis, axis);
+  setShaderUniform('composite, 'stepUV, blurStep);
+  setShaderUniform('composite, 'stepM, blurStepM);
+  setShaderUniform('composite, 'posM, posM);
+  setShaderUniform('composite, 'pad, 6.0 * abs(blurStepM) + 4.0 * axisTexel);
+}
+
+string slideGlsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform vec2 position;
+uniform float ghostSpread;
+uniform vec2 axis;
+uniform vec2 stepUV;
+uniform float stepM;
+uniform float reach;
+
+void main() {
+  vec2 shifted = sourceTextureCoordinate - position;
+  float m = dot(shifted, axis);
+
+  // position sweeps the clone from fully offscreen, across the frame and back out
+  // again, iterations times, so for much of each crossing every tap lands outside
+  // [0,1], every weight comes out 0 and the normalize returns exactly vec4(0).
+  // Reject before paying nine fetches. Only the whole kernel being outside
+  // counts, so no partially covered pixel is touched. The direction is
+  // axis-aligned, so the clone covers a contiguous slab and the branch is
+  // coherent across a warp.
+  if (min(m, 1.0 - m) < -reach) {
+    gl_FragColor = toOutputFormat(vec4(0.0));
+    return;
+  }
+
+  // smoothstep(0,e,v) * smoothstep(0,e,1-v) is exactly smoothstep(0,e,min(v,1-v))
+  // while e < 0.5, because whichever side is inside the ramp leaves the other at
+  // exactly 1. And the taps move along one axis, so the cross-axis half is
+  // identical for all nine of them; hoist it out of the loop.
+  float e = 0.005;
+  vec2 d = min(shifted, 1.0 - shifted);
+  float caCross = smoothstep(0.0, e, dot(d, 1.0 - axis));
+
+  // ghostSpread is pinned to 0 whenever the trail would be sub-texel, so the
+  // settled frames cost one tap instead of nine. Uniform branch.
+  if (ghostSpread <= 0.0) {
+    float ca = caCross * smoothstep(0.0, e, dot(d, axis));
+    gl_FragColor = toOutputFormat(texture2D(s_texture1, shifted) * ca / max(ca, 0.001));
+    return;
+  }
+
+  vec4 color = vec4(0.0);
+  float totalWeight = 0.0;
+
+  for (int i = -4; i <= 4; i++) {
+    float fi = float(i);
+    float gm = m - stepM * fi;
+    float ca = caCross * smoothstep(0.0, e, min(gm, 1.0 - gm));
+
+    // sqrt(1/(1+k|i|)) is inversesqrt(1+k|i|): one instruction instead of a divide
+    // plus a pow.
+    float w = inversesqrt(1.0 + 2.0 * abs(fi)) * ca;
+    color += texture2D(s_texture1, shifted - stepUV * fi) * w;
+    totalWeight += w;
+  }
+
+  color /= max(totalWeight, 0.001);
+  gl_FragColor = toOutputFormat(color);
+}
+";
+
+string compositeGlsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+// The half-res clone composite from 'slideFx.
+uniform sampler2D s_slide;
+
+uniform vec2 position;
+uniform float blurMix;
+uniform vec2 axis;
+uniform vec2 stepUV;
+uniform float stepM;
+uniform float posM;
+uniform float pad;
+
+vec4 overClipA(vec4 b, vec4 a) {
+  // Clip B is premultiplied, so it goes over clip A without another multiply by b.a.
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+  return vec4(rgb, outA);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  float mu = dot(uv, axis);
+
+  // Everything slideFx wrote sits in the slab the translated clone covers, and the
+  // sharp path reads that same slab out of clip B, so outside it clip B is
+  // exactly vec4(0). pad covers this kernel's reach, the half-spread slideFx
+  // already smeared its own nine taps, and a few texels of bilinear reach, so
+  // only a fragment whose entire footprint misses the slab is rejected.
+  float slab = mu - posM;
+  if (min(slab, 1.0 - slab) < -pad) {
+    gl_FragColor = toOutputFormat(overClipA(vec4(0.0), a));
+    return;
+  }
+
+  // smoothstep(0,e,v) * smoothstep(0,e,1-v) is exactly smoothstep(0,e,min(v,1-v))
+  // while e < 0.5. The taps move along one axis, and position is axis-aligned, so
+  // the cross-axis coordinate is the same in both spaces and one cross-axis
+  // feather serves the sharp path's `uv - position` and the blur taps' `uv`.
+  float e = 0.005;
+  vec2 duv = min(uv, 1.0 - uv);
+  float caCross = smoothstep(0.0, e, dot(duv, 1.0 - axis));
+
+  // The sharp path reconstructs the whole chain from the full-res clip B: at zero
+  // spread slideFx collapses to this one clipped tap and the blur to a copy.
+  float caSharp = caCross * smoothstep(0.0, e, min(slab, 1.0 - slab));
+  vec4 sharp = texture2D(s_texture1, uv - position) * caSharp / max(caSharp, 0.001);
+
+  // Sub-texel spread: the sharp path alone, so the settled frame stays pixel-sharp
+  // despite slideFx rendering at half res. blurMix is pinned to exactly 0 there.
+  // Uniform branch.
+  if (blurMix <= 0.0) {
+    gl_FragColor = toOutputFormat(overClipA(sharp, a));
+    return;
+  }
+
+  vec4 color = vec4(0.0);
+  float totalWeight = 0.0;
+
+  // Directional blur over the composited clones, reading the half-res
+  // intermediate. Weighting each tap by the edge feather drops samples that fall
+  // outside the frame instead of letting the sampler wrap the opposite edge in,
+  // and renormalizing by totalWeight keeps the border from darkening.
+  for (int i = -4; i <= 4; i++) {
+    float fi = float(i);
+    float gm = mu + stepM * fi;
+    float ca = caCross * smoothstep(0.0, e, min(gm, 1.0 - gm));
+    float weight = (1.0 / (1.0 + 2.0 * abs(fi))) * ca;
+    color += texture2D(s_slide, uv + stepUV * fi) * weight;
+    totalWeight += weight;
+  }
+
+  color /= max(totalWeight, 0.001);
+  gl_FragColor = toOutputFormat(overClipA(mix(sharp, color, blurMix), a));
+}
+";

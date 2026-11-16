@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "D05FA5A8-826D-43AD-B3DC-2C3A044F8790",
+  "displayName": "Shake Glitch",
+  "description": "[IG Edits] Video effect name. With \"Shake Glitch\", the creator gets an orange-teal LUT color grade with a rhythmic zoom-shake pulse every second.",
+  "iglu": {
+    "legacyId": 3251
+  },
+  "assets": [
+    {
+      "name": "shake_glitch_lut.png",
+      "assetHash": "b246494cb619cf992265b38c25ed03ba10f6872b931f95f07fd5f5c4d6cde677",
+      "hubAssetId": "1447773207534591"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAH4OhqMXnQ"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b69f12b5",
+      "handle": "AQAIcBfiqfBD",
+      "md5": "9b4b42e22364bd89083da23566db5f87"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GAVb9zLcU4QEqIsDABsJXEv58qo_bhQoAAAD"
+    }
+  }
+}

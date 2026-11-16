@@ -1,0 +1,162 @@
+# IGLUSCRIPTCOLLISION_BYPASS: Intentional replacement of C++ native effect - IGLUScript takes precedence on Android/iOS; C++ filter retained as fallback for direct C++ callers (sample app, server tools).
+
+[Filter VideoChromaBlur]
+# Cubic lens distortion plus a stepped chromatic aberration sweep, centred on a point that drifts
+# across the frame on a perlin lookup.
+#
+# `intensity` sets the strength in both modes. With `useBeats` true the beat envelope scales that
+# strength between `beatFloor` and full.
+#
+# BeatReactiveController writes `useBeats` when a manifest declares beatReactive; otherwise nothing
+# writes it and the false default selects the slider alone.
+
+# Strength between pulses, so the effect stays alive rather than switching off. 0.0 gates it fully
+# on and off.
+f32 beatFloor = 0.15;
+
+# Beat-mode intensity range. Wider than the non-beat one and centred so intensity 0.5 gives the
+# -0.42 and 0.4 the effect was designed around, leaving room either side. `beatProgress` arrives
+# already multiplied by the beat's place in the hierarchy, so only a phrase beat reaches the ends.
+f32 distortionBeatMin = -0.21;
+f32 distortionBeatMax = -0.63;
+f32 aberrationBeatMin = 0.2;
+f32 aberrationBeatMax = 0.6;
+
+[Init]
+fun init(Filter filter) {
+    loadTexture('noiseTex, 'texture://TextEffectsSharedAssets/PerlinNoise);
+
+    filter.parameters = {
+        {intensity = 0.0, min = 0.0, max = 1.0, description = "Distortion and aberration strength"},
+        {beatProgress = 0.0, min = 0.0, max = 1.0, description = "Beat envelope, scales intensity"},
+        {useBeats = false, description = "True while the beat system is driving this effect"},
+    };
+
+    filter.passes = {
+        {
+            name = 'chroma_blur,
+            inputs = {'default, 'noiseTex},
+            uniforms = {
+                distortion = -0.03,
+                aberration = 0.175,
+                aberrationOffset = -1.0,
+                time_sec = 0.0,
+                outputSize = {1080.0, 1920.0},
+            },
+            glslShader = glslChromaBlur,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    boolean useBeats = getParameterBoolean('useBeats);
+
+    # Non-beat ranges match VideoChromaBlurFilter.cpp:31-36.
+    f32 intensity = getParameterFloat('intensity);
+    f32 distortion = mix(-0.03, -0.42, intensity);
+    f32 aberration = mix(0.175, 0.4, intensity);
+    f32 aberrationOffset = mix(-1.0, -0.4, intensity);
+
+    if (useBeats) {
+        # `aberrationOffset` keeps its non-beat range and is not scaled: the shader uses it only as a
+        # multiplier on `aberration`, so it does nothing while `aberration` is near 0.
+        f32 beat = clamp(getParameterFloat('beatProgress), 0.0, 1.0);
+        f32 amp = mix(beatFloor, 1.0, beat);
+
+        distortion = mix(distortionBeatMin, distortionBeatMax, intensity) * amp;
+        aberration = mix(aberrationBeatMin, aberrationBeatMax, intensity) * amp;
+    }
+
+    setShaderUniform('chroma_blur, 'distortion, distortion);
+    setShaderUniform('chroma_blur, 'aberration, aberration);
+    setShaderUniform('chroma_blur, 'aberrationOffset, aberrationOffset);
+
+    # Written every frame: vec2 uniforms do not pick up [Init] defaults, and `time_sec` here is
+    # the host parameter, unrelated to the uniform of that name in VideoShaderUniformsOpenGL.
+    setShaderUniform('chroma_blur, 'time_sec, getParameterFloat('time_sec));
+    setShaderUniform('chroma_blur, 'outputSize, getTextureSize('default));
+}
+
+#### Single pass: distortion + chromatic aberration ####
+# `auxSampler1` is 'noiseTex -- aux inputs bind by their index in `inputs`, not by name.
+
+string glslChromaBlur = "
+    precision highp float;
+
+    varying vec2 sourceTextureCoordinate;
+
+    BaseUniformsOpenGL;
+
+    uniform sampler2D auxSampler1;
+    uniform float time_sec;
+    uniform vec2 outputSize;
+
+    uniform float distortion;
+    uniform float aberration;
+    uniform float aberrationOffset;
+
+    vec2 cubicDistortionUV(vec2 uv, float distortion, vec2 center) {
+        float aspectRatio = outputSize.x / outputSize.y;
+
+        // negate aspect ratio in distortion
+        uv.x = 0.5 + (uv.x - 0.5) * aspectRatio;
+
+        // apply distortion
+        vec2 dir = uv - center;
+        float dist = length(dir);
+        vec2 duv = uv + dir * dist * dist * distortion;
+
+        // reapply aspect ratio negation
+        duv.x = 0.5 + (duv.x - 0.5) / aspectRatio;
+
+        return duv;
+    }
+
+    // Two channels of the noise row, offset so they do not move together.
+    vec2 noiseAt(float t) {
+        float x = texture2D(auxSampler1, vec2(fract(t), 0.0)).r;
+        float y = texture2D(auxSampler1, vec2(fract(t + 0.3), 0.0)).r;
+        return vec2(x, y);
+    }
+
+    void main() {
+        // One sweep of the noise every 5 seconds. Same value as
+        // VideoChromaBlurFilter.cpp:83-84, where vec2(0.5) * noise * 2.0 reduces to the noise.
+        vec2 center = noiseAt(time_sec / 5.0);
+
+        vec2 distortionUV = cubicDistortionUV(sourceTextureCoordinate, distortion, center);
+        vec4 distortionBase = sampleInput(distortionUV);
+
+        vec4 distortionColor = vec4(0., 0., 0., 1.);
+        float offset = aberration * aberrationOffset;
+
+        // Arbitrary number of steps between channels.
+        const float steps = 10.;
+        for (float i = 0.; i < steps; i++) {
+            float currentStep = i / steps;
+
+            // offset aberration to allow convex, concave, or balanced distortion
+            float aberrate = aberration * currentStep;
+
+            vec2 duvRG = cubicDistortionUV(distortionUV, aberrate + offset, center);
+            vec4 rg = sampleInput(duvRG);
+            vec4 r = vec4(rg.r, 0., 0., 1.) * 2.;
+            vec4 g = vec4(0., rg.g, 0., 1.);
+            distortionColor += mix(g, r, currentStep) / steps;
+
+            vec2 duvGB = cubicDistortionUV(distortionUV, -aberrate + offset, center);
+            vec4 gb = sampleInput(duvGB);
+            vec4 g2 = vec4(0., gb.g, 0., 1.);
+            vec4 b = vec4(0., 0., gb.b, 1.) * 2.;
+            distortionColor += mix(b, g2, currentStep) / steps;
+        }
+
+        // The sweep leaves a blue tint; these two terms cancel it.
+        distortionColor.r += distortionBase.r / steps;
+        distortionColor.g += distortionBase.g / steps * 0.5;
+        distortionColor.a = 1.0;
+
+        gl_FragColor = toOutputFormat(distortionColor);
+    }
+";

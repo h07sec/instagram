@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "885986782275200",
+  "displayName": "Seoul",
+  "description": "[IG Edits] Video effect name. With \"Seoul\", the creator can apply a Spark-ported cool, faded film grade.",
+  "iglu": {
+    "legacyId": 3430
+  },
+  "assets": [
+    {
+      "name": "seoul_lut.png",
+      "assetHash": "da89f65943e0de2746bd7af05c4d5a6a4b014953da665650c3d1cc1e5e73be4f",
+      "hubAssetId": "1155222414114514"
+    },
+    {
+      "name": "seoul_noise.png",
+      "assetHash": "970adc8f011be23ae3bb0e27920f973be0e0e6465850dfc22cb000bb16685b8c",
+      "hubAssetId": "3707287252752665"
+    }
+  ]
+}

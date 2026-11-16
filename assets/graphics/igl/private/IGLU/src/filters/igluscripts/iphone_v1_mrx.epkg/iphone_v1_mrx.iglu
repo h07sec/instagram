@@ -1,0 +1,83 @@
+[Filter IphoneV1Mrx]
+
+[Init]
+fun init(Filter filter)
+{
+    makeTexture('iphone_v1_mrx_lut);
+
+    filter.parameters = {
+        {strength = 1.0, min = 0.0, max = 1.0, description = "Mix of the effect over the original image (1.0 = full effect)"},
+        {lut_strength = 1.0, min = 0.0, max = 1.0, description = "LUT mix strength"},
+    };
+
+    filter.passes = {{
+      name = 'pass0,
+      inputs = {'default, 'iphone_v1_mrx_lut},
+      uniforms = {
+        strength = 1.0,
+        lut_strength = 1.0,
+      },
+      glslShader = glslLut,
+    }};
+}
+
+string lut_path = "lut_path";
+string iphone_v1_mrx_lut_path = "iphone_v1_mrx_lut_path";
+string lut_filename = "";
+
+[PreRender]
+fun preRender(Filter filter){
+    f32 effect_strength = getParameterFloat('strength);
+    setShaderUniform('pass0, 'strength, effect_strength);
+
+    # iOS passes the remote LUT under the generic 'lut_path; iphone_v1_mrx_lut_path is for local testing.
+    string lut_filename_parameter = getParameterString(lut_path);
+    if (lut_filename_parameter == "") {
+        lut_filename_parameter = getParameterString(iphone_v1_mrx_lut_path);
+    }
+    if (lut_filename_parameter != "") {
+        string new_lut_filename = stringAppend("textureFilePath://", lut_filename_parameter);
+        if (new_lut_filename != lut_filename) {
+            lut_filename = new_lut_filename;
+            loadTexture('iphone_v1_mrx_lut, lut_filename);
+        }
+    }
+
+    f32 s = getParameterFloat('lut_strength);
+    setShaderUniform('pass0, 'lut_strength, s);
+}
+
+#### GLSL shader ####
+
+string glslLut = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    uniform sampler2D auxSampler0;
+    uniform sampler2D auxSampler1;
+
+    uniform float lut_strength;
+
+    void main() {
+      // Keep the unclamped camera: the LUT input clamp must not leak into the strength mix,
+      // or strength 0 lifts pure black and caps pure white.
+      vec4 src = sampleInput(sourceTextureCoordinate);
+      vec4 texel = vec4(clamp(src.rgb, 0.00781, 0.98438), src.a);
+
+      float x = texel.r / 8.0;
+      float y = texel.g / 8.0;
+      float z = texel.b;
+
+      float blueY = floor(z * 8.0) / 8.0;
+      float blueX = floor((z - blueY) * 64.0) / 8.0;
+
+      x += blueX;
+      y += blueY;
+
+      vec3 color = texture2D(auxSampler1, vec2(x, y)).xyz;
+
+      texel = mix(src, vec4(color, src.a), strength * lut_strength);
+
+      gl_FragColor = toOutputFormat(texel);
+    }
+    ";

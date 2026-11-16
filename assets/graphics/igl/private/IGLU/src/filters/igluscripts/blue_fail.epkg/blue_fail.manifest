@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2372105299656482",
+  "displayName": "Blue fail",
+  "description": "[IG Edits] Video effect name. With \"Blue fail\", the creator can apply a Spark-ported cool colour grade with flickering blue glitch bars.",
+  "iglu": {
+    "legacyId": 3422
+  },
+  "assets": [
+    {
+      "name": "blue_fail_lut.png",
+      "assetHash": "ee8a0a2d67ca4e3e7402986cca6e42f730cb5ba5a0b1ef74ca7f2d8699bcfa26",
+      "hubAssetId": "3101355753529712"
+    },
+    {
+      "name": "blue_fail_glitch.png",
+      "assetHash": "520036d10e6d5eae7bed67d35b0818260937663b8b23a49960b4c51b05c7ec62",
+      "hubAssetId": "1439697958355119"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEHF3FoGXA"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "536a4ae9",
+      "handle": "AQAEJud1l3Qo",
+      "md5": "6ca032805ded35b2d30910a073b182e1"
+    }
+  }
+}

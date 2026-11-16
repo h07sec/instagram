@@ -1,0 +1,245 @@
+[Filter IgluscriptVideoPopupsFilter]
+# Pops up to 8 framed thumbnail copies of the content at scripted positions.
+#
+# On the clock, `progress` drives a frame counter and each layer fades in and out over its own
+# frame window. With `useBeats` true the counter is replaced by `beatStep`: each layer is visible
+# over a range of steps instead, so one pops or disappears per beat.
+
+[Init]
+fun init(Filter filter) {
+  filter.parameters = {
+    {duration = 3.0, min = 0.5, max = 6.0},
+    {beatStep = 0.0, min = 0.0, max = 15.0, description = "Beat step counter"},
+    {useBeats = false, description = "True while the beat system is driving this effect"},
+  };
+
+  filter.passes = {{
+      name = 'popups, inputs = {'default},
+      uniforms = {
+        inputSize = {1080.0, 1920.0},
+        progress = 0.0,
+        startF0 = 4.0,
+        endF0 = 72.0,
+        startF1 = 9.0,
+        endF1 = 29.0,
+        maskScale1 = 0.84,
+        imgScale1 = 0.84,
+        startF2 = 12.0,
+        endF2 = 32.0,
+        maskScale2 = 0.84,
+        imgScale2 = 0.84,
+        startF3 = 14.0,
+        endF3 = 34.0,
+        maskScale3 = 0.84,
+        imgScale3 = 0.84,
+        startF4 = 23.0,
+        endF4 = 35.0,
+        maskScale4 = 0.77,
+        imgScale4 = 1.0,
+        startF5 = 34.0,
+        endF5 = 72.0,
+        maskScale5 = 0.87,
+        imgScale5 = 1.0,
+        startF6 = 39.0,
+        endF6 = 72.0,
+        maskScale6 = 0.7,
+        imgScale6 = 0.6,
+        startF7 = 41.0,
+        endF7 = 72.0,
+        maskScale7 = 0.62,
+        imgScale7 = 0.725,
+        stepIndex = 0.0,
+        beatMode = 0.0,
+      },
+      glslShader = glsl
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progressValue = getParameterFloat('progress);
+  setShaderUniform('popups, 'progress, progressValue);
+
+  # Uniforms are floats, so beat mode is selected with 0.0 / 1.0 rather than a boolean.
+  f32 beatMode = 0.0;
+  f32 stepIndex = 0.0;
+  if (getParameterBoolean('useBeats)) {
+    beatMode = 1.0;
+    stepIndex = getParameterFloat('beatStep);
+  }
+  setShaderUniform('popups, 'beatMode, beatMode);
+  setShaderUniform('popups, 'stepIndex, stepIndex);
+}
+string glsl = "
+
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform vec2 inputSize;
+uniform float stepIndex;
+uniform float beatMode;
+uniform float progress;
+
+const vec2 compRes = vec2(1080.0, 1920.0);
+
+uniform float startF0;
+uniform float endF0;
+const vec2 centerPx0 = vec2(540.0, 960.0);
+
+uniform float startF1;
+uniform float endF1;
+uniform float maskScale1;
+uniform float imgScale1;
+const vec2 centerPx1 = vec2(550.0, 953.0);
+
+uniform float startF2;
+uniform float endF2;
+uniform float maskScale2;
+uniform float imgScale2;
+const vec2 centerPx2 = vec2(510.0, 1040.0);
+
+uniform float startF3;
+uniform float endF3;
+uniform float maskScale3;
+uniform float imgScale3;
+const vec2 centerPx3 = vec2(470.0, 1130.0);
+
+uniform float startF4;
+uniform float endF4;
+uniform float maskScale4;
+uniform float imgScale4;
+const vec2 centerPx4 = vec2(353.0, 776.0);
+
+uniform float startF5;
+uniform float endF5;
+uniform float maskScale5;
+uniform float imgScale5;
+const vec2 centerPx5 = vec2(522.0, 648.0);
+
+uniform float startF6;
+uniform float endF6;
+uniform float maskScale6;
+uniform float imgScale6;
+const vec2 centerPx6 = vec2(380.0, 1230.0);
+
+uniform float startF7;
+uniform float endF7;
+uniform float maskScale7;
+uniform float imgScale7;
+const vec2 centerPx7 = vec2(775.0, 1150.0);
+
+float fadeWindow(float f, float startF, float endF){
+  float inF = smoothstep(startF, startF + 1.0, f);
+  float outF = smoothstep(endF - 1.0, endF, f);
+  return inF * (1.0 - outF);
+}
+
+float squareMask(vec2 uv, vec2 centerUV, float halfSizeUV, vec2 ratio){
+  vec2 d = uv - centerUV;
+  float r = max(abs(d.x) * ratio.x, abs(d.y));
+  return step(r, halfSizeUV);
+}
+
+// Layout math is authored top-origin. On the UP==1 backend (OpenGL)
+// sourceTextureCoordinate is bottom-origin, so flip into the canonical
+// top-origin space. flipUV is its own inverse: call it again to map back to
+// native coords right before sampling.
+vec2 flipUV(vec2 uv){
+  if (UP > 0.0) { uv.y = 1.0 - uv.y; }
+  return uv;
+}
+
+vec4 prepLayer(vec2 centerPx, float mScale){
+  vec2 offsetPx = centerPx - compRes * 0.5;
+  vec2 ctrUV = offsetPx * (inputSize / compRes) + inputSize * 0.5;
+  float halfUV = (mScale * 0.5) * (min(inputSize.x, inputSize.y) / inputSize.y);
+  return vec4((ctrUV / inputSize), halfUV, 0.0);
+}
+
+vec3 doLayer(vec4 prep, float imgScale, float alpha, vec2 offset){
+  if(alpha <= 0.0) return vec3(0.0);
+
+  vec2 ratio = vec2(inputSize.x / inputSize.y, 1.0);
+  float halfUV = prep.z;
+
+  vec2 stc = flipUV(sourceTextureCoordinate);
+
+  vec2 uv = (stc - prep.xy) / imgScale + prep.xy;
+
+  uv.y -= (halfUV / 2.0) + offset.y;
+  uv.x -= offset.x;
+
+  float mask = squareMask(stc, prep.xy, halfUV, ratio);
+  vec3 col = sampleInput(flipUV(uv)).rgb * alpha * mask;
+  return col;
+}
+
+void main() {
+
+  vec2 uv = flipUV(sourceTextureCoordinate);
+  vec2 ratio = vec2(inputSize.x / inputSize.y, 1.0);
+  float frame = progress * 71.0;
+  float s = mod(stepIndex, 16.0);
+
+  vec3 outCol = sampleInput(flipUV(uv)).rgb;
+
+  // Per-layer visibility. On the clock each layer fades over its frame window; on a beat each is
+  // visible over a range of steps instead. Layer 0 is the unmasked backdrop the thumbnails pop
+  // over, so in beat mode it is simply always on: the step windows cycle, and gating it on a step
+  // would drop the backdrop for one beat every time the cycle wrapped.
+  float a0 = mix(fadeWindow(frame, startF0, endF0), 1.0, beatMode);
+  float a1 = mix(fadeWindow(frame, startF1, endF1), step(2.0, s) * (1.0 - step(6.0, s)), beatMode);
+  float a2 = mix(fadeWindow(frame, startF2, endF2), step(3.0, s) * (1.0 - step(7.0, s)), beatMode);
+  float a3 = mix(fadeWindow(frame, startF3, endF3), step(4.0, s) * (1.0 - step(8.0, s)), beatMode);
+  float a4 = mix(fadeWindow(frame, startF4, endF4), step(5.0, s) * (1.0 - step(9.0, s)), beatMode);
+  float a5 = mix(fadeWindow(frame, startF5, endF5), step(10.0, s) * (1.0 - step(13.0, s)), beatMode);
+  float a6 = mix(fadeWindow(frame, startF6, endF6), step(11.0, s) * (1.0 - step(14.0, s)), beatMode);
+  float a7 = mix(fadeWindow(frame, startF7, endF7), step(12.0, s) * (1.0 - step(15.0, s)), beatMode);
+
+  vec4 p0 = prepLayer(centerPx0, 5.0);
+  outCol = mix(outCol, doLayer(p0, 1.5, 1.0, vec2(0.0,-p0.z / 2.0)), a0 );
+
+  vec4 p1 = prepLayer(centerPx1, maskScale1);
+  float m1 = squareMask(uv, p1.xy, p1.z * imgScale1, ratio);
+  outCol = mix(outCol, doLayer(p1, imgScale1, 1.0, vec2(0.0)), a1 * m1 );
+
+  vec4 p2 = prepLayer(centerPx2, maskScale2);
+  float m2 = squareMask(uv, p2.xy, p2.z * imgScale2, ratio);
+  outCol = mix(outCol, doLayer(p2, imgScale2, 1.0, vec2(0.0)), a2 * m2);
+
+  vec4 p3 = prepLayer(centerPx3, maskScale3);
+  float m3 = squareMask(uv, p3.xy, p3.z * imgScale3, ratio);
+  outCol = mix(outCol, doLayer(p3, imgScale3, 1.0, vec2(0.0)), a3 * m3);
+
+  vec4 p4 = prepLayer(centerPx4, maskScale4);
+  float m4 = squareMask(uv, p4.xy, p4.z * imgScale4, ratio);
+  outCol = mix(outCol, doLayer(p4, imgScale4, 1.0, vec2(-0.2, -0.25)), a4 * m4);
+
+  // Layers 5-7 overlap, so their order decides which sits on top. The clock draws 5 last; on a
+  // beat it is drawn first, matching the order the step windows were authored against.
+  vec4 p5 = prepLayer(centerPx5, maskScale5);
+  float m5 = squareMask(uv, p5.xy, p5.z * imgScale5, ratio);
+  vec3 l5 = doLayer(p5, imgScale5, 1.0, vec2(-0.05, -0.3));
+
+  vec4 p6 = prepLayer(centerPx6, maskScale6);
+  float m6 = squareMask(uv, p6.xy, p6.z * imgScale6, ratio);
+  vec3 l6 = doLayer(p6, imgScale6, 1.0, vec2(-0.2, 0.05));
+
+  vec4 p7 = prepLayer(centerPx7, maskScale7);
+  float m7 = squareMask(uv, p7.xy, p7.z * imgScale7, ratio);
+  vec3 l7 = doLayer(p7, imgScale7, 1.0, vec2(0.1, 0.05));
+
+  if (beatMode > 0.5) {
+    outCol = mix(outCol, l5, a5 * m5);
+    outCol = mix(outCol, l6, a6 * m6);
+    outCol = mix(outCol, l7, a7 * m7);
+  } else {
+    outCol = mix(outCol, l6, a6 * m6);
+    outCol = mix(outCol, l7, a7 * m7);
+    outCol = mix(outCol, l5, a5 * m5);
+  }
+
+  vec4 color = vec4(outCol, 1.0);
+  gl_FragColor = toOutputFormat(color);
+}";

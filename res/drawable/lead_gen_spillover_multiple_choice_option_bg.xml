@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <size android:height="48.0dip" android:width="300.0dip" />
+            <solid android:color="?igds_color_text_and_icon_primary" />
+            <corners android:radius="500.0dip" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <size android:height="48.0dip" android:width="300.0dip" />
+            <stroke android:width="1.0dip" android:color="@color/igds_separator" />
+            <solid android:color="@color/context_line_color" />
+            <corners android:radius="500.0dip" />
+        </shape>
+    </item>
+</selector>

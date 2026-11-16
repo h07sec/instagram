@@ -1,0 +1,83 @@
+[Filter TransitionMulticlipBlindsVertical]
+
+# Clip B blinds in vertically (the Blinds In effect) over an untouched clip A.
+#
+# Ported from the Easel web tool's multiclip_blinds_vertical.iglu.
+# Easel eases progress by its [AnimationCurve quarticInOut] tag before the
+# script sees it; the transition host passes linear progress, so the curve is
+# applied in [PreRender] instead.
+#
+# The video_blinds_vertical mask and the over-composite run in one pass that
+# reads both clips.
+
+fun easeInOutQuartic(f32 t) f32 {
+  if (t < 0.5) {
+    return 8.0 * t * t * t * t;
+  }
+  f32 u = t - 1.0;
+  return 1.0 - 8.0 * u * u * u * u;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {amount = 0.0, min = 0.0, max = 1.0, description = "Feather amount"},
+    {direction = 3.0, min = 2.0, max = 3.0, description = "Direction code: 2 = up, 3 = down"},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        threshold = 0.0,
+        amount = 0.0,
+        bandMix = 1.0,
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = easeInOutQuartic(max(getParameterFloat('progress), getParameterFloat('transition_progress)));
+  f32 amount = getParameterFloat('amount);
+  setShaderUniform('composite, 'threshold, p * (1.0 + amount));
+  setShaderUniform('composite, 'amount, amount);
+  setShaderUniform('composite, 'bandMix, getParameterFloat('direction) - 2.0);
+}
+
+string glsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float threshold;
+uniform float amount;
+uniform float bandMix;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 b = texture2D(s_texture1, uv);
+
+  float guvy = max(UP, 0.0) + DOWN * uv.y;
+  float amt = fract(guvy * 10.0);
+  float band = mix(1.0 - amt, amt, bandMix);
+  b.a *= smoothstep(band, band + amount, threshold);
+  b.rgb *= b.a;
+
+  // Clip B is premultiplied by its mask, so it goes over clip A without another
+  // multiply by b.a.
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

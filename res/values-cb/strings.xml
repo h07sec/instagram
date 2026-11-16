@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130002">ویلایەت</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">ناونیشان</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">داخستنی وێبگەڕ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s دەیەوێت شوێنی ئامێرەکەت بەکار بهێنێت.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">ڕێگەپێدان</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">بلۆککردن</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">بەردەوامبوون بۆ ماڵپەڕ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">بگەڕێرەوە</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">کێشەیەک هەیە لەو مۆڵەتی پاراستنەی %1$s بەکاری هێناوە. زانیارییە کەسییەکانت، وەک تێپەڕەوشە و ژمارەی کارتی متمانە، دەکرێت پارێزراو نەبن کاتێک لەگەڵ ئەم ماڵپەڕە هاوبەش دەکرێن.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">ئەم ماڵپەڕە پەیوەندییەکی پارێزراو بەکار ناهێنێت</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">گه‌ڕانه‌وه‌</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">کێشەیەک ڕووی دا</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009e">پشتگوێخستن</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">پەیامی ئەلیکترۆنی</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">ئەو ماڵپەڕەی تۆ سەیری دەکەیت هەوڵ دەدات ئەپێکی دەرەکی بکاتەوە. ئایا دەتەوێت بەردەوام بیت؟</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">بەردەوامبوون</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">تۆ ئەپەکەمان بەجێ دەهێڵیت</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">ڕەنگە هۆکاری ئەمە هەڵەیەکی تەکنیکی بێت کە ئێمە کار بۆ چاککردنی دەکەین. دووبارە ئەم پەڕەیە بار بکەرەوە.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">نوێکردنەوە</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">پەڕەکە لە ئێستادا بەردەست نییە</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">پاشناو</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">پەڕەکە ناتوانرێت بار بکرێت</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">کردنەوە لە %1$s</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">بژاردەی زیاتر</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">ناو</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">ئێستا تۆ پڕ بە شاشە دەیبینیت. بۆ لای چەپ لای بدە یاخود پەنجە بە دوگمەی گەڕانەوەدا بنێ بۆ دەرچوون.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">لە ئێستادا کێشەمان هەیە لە دامەزراندنی %2$s بە %1$s. دەتوانیت دووبارە هەوڵ بدەیتەوە، یان جارێ %2$s بە ئینگلیزی (ئەمریکا) بەکار بهێنە.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">چرکەیەک تا %1$s دادەمەزرێنین...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">هەوڵ بدەرەوە</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">بەردەوامبوون بە زمانی ئینگلیزی (ویلایەتە یەکگرتووەکانی ئەمەریکا)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">زیپکۆد</string>
+</resources>

@@ -1,0 +1,458 @@
+[Filter VideoOoePrismLensFilter]
+
+[Init]
+fun init(Filter filter) {
+
+
+  makeTexture('ooe_lens_caustics);
+
+  filter.parameters = {
+    {opacity = 0.34, min = 0.0, max = 1.0, description = "Opacity of Clones"},
+    {amount = 1.0, min = 0.0, max = 1.0, description = "Copies"},
+    {intensity = 0.8, min = 0.0, max = 1.0, description = "Overlay Intensity"},
+  };
+
+  filter.passes = {{
+    name = 'prismClones,
+    inputs = {'default},
+    scale = {0.25, 0.25},
+    uniforms = {
+      inputSize = {1080.0, 1920.0},
+      prismCopies = 12.0,
+      prismSpread = 1.0,
+      ringStartDir = {0.0, 1.0},
+      ringStepSinCos = {0.0, 1.0},
+      gradientAxis = {0.0, 1.0},
+      chroma = 8.0,
+      hexRadius = 0.3,
+      hexFeather = 0.0,
+    },
+    glslShader = prismClonesGlsl,
+  },
+  {
+    name = 'cloneBlur0,
+    inputs = {'prismClones},
+    scale = {0.25, 0.25},
+    uniforms = {
+      blurOffset = 2.0,
+      outputSize = {1080.0, 1920.0},
+    },
+    glslShader = kawaseGlsl,
+  },
+  {
+    name = 'ortonBlur,
+    inputs = {'default, 'cloneBlur0},
+    # Orton glow is low-frequency and screen-blended at ortonStrength=0.3, so it
+    # tolerates half-resolution rendering. inputSize stays full-res so the blur
+    # REACH in UV is unchanged; only the output pixel count drops to 1/4.
+    scale = {0.125, 0.125},
+    uniforms = {
+      inputSize = {1080.0, 1920.0},
+      cloneOpacity = 1.0,
+    },
+    glslShader = lensBlurGlsl,
+  },
+  {
+    name = 'ortonCompose,
+    # 'cloneBlur0 must come last: listed before 'ortonBlur, the graph renders it twice per frame.
+    inputs = {'default, 'ortonBlur, 'cloneBlur0},
+    uniforms = {
+      cloneOpacity = 1.0,
+      ortonStrength = 1.0,
+      progress = 0.0,
+      glowTexel = {0.00740741, 0.00416667},
+      glowSpread = 1.0,
+    },
+    glslShader = ortonGlsl,
+  },
+  {
+    name = 'chromaFinal,
+    inputs = {'ortonCompose, 'ooe_lens_caustics},
+    uniforms = {
+      intensity = 0.8,
+      outputSize = {1080.0, 1920.0},
+    },
+    glslShader = chromaFinalGlsl,
+  }
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progress = getParameterFloat('progress);
+  f32 time_sec = getParameterFloat('time_sec);
+
+  f32 blurParam = 0.34;
+  f32 chromaParam = 0.1;
+  f32 numCopies = max(1.0, round(getParameterFloat('amount) * 12.0));
+
+  f32 cloneOpacity = getParameterFloat('opacity);
+
+  f32 maskBlurAmount = 10.0 * blurParam;
+  f32 chromaAmount = 20.0 * chromaParam;
+  f32 finalChromaAmount = 0.05 * chromaParam;
+
+  f32 spread = 0.93;
+  f32 outro = 0.0;
+
+  f32 progressDirection = progress;
+  if (outro >= 0.5) {
+    progressDirection = 1.0 - progress;
+  }
+
+  f32 blurT = 1.0 - progressDirection;
+  f32 cubicT = blurT * blurT * blurT;
+
+  f32 animatedSpread = spread * (0.5 + 0.5 * (1.0 - cubicT));
+  f32 animatedChroma = chromaAmount * progressDirection;
+
+  setShaderUniform('prismClones, 'prismCopies, numCopies);
+  setShaderUniform('prismClones, 'prismSpread, animatedSpread);
+
+  f32 hexSize = 0.16;
+  f32 hexFeather = 0.03;
+  setShaderUniform('prismClones, 'chroma, animatedChroma);
+  setShaderUniform('prismClones, 'hexRadius, hexSize);
+  setShaderUniform('prismClones, 'hexFeather, hexFeather);
+
+  f32 ringStartAngle = 0.125 * time_sec;
+  vec2 ringStartDir = {sin(ringStartAngle), cos(ringStartAngle)};
+  f32 ringStepAngle = 6.28318530718 / numCopies;
+  vec2 ringStepSinCos = {sin(ringStepAngle), cos(ringStepAngle)};
+  f32 gradientAngle = 4.16;
+  vec2 gradientAxis = {sin(gradientAngle), cos(gradientAngle)};
+  setShaderUniform('prismClones, 'ringStartDir, ringStartDir);
+  setShaderUniform('prismClones, 'ringStepSinCos, ringStepSinCos);
+  setShaderUniform('prismClones, 'gradientAxis, gradientAxis);
+
+  vec2 sz = getTextureSize('default);
+  setShaderUniform('prismClones, 'inputSize, sz);
+
+  # Clone mask blur. sqrt(2) preserves the two equal passes' per-axis variance.
+  setShaderUniform('cloneBlur0, 'blurOffset, maskBlurAmount * 0.35355);
+  setShaderUniform('cloneBlur0, 'outputSize, sz);
+
+  setShaderUniform('ortonBlur, 'inputSize, sz);
+  setShaderUniform('ortonBlur, 'cloneOpacity, cloneOpacity);
+  setShaderUniform('ortonCompose, 'cloneOpacity, cloneOpacity);
+
+  # 'ortonBlur renders at 0.125 scale, so one bilinear fetch of it in 'ortonCompose
+  # is an 8x upscale. Hand that pass the glow texel size so it can reconstruct with
+  # a wider tap set instead. This cannot reuse inputSize/outputSize: both describe
+  # the full-res 'default input on 'ortonCompose and are auto-overwritten each frame.
+  vec2 glowTexel = {8.0 / max(sz.x, 1.0), 8.0 / max(sz.y, 1.0)};
+  setShaderUniform('ortonCompose, 'glowTexel, glowTexel);
+
+  # Tuning knob: scales the reconstruction footprint in glow texels. 1.0 is the
+  # canonical kernel; raise it for a softer, wider glow.
+  f32 glowSpread = 1.0;
+  setShaderUniform('ortonCompose, 'glowSpread, glowSpread);
+
+  f32 ortonStrength = 0.3;
+  setShaderUniform('ortonCompose, 'ortonStrength, ortonStrength);
+  setShaderUniform('ortonCompose, 'progress, progressDirection);
+
+  setShaderUniform('chromaFinal, 'outputSize, sz);
+
+  f32 intensity = getParameterFloat('intensity);
+  setShaderUniform('chromaFinal, 'intensity, intensity);
+
+}
+
+# ==========================================================================
+# Kawase blur — 5-tap diagonal kernel for clone-mask softening
+# ==========================================================================
+string kawaseGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform float blurOffset;
+uniform vec2 outputSize;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  // At zero offset every tap collapses onto the centre texel, so one fetch is identity.
+  if (blurOffset == 0.0) {
+    gl_FragColor = toOutputFormat(sampleInput(uv));
+    return;
+  }
+
+  vec2 px = 1.0 / max(outputSize, vec2(1.0));
+
+  vec4 color = sampleInput(uv) * 4.0;
+  color += sampleInput(uv + vec2(-blurOffset, -blurOffset) * px);
+  color += sampleInput(uv + vec2( blurOffset, -blurOffset) * px);
+  color += sampleInput(uv + vec2(-blurOffset,  blurOffset) * px);
+  color += sampleInput(uv + vec2( blurOffset,  blurOffset) * px);
+
+  gl_FragColor = toOutputFormat(color / 8.0);
+}
+";
+
+# ==========================================================================
+# Prism clones — renders clone content with premultiplied alpha (no original base)
+# ==========================================================================
+string prismClonesGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 inputSize;
+uniform float prismCopies;
+uniform float prismSpread;
+uniform vec2 ringStartDir;
+uniform vec2 ringStepSinCos;
+uniform vec2 gradientAxis;
+uniform float chroma;
+uniform float hexRadius;
+uniform float hexFeather;
+
+const vec2 prismCenter = vec2(0.5);
+
+vec3 sampleChromaHelper(vec2 uv, vec2 chromaOffset) {
+  vec2 uvOffset = chromaOffset / inputSize;
+
+  if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+    return vec3(0.0);
+  }
+
+  vec2 uvR = clamp(uv - uvOffset, 0.0, 1.0);
+  vec2 uvB = clamp(uv + uvOffset, 0.0, 1.0);
+
+  return vec3(sampleInput(uvR).r,
+  sampleInput(uv).g,
+  sampleInput(uvB).b);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 center = prismCenter;
+
+  vec2 safeInputSize = max(inputSize, vec2(1.0, 1.0));
+  float safeSizeScale = min(safeInputSize.x, safeInputSize.y) / 1080.0;
+
+  if (inputSize.x <= 0.0 || inputSize.y <= 0.0) {
+    gl_FragColor = toOutputFormat(vec4(0.0));
+    return;
+  }
+
+  vec3 result = vec3(0.0);
+  float totalAlpha = 0.0;
+
+  vec2 nextDir = ringStartDir;
+  mat2 stepRotation = mat2(
+    ringStepSinCos.y, -ringStepSinCos.x,
+    ringStepSinCos.x, ringStepSinCos.y);
+
+  for (int i = 0; i < 12; i++) {
+    if (float(i) >= prismCopies) break;
+
+    // Advance before any early exit so the recurrence stays aligned with i.
+    vec2 ringDir = nextDir;
+    nextDir = stepRotation * nextDir;
+
+    // The ring is laid out bottom-origin, as OpenGL frames arrive (UP == 1) and as the
+    // tray preview shows it; mirror it vertically on top-origin backends (Metal, UP == -1).
+    vec2 dir = vec2(ringDir.x, ringDir.y * UP);
+
+    vec2 offUV = dir * prismSpread * 0.5;
+
+    vec2 cloneCenter = center - offUV;
+    vec2 p = (uv - cloneCenter) * vec2(safeInputSize.x / safeInputSize.y, 1.0);
+
+    // The support planes give the exact interior distance used by the feather;
+    // exterior distance magnitude is irrelevant because those copies contribute zero.
+    vec2 hexPoint = abs(p);
+    float d = max(hexPoint.y, dot(hexPoint, vec2(0.866025404, 0.5))) - hexRadius;
+    if (d >= 0.0) {
+      continue;
+    }
+
+    float mask = 1.0 - smoothstep(-hexFeather, 0.0, d);
+    float rawOpacity = (dot(ringDir, gradientAxis) + 1.0) * 0.5;
+    float alpha = rawOpacity * rawOpacity * sqrt(rawOpacity);
+    mask *= alpha;
+
+    // The three chroma taps are only consumed inside this branch, so gating the
+    // fetches on the hexagon mask keeps the result identical while skipping the
+    // sampling entirely for pixels this clone does not cover.
+    if (mask > 0.0) {
+      float subRot = 0.02 * float(i) * prismSpread * UP;
+      float ca = cos(subRot);
+      float sa = sin(subRot);
+      mat2 rot = mat2(ca, -sa, sa, ca);
+
+      vec2 sampUV = rot * (uv - center) + center + offUV;
+      vec2 cOff = dir * chroma * safeSizeScale;
+      vec3 col = sampleChromaHelper(sampUV, cOff);
+
+      result = result * (1.0 - mask) + col * mask;
+      totalAlpha = totalAlpha * (1.0 - mask) + mask;
+    }
+  }
+
+  gl_FragColor = toOutputFormat(vec4(result, totalAlpha));
+}
+";
+
+# ==========================================================================
+# Lens blur — disc sampling with concentric rings for bokeh character
+# ==========================================================================
+string lensBlurGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 inputSize;
+uniform sampler2D auxSampler1;
+uniform float cloneOpacity;
+
+vec4 samplePrismComposite(vec2 uv) {
+  vec3 original = sampleInput(uv).rgb;
+  vec4 clones = texture2D(auxSampler1, uv);
+  float a = clones.a * cloneOpacity;
+  return vec4(original * (1.0 - a) + clones.rgb * cloneOpacity, 1.0);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  // Blur reach is referenced to the full-res source, not this pass's (scaled)
+  // render target, so the glow width is invariant to the pass `scale`.
+  vec2 pixelSize = 1.0 / max(inputSize, vec2(1.0));
+
+  vec4 sum = samplePrismComposite(uv);
+
+  // Six samples on the inner ring at radius 13.6.
+  sum += samplePrismComposite(uv + vec2(13.6, 0.0) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(6.8, 11.7779455) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-6.8, 11.7779455) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-13.6, 0.0) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-6.8, -11.7779455) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(6.8, -11.7779455) * pixelSize);
+
+  // Twelve samples on the outer ring at radius 27.2.
+  sum += samplePrismComposite(uv + vec2(27.2, 0.0) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(23.555891, 13.6) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(13.6, 23.555891) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(0.0, 27.2) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-13.6, 23.555891) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-23.555891, 13.6) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-27.2, 0.0) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-23.555891, -13.6) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(-13.6, -23.555891) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(0.0, -27.2) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(13.6, -23.555891) * pixelSize);
+  sum += samplePrismComposite(uv + vec2(23.555891, -13.6) * pixelSize);
+
+  gl_FragColor = toOutputFormat(sum / 19.0);
+}
+";
+
+# ==========================================================================
+# Final chromatic aberration — radial RGB split increasing from center to edges
+# ==========================================================================
+string chromaFinalGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform sampler2D auxSampler1;
+uniform float intensity;  // 0..2 — follows video_dreamcatcher.iglu convention
+
+void main() {
+  // uniform float chromaAmount;
+  float chromaAmount = 0.05;
+  vec2 uv = sourceTextureCoordinate;
+  float aspect = outputSize.x / outputSize.y;
+  // Radial vector from center, aspect-corrected
+  vec2 dir = uv - 0.5;
+  dir.x *= aspect;
+  float dist = length(dir);
+  // Offset in UV space (normalize direction back to UV)
+  vec2 chromaShift = (uv - 0.5) * chromaAmount * dist;
+  float r = sampleInput(uv + chromaShift).r;
+  float g = sampleInput(uv).g;
+  float b = sampleInput(uv - chromaShift).b;
+  vec3 base = vec3(r, g, b);
+
+  // Screen-blend the caustics overlay on top (matches demo_video_overlay.iglu)
+  vec3 vid = texture2D(auxSampler1, uv).rgb;
+  vec3 result = 1.0 - (1.0 - base) * (1.0 - vid * intensity);
+
+  gl_FragColor = toOutputFormat(vec4(result, 1.0));
+}
+";
+
+# ==========================================================================
+# Orton compose — screen-blend lens-blurred glow onto sharp prism
+# ==========================================================================
+string ortonGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform sampler2D auxSampler2;
+uniform float cloneOpacity;
+uniform float ortonStrength;
+uniform float progress;
+uniform vec2 glowTexel;
+uniform float glowSpread;
+
+vec3 samplePrismComposite(vec2 uv) {
+  vec3 original = sampleInput(uv).rgb;
+  vec4 clones = texture2D(auxSampler2, uv);
+  float a = clones.a * cloneOpacity;
+  return original * (1.0 - a) + clones.rgb * cloneOpacity;
+}
+
+// auxSampler1 holds the 1/8-scale glow, so a single bilinear fetch reconstructs an
+// 8x upscale: piecewise-linear, and its slope breaks at every glow texel boundary,
+// which reads as facets and 8px blocks wherever the glow dominates. These eight
+// taps span two glow texels with a smooth (C1) falloff, removing the creases and
+// widening the glow. All eight read a 1/8-scale target, so they stay cache-resident.
+vec3 sampleGlow(vec2 uv) {
+  vec2 h = glowTexel * 0.5 * glowSpread;
+
+  vec3 sum = texture2D(auxSampler1, uv + vec2(-h.x * 2.0, 0.0)).rgb;
+  sum += texture2D(auxSampler1, uv + vec2(-h.x, h.y)).rgb * 2.0;
+  sum += texture2D(auxSampler1, uv + vec2(0.0, h.y * 2.0)).rgb;
+  sum += texture2D(auxSampler1, uv + vec2(h.x, h.y)).rgb * 2.0;
+  sum += texture2D(auxSampler1, uv + vec2(h.x * 2.0, 0.0)).rgb;
+  sum += texture2D(auxSampler1, uv + vec2(h.x, -h.y)).rgb * 2.0;
+  sum += texture2D(auxSampler1, uv + vec2(0.0, -h.y * 2.0)).rgb;
+  sum += texture2D(auxSampler1, uv + vec2(-h.x, -h.y)).rgb * 2.0;
+
+  return sum / 12.0;
+}
+
+float screenBlend(float base, float blend) {
+  return 1.0 - (1.0 - base) * (1.0 - blend);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  // Pass inputs: {'default, 'ortonBlur, 'cloneBlur0}. 'default remains first
+  // for Metal; auxSampler1 contains the blur and auxSampler2 contains clones.
+  vec3 sharp = samplePrismComposite(uv);
+  vec3 blurred = sampleGlow(uv);
+
+  vec3 glow = vec3(
+    screenBlend(sharp.r, blurred.r),
+    screenBlend(sharp.g, blurred.g),
+    screenBlend(sharp.b, blurred.b)
+  );
+
+  vec3 result = mix(blurred, sharp, progress);
+  result = mix(result, glow, ortonStrength);
+  gl_FragColor = toOutputFormat(vec4(result, 1.0));
+}
+";

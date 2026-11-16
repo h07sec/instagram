@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "670234280765623",
+  "displayName": "Made by Heaven 🤍",
+  "description": "[IG Edits] Color filter name. With \"Made by Heaven\", the creator can apply a Spark-ported sun-warm grade with lifted shadows, cool clean highlights and soft skin.",
+  "iglu": {
+    "legacyId": 3420
+  },
+  "assets": [
+    {
+      "name": "made_by_heaven_lut.png",
+      "assetHash": "d34f88cbe2bda81c5b8886aeeedfd13f313f7d7602056e762da7296c54e056d7",
+      "hubAssetId": "1509381924362593"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEAV6BOZnE"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5bef71d7",
+      "handle": "AQAEE-7da3ko",
+      "md5": "0c62a5d0ae4b23e554a4d4a6ece287d4"
+    }
+  }
+}

@@ -1,0 +1,290 @@
+[Filter BlobIn]
+
+[Init]
+fun init(Filter filter) {
+    loadTexture('noiseTex, 'texture://TextEffectsSharedAssets/PerlinNoise);
+
+filter.parameters = {
+    # Host-space amount is a 0-1 fraction: the Edits iOS Amount slider formats
+    # the value itself as a percentage, not its position within min/max.
+    # Noise scale stays in shader-space (0.1..1.68). The default fraction maps
+    # back to the authored 0.8782 with the runtime's float32 mix().
+    {amount = 0.5, min = 0.0, max = 1.0, description = "Noise scale"},
+    # video_blob_out composes this filter through igid and forwards outro = 1.0,
+    # which runs the shared clock below backwards so the frame conceals instead
+    # of revealing. Both play directions live here so there is one shader to fix.
+    {outro = 0.0, min = 0.0, max = 1.0, description = "0 = In, 1 = Out"},
+};
+
+    filter.passes = {
+        {
+            name = 'pass0,
+            inputs = {'default, 'noiseTex},
+            shaderInputNames = {'default, 'noiseTex},
+            uniforms = {
+                progress = 0.0,
+                noiseScale = 0.8782,
+                outro = 0.0,
+                aspect = 0.5625,
+            },
+            glslShader = glsl,
+        },
+        {
+            name = 'heightDown,
+            inputs = {'pass0},
+            # Quarter-res downsample of the mask alpha. The emboss pass only
+            # needs a smooth height field, and a single bilinear tap here is
+            # a 2x2 tent prefilter, enough for the soft glob mask.
+            scale = {0.25, 0.25},
+            glslShader = downGlsl,
+        },
+        {
+            name = 'heightBlur,
+            inputs = {'heightDown},
+            igid = 'box_blur,
+            # Blurs at quarter-res: 1/16th the pixels. Input and output are
+            # both quarter-res so the child's vertical/horizontal radii match
+            # (see PreRender for the kernel math).
+            scale = {0.25, 0.25},
+            uniforms = {
+                kernel_size = 1.0,
+            },
+        },
+        {
+            name = 'emboss,
+            inputs = {'pass0, 'heightBlur},
+            shaderInputNames = {'pass0, 'tex1},
+            uniforms = {
+                texel = {0.000925, 0.000520},
+                outro = 0.0,
+            },
+            glslShader = embossGlsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    vec2 size = getTextureSize('default);
+    setShaderUniform('pass0, 'aspect, size.x / size.y);
+
+    # Convert host-space amount to shader-space only here; Blob Out forwards
+    # the same fraction, so composed effects must not apply a second remap.
+    # The top end is the old 20% slider point: 0.1 + 0.2 * (8.0 - 0.1) = 1.68.
+    f32 amount = clamp(getParameterFloat('amount), 0.0, 1.0);
+    setShaderUniform('pass0, 'noiseScale, mix(0.1, 1.68, amount));
+
+    # Kernel size is authored against a 1080-referenced frame so a given
+    # value smooths the same amount at any export size, matching how the
+    # gradient below is normalised per texel. heightBlur runs at quarter-res
+    # (see [Init]), where one texel spans four full-res texels, so the count
+    # is divided by 4 to keep the same uv-space footprint.
+    f32 s = min(size.x, size.y) / 1080.0;
+    setShaderUniform('heightBlur, 'kernel_size, 30.0 * s / 4.0);
+
+    vec2 texel = {1.0 / size.x, 1.0 / size.y};
+    setShaderUniform('emboss, 'texel, texel);
+}
+
+# Single-tap quarter-res downsample for the mask alpha. The render target is
+# quarter-res, so the bilinear fetch itself is a 2x2 tent prefilter; the
+# emboss pass only needs a smooth low-frequency height field, which survives
+# this. Alpha-preserving copy: rgb passes through for the refraction fetch.
+string downGlsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+    void main() {
+        vec4 c = sampleInput(sourceTextureCoordinate);
+        gl_FragColor = toOutputFormat(c);
+    }
+";
+
+string glsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D noiseTex;
+    uniform float progress;
+    uniform float noiseScale;
+    uniform float outro;
+    uniform float aspect;
+
+    // perlin_noise.png only occupies part of the 0-1 range, so stretch it back
+    // out. Without this the mask would sit idle until the clock passed the
+    // noise minimum and finish early at its maximum, wasting the duration.
+    #define NOISE_MIN 0.19
+    #define NOISE_MAX 0.79
+
+    #define SOFTNESS 0.4027
+    #define OFFSET_Y 0.08
+    #define OFFSET_DURATION 0.35
+    #define REVEAL_DURATION 0.8
+    #define START_SCALE 1.06
+
+    // Normalise the shared clock against one term's duration, so a term with a
+    // duration below 1.0 lands early and holds instead of running the whole
+    // transition.
+    float phase(float p, float d) {
+        return clamp(p / max(d, 0.001), 0.0, 1.0);
+    }
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+
+        // Every progress-driven term in this filter reads the same outro-aware
+        // clock, then normalises it against its own duration so each one
+        // can land at a different point without desyncing from the play
+        // direction.
+        float p = mix(progress, 1.0 - progress, outro);
+
+        // Settle the media down into place over the first OFFSET_DURATION of that
+        // clock. Cubic ease-out so it moves fast then decelerates in, rather
+        // than arriving at a constant speed and stopping dead.
+        float t = phase(p, OFFSET_DURATION);
+        float eased = 1.0 - pow(1.0 - t, 3.0);
+        float yOff = OFFSET_Y * (1.0 - eased);
+
+        // Scale shares the same eased timeline so the zoom and the slide land
+        // together. Dividing the centred uv magnifies the image, so START_SCALE
+        // above 1.0 starts too big and resolves back to native.
+        float scale = mix(START_SCALE, 1.0, eased);
+
+        // Only the media moves. The noise is read at the unshifted uv so the
+        // gel pattern stays anchored to the frame instead of travelling with
+        // the content.
+        vec2 muv = (uv - 0.5) / max(scale, 0.001) + 0.5 + vec2(0.0, yOff);
+        vec4 color = sampleInput(muv);
+
+        // Aspect-correct so globs stay round, and scale about the centre so the
+        // slider zooms into the middle of the frame. perlin_noise.png tiles
+        // seamlessly, so fract() repeats it without a visible seam.
+        vec2 nuv = fract((uv - 0.5) * vec2(aspect, 1.0) * noiseScale + 0.5);
+        float n = clamp((texture2D(noiseTex, nuv).r - NOISE_MIN) / (NOISE_MAX - NOISE_MIN), 0.0, 1.0);
+
+        // Pad the ramp by the smoothstep width so pr = 0 passes nothing and
+        // pr = 1 passes everything, whatever the softness.
+        float pr = phase(p, REVEAL_DURATION);
+        float e = max(SOFTNESS, 0.001);
+        float mask = smoothstep(n, n + e, pr * (1.0 + e));
+
+        color.a = color.a * mask;
+        gl_FragColor = toOutputFormat(color);
+    }
+";
+
+string embossGlsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D tex1;
+    uniform vec2 texel;
+    uniform float progress;
+    uniform float outro;
+
+    // How steeply the alpha ramp is read as a height field. Fixed so the bevel
+    // shape stays consistent and EMBOSS_STRENGTH is a clean linear dial.
+    #define SLOPE_GAIN 0.08
+
+    #define ALPHA_CUT 0.3913
+    #define EMBOSS_STRENGTH 0.5
+    #define LIGHT_ANGLE 50.87
+    #define BEVEL_WIDTH 1.0
+    #define SHADE_SOFTNESS 0.02
+    #define EDGE_SMOOTH 0.2
+    #define RIM_SOFTNESS 0.03
+    #define EMBOSS_FADE_START 0.3
+    #define EMBOSS_FADE_END 0.7
+    #define REFRACT_FADE_END 0.6
+    #define BRIGHTNESS_BOOST 0.22
+    #define BRIGHTNESS_FADE_START 0.6
+    #define COLOR_DURATION 0.8
+    #define REFRACT_STRENGTH -0.8
+
+    // Ramp 1 -> 0 across [start, end]. Clamping start below 1.0 and forcing end
+    // above it keeps a value dragged past its partner from inverting the ramp.
+    float retire(float p, float start, float end) {
+        float s = min(start, 0.999);
+        return 1.0 - smoothstep(s, max(end, s + 0.001), p);
+    }
+
+    // Normalise the shared clock against one term's duration, matching pass0.
+    float phase(float p, float d) {
+        return clamp(p / max(d, 0.001), 0.0, 1.0);
+    }
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+
+        // Retire the bevel over the tail of the clock so the frame lands on
+        // untouched base media. Keyed off the same outro-aware value pass0
+        // uses, so a reversed play (outro = 1) fades at progress = 0 instead.
+        // Lighting and refraction share the start but get their own finish, so
+        // the displacement can outlast the highlight or vice versa.
+        float p = mix(progress, 1.0 - progress, outro);
+        float fade = retire(p, EMBOSS_FADE_START, EMBOSS_FADE_END);
+        float refractFade = retire(p, EMBOSS_FADE_START, REFRACT_FADE_END);
+
+        // Central-difference gradient of the mask alpha, divided by the sample
+        // spread so it is alpha-per-uv and the bevel looks the same at any
+        // output resolution rather than thinning out as the frame gets bigger.
+        // Taps come from tex1 (the blurred height field): bilinear magnification
+        // of the noise makes the crisp alpha piecewise linear, so differentiating
+        // it directly gives a faceted, banded bevel.
+        vec2 d = texel * max(BEVEL_WIDTH, 1.0);
+        float aL = texture2D(tex1, uv - vec2(d.x, 0.0)).a;
+        float aR = texture2D(tex1, uv + vec2(d.x, 0.0)).a;
+        float aD = texture2D(tex1, uv - vec2(0.0, d.y)).a;
+        float aU = texture2D(tex1, uv + vec2(0.0, d.y)).a;
+        vec2 grad = vec2(aR - aL, aU - aD) * 0.5 / d;
+
+        // Refract the base media through the bevel: to first order a thin lens
+        // just offsets the lookup along the surface gradient, so the vector
+        // already computed for lighting doubles as the displacement.
+        // pass0 keeps the full unmasked media in rgb and carries the reveal only
+        // in alpha, so a displaced fetch can never pull in empty pixels. Alpha
+        // is still read at the undisplaced uv, leaving the rim contour intact.
+        vec2 refrUv = uv - grad * REFRACT_STRENGTH * texel * refractFade;
+        vec4 color = vec4(sampleInput(refrUv).rgb, sampleInput(uv).a);
+
+        // Lift the media then resolve back to native exposure by p = 1, so the
+        // frame always lands on unmodified brightness however early the decay
+        // starts. Multiplicative rather than additive so it reads as exposure
+        // and leaves true black alone instead of greying it up.
+        float bright = retire(p, BRIGHTNESS_FADE_START, 1.0);
+        color.rgb = color.rgb * (1.0 + BRIGHTNESS_BOOST * bright);
+
+        // Treat the soft glob edge as a slope and light it. Negating the
+        // gradient is the usual height-field normal: the surface tilts away
+        // from where the alpha is rising.
+        vec3 nrm = normalize(vec3(-grad * SLOPE_GAIN, 1.0));
+        float rad = radians(LIGHT_ANGLE);
+        vec3 lightDir = normalize(vec3(cos(rad), sin(rad), 0.6));
+
+        // Subtracting the flat-surface response keeps the glob interiors
+        // untouched, so only the sloped rim picks up highlight and shadow.
+        float shade = dot(nrm, lightDir) - lightDir.z;
+
+        // Roll the lighting response off asymptotically instead of letting the
+        // clamp below cut it, which otherwise reads as a hard terminator.
+        shade = shade / (1.0 + SHADE_SOFTNESS * 4.0 * abs(shade));
+
+        color.rgb = clamp(color.rgb + shade * EMBOSS_STRENGTH * fade, 0.0, 1.0);
+
+        float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        float pc = phase(p, COLOR_DURATION);
+        color.rgb = mix(vec3(gray, gray, gray), color.rgb, pc);
+
+        // Everything below ALPHA_CUT is forced to a true 0, so the gel gets a
+        // defined rim instead of a long feathered tail. Remapping to 1.0 keeps
+        // fully opaque pixels opaque, so the mask still resolves fully.
+        float a = mix(color.a, texture2D(tex1, uv).a, EDGE_SMOOTH);
+        color.a = smoothstep(ALPHA_CUT, ALPHA_CUT + RIM_SOFTNESS, a);
+
+        // The passes above carry the reveal in alpha while rgb stays the full
+        // unmasked media, so the refraction fetch can never pull in empty
+        // pixels. The runtime composites premultiplied, so fold alpha into rgb
+        // here, after the bevel lighting, so highlights vanish with the glob
+        // instead of glowing in cleared regions.
+        color.rgb = color.rgb * color.a;
+        gl_FragColor = toOutputFormat(color);
+    }
+";

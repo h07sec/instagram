@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "345001A4-43F6-49B0-816C-5F3E57423BC9",
+  "displayName": "DAZZ CAM",
+  "description": "[IG Edits] Color filter name. With \"DAZZ CAM\", the creator gets a vivid dusk-toned film camera LUT color grade with skin smoothing and fine dark grain applied to the camera image.",
+  "iglu": {
+    "legacyId": 3287
+  },
+  "assets": [
+    {
+      "name": "dazz_cam_lut.png",
+      "assetHash": "9abecfcd3cd3e22620eb6456fa42134c43238936b79d92c08aaddef7fec2f93a",
+      "hubAssetId": "3631819850329385"
+    },
+    {
+      "name": "dazz_cam_date.png",
+      "assetHash": "dbfed42ad6962b267334616a432172693565e0f254ac56b93baf4a2ab67085ca",
+      "hubAssetId": "1782637256302218"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGsGWmvOxB"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "9475008c",
+      "handle": "AQALyCQJKZEt",
+      "md5": "511f48e5bbbf2af68732c7d6e21e22d9"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GCR9fDOOxlRntSQIAHh-jLeY240TbhQoAAAD"
+    }
+  }
+}

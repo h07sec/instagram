@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "370D9D54-1FB8-4AE9-A6B8-204747A8CC5B",
+  "displayName": "𝗛𝘂𝗷𝗶 ™",
+  "description": "[IG Edits] Color filter name. With \"𝗛𝘂𝗷𝗶 ™\", the creator gets a retro disposable-camera LUT color grade with warm light leaks, a printed date stamp and skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3291
+  },
+  "assets": [
+    {
+      "name": "huji_lut.png",
+      "assetHash": "6f1d386511ff4218ff7112a12c524be58a57e0a891a751ef0987f14f69519d80",
+      "hubAssetId": "1606534160464822"
+    },
+    {
+      "name": "huji_leak1.png",
+      "assetHash": "30966ceb531a97bc084aa182cfb4ccd4d0886122153e7902774471b4991bd221",
+      "hubAssetId": "1595384229273001"
+    },
+    {
+      "name": "huji_leak2.png",
+      "assetHash": "094f874ec798b4a87b3190425b4bf048c8fba5d63cbd366f9a2c5cbd9059763b",
+      "hubAssetId": "4272684222876040"
+    },
+    {
+      "name": "huji_date.png",
+      "assetHash": "c090719b3e30b2e6bfdb6a2c399c3280eac695950e60dbc2377499c490e745a2",
+      "hubAssetId": "3617653351724296"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGavd3EGaG"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ce17f1e9",
+      "handle": "AQAFGHXQE42u",
+      "md5": "277aec3414abf6785a8d19a0f399e236"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GABNlTPVDetKKXQGAPJAitvJjA58bhQoAAAD"
+    }
+  }
+}

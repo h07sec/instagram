@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "930687388439111",
+  "displayName": "8K Ultra HD",
+  "description": "[IG Edits] Color filter name. With \"8K Ultra HD\", the creator can apply a Spark-ported crisp, warm, high-saturation grade with light sharpening and soft skin smoothing.",
+  "iglu": {
+    "legacyId": 3415
+  },
+  "assets": [
+    {
+      "name": "8k_ultra_hd_lut.png",
+      "assetHash": "1ce44b3e290927641389ee29a10e1e553aae8327d7698050340dc86dbc38f39f",
+      "hubAssetId": "1597431408800605"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFF7TofedU"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "cb80f024",
+      "handle": "AQAF3s_P2cBO",
+      "md5": "ff71359439fe76fb4fdd9c60ac6c5d6c"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1545871872231684",
+  "displayName": "Neon Rainbow",
+  "description": "[IG Edits] Color preset filter name. Applies a neon rainbow overlay with skin smoothing.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAE29pa9DdL"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "706c24e9",
+      "handle": "AQAGkz3NPZbu",
+      "md5": "e568668ae8003c96ee0bbda348adf0e6"
+    }
+  },
+  "iglu": {
+    "legacyId": 3183
+  },
+  "assets": [
+    {
+      "name": "neon_rainbow_overlay.png",
+      "assetHash": "9f60dd75beecb16a4e25ee006127aefe59cf3d0f6100d9728efd2ba18c96823b",
+      "hubAssetId": "1036163265672298"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GE5Z2DFIQBscOu8IAK9PMOUDkp1VbhQoAAAD"
+    }
+  }
+}

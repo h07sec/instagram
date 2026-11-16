@@ -1,0 +1,34 @@
+[Filter BlobOut]
+
+# Outro half of the blob pair. video_blob_in owns the shaders and already reads
+# an outro-aware clock, so this filter just runs it with outro = 1.0 rather than
+# carrying a second copy of the same 240 lines.
+
+[Init]
+fun init(Filter filter) {
+    filter.passes = {{
+        name = 'blobOut,
+        igid = 'video_blob_in,
+        inputs = {'default},
+        uniforms = {
+            outro = 1.0,
+        },
+    }};
+
+    filter.parameters = {
+        {progress = 0.0, min = 0.0, max = 1.0, description = "Animation Progress"},
+        # Same host-space fraction as Blob In and both base/overlay manifests.
+        # Forward unchanged: the child owns the only shader-space remap.
+        {amount = 0.5, min = 0.0, max = 1.0, description = "Noise scale"},
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    # A nested filter reads its parameters from the composing pass's uniform map,
+    # not from its own [Init] defaults, so every value video_blob_in looks up has
+    # to be forwarded here or it reads back as zero.
+    setShaderUniform('blobOut, 'progress, getParameterFloat('progress));
+    setShaderUniform('blobOut, 'amount, getParameterFloat('amount));
+    setShaderUniform('blobOut, 'outro, 1.0);
+}

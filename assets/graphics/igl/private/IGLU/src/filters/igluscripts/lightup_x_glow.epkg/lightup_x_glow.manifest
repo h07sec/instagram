@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "863981561258875",
+  "displayName": "LIGHTUP x GLOW",
+  "description": "[IG Edits] Color filter name. With \"LIGHTUP x GLOW\", the creator can apply a Spark-ported bright, hazy pastel colour grade.",
+  "iglu": {
+    "legacyId": 3432
+  },
+  "assets": [
+    {
+      "name": "lightup_x_glow_lut.png",
+      "assetHash": "2bbc08a6c9aab0dc28a56e17f54ed6812852d92d7c0a7d3253796ae688d26f37",
+      "hubAssetId": "4676132902707024"
+    }
+  ]
+}

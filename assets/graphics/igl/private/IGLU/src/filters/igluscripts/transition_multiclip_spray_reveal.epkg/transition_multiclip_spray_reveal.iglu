@@ -1,0 +1,203 @@
+[Filter TransitionMulticlipSprayReveal]
+
+# Clip B sprays in from the top over clip A, which blurs out underneath it.
+#
+# Ported from the Easel web tool's multiclip_spray_reveal.iglu. Easel nests its
+# transition_spray_in effect for clip B; that effect is not in this repo, so its
+# compose math is inlined into the composite pass below. Easel runs it with a
+# zero blur radius and keeps only its spray mask, so its two blur passes reduce
+# to the single quarter-res copy of clip B, 'bQuarter.
+#
+# Easel eases progress by its [AnimationCurve quadraticOut] tag before the
+# script sees it; the transition host passes linear progress, so the curve is
+# applied in [PreRender] instead.
+
+fun easeOutQuadratic(f32 t) f32 {
+  return t * (2.0 - t);
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {blurSize = 6.0, min = 0.0, max = 20.0, description = "blurSize"},
+    {revealSmoothness = 0.25, min = 0.001, max = 1.0, description = "revealSmoothness"},
+    {blendWindow = 0.1, min = 0.001, max = 1.0, description = "blendWindow"},
+  };
+
+  filter.passes = {
+    {
+      name = 'bQuarter,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      scale = {0.25, 0.25},
+      glslShader = copyGlsl,
+    },
+    {
+      name = 'aBlurH,
+      inputs = {'default},
+      scale = {0.25, 0.25},
+      uniforms = {
+        blurSize = 0.0,
+        texelSize = {0.00208, 0.0037},
+      },
+      glslShader = blurHGlsl,
+    },
+    {
+      name = 'aBlurV,
+      inputs = {'aBlurH},
+      scale = {0.25, 0.25},
+      uniforms = {
+        blurSize = 0.0,
+        texelSize = {0.00208, 0.0037},
+      },
+      glslShader = blurVGlsl,
+    },
+    {
+      name = 'composite,
+      inputs = {'default, 'transition, 'bQuarter, 'aBlurV},
+      shaderInputNames = {'default, 's_texture1, 's_texture2, 's_texture3},
+      uniforms = {
+        blend = 0.0,
+        toBlur = 0.0,
+        revealSmoothness = 0.25,
+        revealThreshold = 0.0,
+        outputSize = {1080.0, 1920.0},
+      },
+      glslShader = compositeGlsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = easeOutQuadratic(max(getParameterFloat('progress), getParameterFloat('transition_progress)));
+
+  # Quarter-res blur texel, so the radius reads the same at any output size.
+  vec2 size = getTextureSize('default);
+  vec2 blurTexel = {4.0 / size.x, 4.0 / size.y};
+  setShaderUniform('aBlurH, 'texelSize, blurTexel);
+  setShaderUniform('aBlurV, 'texelSize, blurTexel);
+
+  f32 aBlur = getParameterFloat('blurSize) * p;
+  setShaderUniform('aBlurH, 'blurSize, aBlur);
+  setShaderUniform('aBlurV, 'blurSize, aBlur);
+
+  # Over the last blendWindow clip B's mask swaps to the sharp frame, and over
+  # the first one clip A dithers over to its blur.
+  f32 w = max(getParameterFloat('blendWindow), 0.0001);
+  f32 s = max(getParameterFloat('revealSmoothness), 0.001);
+  setShaderUniform('composite, 'blend, clamp((p - (1.0 - w)) / w, 0.0, 1.0));
+  setShaderUniform('composite, 'toBlur, clamp(p / w, 0.0, 1.0));
+  setShaderUniform('composite, 'revealSmoothness, s);
+  setShaderUniform('composite, 'revealThreshold, p * (1.0 + s));
+  setShaderUniform('composite, 'outputSize, size);
+}
+
+string copyGlsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+
+void main() {
+  gl_FragColor = toOutputFormat(texture2D(s_texture1, sourceTextureCoordinate));
+}
+";
+
+string blurHGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform float blurSize;
+uniform vec2 texelSize;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 stepUV = vec2(texelSize.x * blurSize, 0.0);
+  vec4 sum = sampleInput(uv) * 0.1633;
+  sum += (sampleInput(uv - stepUV) + sampleInput(uv + stepUV)) * 0.1531;
+  sum += (sampleInput(uv - 2.0 * stepUV) + sampleInput(uv + 2.0 * stepUV)) * 0.12245;
+  sum += (sampleInput(uv - 3.0 * stepUV) + sampleInput(uv + 3.0 * stepUV)) * 0.0918;
+  sum += (sampleInput(uv - 4.0 * stepUV) + sampleInput(uv + 4.0 * stepUV)) * 0.051;
+  gl_FragColor = toOutputFormat(sum);
+}
+";
+
+string blurVGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform float blurSize;
+uniform vec2 texelSize;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 stepUV = vec2(0.0, texelSize.y * blurSize);
+  vec4 sum = sampleInput(uv) * 0.1633;
+  sum += (sampleInput(uv - stepUV) + sampleInput(uv + stepUV)) * 0.1531;
+  sum += (sampleInput(uv - 2.0 * stepUV) + sampleInput(uv + 2.0 * stepUV)) * 0.12245;
+  sum += (sampleInput(uv - 3.0 * stepUV) + sampleInput(uv + 3.0 * stepUV)) * 0.0918;
+  sum += (sampleInput(uv - 4.0 * stepUV) + sampleInput(uv + 4.0 * stepUV)) * 0.051;
+  gl_FragColor = toOutputFormat(sum);
+}
+";
+
+string compositeGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform sampler2D s_texture2;
+uniform sampler2D s_texture3;
+uniform float blend;
+uniform float toBlur;
+uniform float revealSmoothness;
+uniform float revealThreshold;
+uniform vec2 outputSize;
+
+float hash12(vec2 p) {
+  vec3 p3 = fract(vec3(p.x, p.y, p.x) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  // hash12 needs pixel-scale input; on 0-1 UVs it degenerates into visible bands.
+  vec2 pixel = floor(uv * outputSize);
+  // Squeezed into an open range so every threshold stays inside (0, 1).
+  float d = hash12(pixel) * 0.998 + 0.001;
+
+  // Clip B spray mask. The quarter-res copy arrives upscaled with a soft alpha
+  // edge; dithering it against full-res noise turns that ramp into single-pixel
+  // spray. Over the last blendWindow the mask swaps to the sharp frame and eases
+  // back to the true alpha so the final frame keeps the clip's own edges.
+  vec4 bSharp = texture2D(s_texture1, uv);
+  float imgA = mix(texture2D(s_texture2, uv).a, bSharp.a, step(d, blend));
+
+  // Distance from the top edge on every backend, so the wipe always runs down.
+  float depth = max(UP, 0.0) + DOWN * uv.y;
+  float revealed = smoothstep(depth, depth + revealSmoothness, revealThreshold);
+  float softA = imgA * revealed;
+  float da = hash12(pixel + 53.0) * 0.998 + 0.001;
+  vec4 b = vec4(bSharp.rgb, mix(step(da, softA), softA, blend));
+
+  // The blur chain is quarter-res even at radius 0, so clip A starts on the
+  // sharp frame and dithers over to the blur across the first blendWindow.
+  vec4 a = mix(sampleInput(uv), texture2D(s_texture3, uv), step(d, toBlur));
+
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb * b.a + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

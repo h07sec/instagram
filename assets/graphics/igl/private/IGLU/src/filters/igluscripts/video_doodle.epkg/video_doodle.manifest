@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2151ef84-1ca8-4880-8a0a-6b083dc81a25",
+  "displayName": "Doodle",
+  "description": "[IG Edits] Video effect name. With \"Doodle\", the creator can draw the subject in or out with a hand-drawn brush stroke that leaves a glowing edge.",
+  "iglu": {
+    "legacyId": 4001,
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 3000,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 3.0,
+        "min": 0.5,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "name": "brushTex.png",
+      "assetHash": "fc02e18c4b89e56365e6fba75dee5b9bf6e6795465bd55811ae416852e465b78",
+      "hubAssetId": "2104621856813108"
+    }
+  ]
+}

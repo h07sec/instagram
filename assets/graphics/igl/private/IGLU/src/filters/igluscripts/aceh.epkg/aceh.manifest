@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "C50F50B1-116D-4E3F-BB2A-05A46ABA040B",
+  "displayName": "Aceh🌺",
+  "description": "[IG Edits] Color filter name. With \"Aceh🌺\", the creator gets a bright, soft pink LUT color grade with strong skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3280
+  },
+  "assets": [
+    {
+      "name": "aceh_lut.png",
+      "assetHash": "84713a068455333c52525dd936794b36d38e581183cec34627f24201b80f3abe",
+      "hubAssetId": "1114048214810317"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGbNbyEAkN"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e574dc52",
+      "handle": "AQADG2krtla7",
+      "md5": "389faab4ed40edf6d5ba535caec40f8c"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNhXVTOQFa58MhAFAMjHlUhQuNNCbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "E3CA7C43-203C-4427-BD4F-A394D94796A8",
+  "displayName": "Jack",
+  "description": "[IG Edits] Video effect name. With \"Jack\", the creator gets a black and white picture-in-picture: the full camera image in a centred frame over a zoomed, faded background.",
+  "iglu": {
+    "legacyId": 3238
+  },
+  "assets": [
+    {
+      "name": "jack_lut.png",
+      "assetHash": "ce8e00b9607ac94174ae36bd2ef64819139bb16935299e3ff22711389878d36b",
+      "hubAssetId": "1467066675519057"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFU8Ux9MDv"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c0400266",
+      "handle": "AQAGm3YEkxi4",
+      "md5": "d2fbe2fd7d99f16e9dc284ab7489dc7b"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GKsz3DIOhoSsCj0HAJz__C0UqOA_bhQoAAAD"
+    }
+  }
+}

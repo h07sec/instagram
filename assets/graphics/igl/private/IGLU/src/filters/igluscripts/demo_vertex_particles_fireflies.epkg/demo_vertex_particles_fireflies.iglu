@@ -1,0 +1,360 @@
+[Filter DemoVertexParticlesFireflies]
+
+# Vertex-stage particle system whose particles are lit by the frame they sit on.
+#
+# Ported from the Easel web tool's FireflyTransition (src/passes/particles/
+# FireflyParticlePassInfo.ts). This sample is the single-clip half of it: the
+# swarm ignites, flies off and fades, on a loop. The two-clip cut lives in
+# transition_fireflies.iglu.
+#
+# The load-bearing idea is vertex texture fetch. Particles are laid out on a
+# cols x rows grid in UV space rather than spawned from a point, and each one
+# samples the frame at its own home UV, so at rest the swarm blankets the image
+# one-to-one and reads as the image itself rather than as sparkles sitting on
+# top of it. Sizing each quad to its cell is what keeps that true.
+#
+# Why the srcRgba copy pass: the vertex stage samples a texture directly, with
+# none of the fragment stage's format-convert machinery. A YUV camera input
+# leaves the 's_texture' slot inactive and would sample black, so the frame is
+# first copied through a fragment pass - whose output is always RGBA - and the
+# vertex shader samples that. It runs at quarter res, still far above the
+# 72x128 grid the particles actually read.
+#
+# Simulation is stateless: position is a closed-form function of (id, progress,
+# time), so there are no feedback buffers and scrubbing is deterministic.
+#
+# Runs on OpenGL and Metal; shaderc cross-compiles the vertex stage to a Metal
+# vertex entry point.
+
+[Init]
+fun init(Filter filter)
+{
+    filter.parameters = {
+        {amount = 1.0, min = 0.0, max = 1.0, description = "Particle layer opacity"},
+        {duration = 4.0, min = 0.5, max = 20.0, description = "Seconds per loop"},
+        {u_seed = 3.0, min = 0.0, max = 100.0, description = "Scatter seed"},
+        {u_sizeScale = 4.0, min = 0.2, max = 8.0, description = "Particle size, in grid cells"},
+        {u_glow = 0.8, min = 0.0, max = 4.0, description = "Brightness once lit"},
+        {u_flicker = 0.45, min = 0.0, max = 1.0, description = "Blink depth"},
+        {u_flySpeed = 0.9, min = 0.0, max = 3.0, description = "Distance travelled, in NDC"},
+    };
+
+    filter.passes = {
+      {
+        name = 'srcRgba,
+        inputs = {'default},
+        scale = {0.25, 0.25},
+        uniforms = { unused = 0.0 },
+        glslShader = fsCopy,
+      },
+      {
+        name = 'particles,
+        inputs = {'default, 'srcRgba},
+        shaderInputNames = {'default, 's_srcRgba},
+        geometry = {type = 'quads, count = 9216.0},
+        blendMode = 'premultiplied,
+        bufferType = 'float16,
+        clearBeforeDraw = true,
+        uniforms = {
+          u_progress = 0.0,
+          u_time = 0.0,
+          u_aspect = 1.0,
+          u_seed = 3.0,
+          u_cols = 72.0,
+          u_rows = 128.0,
+          u_jitter = 0.7,
+          u_sizeScale = 4.0,
+          u_lumaBias = 0.6,
+          u_restGlow = 0.5,
+          u_igniteSpread = 0.25,
+          u_burstAt = 0.28,
+          u_burstWidth = 0.6,
+          u_burstGrow = 1.4,
+          u_flyStart = 0.17,
+          u_flyStagger = 0.3,
+          u_flySpeed = 0.9,
+          u_decel = 3.0,
+          u_rise = 1.2,
+          u_burstPush = 1.5,
+          u_wander = 0.05,
+          u_wanderSpeed = 3.0,
+          u_flicker = 0.45,
+          u_flickerRamp = 1.0,
+          u_flickerSpeed = 20.0,
+          u_glow = 0.8,
+          u_tintColor = {0.7, 0.7, 0.7, 1.0},
+          u_tintAmount = 0.35,
+          u_softness = 0.17,
+          u_haloGain = 0.55,
+        },
+        glslVertexShader = vsFireflies,
+        glslShader = fsFireflies,
+      },
+      {
+        name = 'composite,
+        inputs = {'default, 'particles},
+        shaderInputNames = {'default, 's_particles},
+        uniforms = { amount = 1.0 },
+        glslShader = fsComposite,
+      },
+    };
+}
+
+# The grid is baked into the vertex buffer, so cols/rows are pushed from here
+# rather than exposed as parameters. 72x128 matches a 9:16 frame, which is what
+# makes the cells square, so a u_sizeScale of 1.0 covers exactly one cell before
+# the burst envelope scales it up.
+f32 kCols = 72.0;
+f32 kRows = 128.0;
+
+[PreRender]
+fun preRender(Filter filter){
+    # Host-driven time, so the flight is a function of the frame being rendered
+    # rather than of how long the process has been up. getLocalTime() is
+    # wall-clock since runtime start, which an offscreen render joins several
+    # seconds in, catching only the tail of the loop.
+    f32 time = getParameterFloat('time_sec);
+    setShaderUniform('particles, 'u_time, time);
+
+    # Standalone demo, so progress is looped here. The transition takes it from
+    # the host instead.
+    f32 duration = getParameterFloat('duration);
+    f32 progress = fract(time / duration);
+    setShaderUniform('particles, 'u_progress, progress);
+
+    vec2 size = getTextureSize('default);
+    setShaderUniform('particles, 'u_aspect, size.x / size.y);
+
+    setShaderUniform('particles, 'u_cols, kCols);
+    setShaderUniform('particles, 'u_rows, kRows);
+
+    setShaderUniform('particles, 'u_seed, getParameterFloat('u_seed));
+    setShaderUniform('particles, 'u_sizeScale, getParameterFloat('u_sizeScale));
+    setShaderUniform('particles, 'u_glow, getParameterFloat('u_glow));
+    setShaderUniform('particles, 'u_flicker, getParameterFloat('u_flicker));
+    setShaderUniform('particles, 'u_flySpeed, getParameterFloat('u_flySpeed));
+
+    setShaderUniform('composite, 'amount, getParameterFloat('amount));
+}
+
+#### GLSL shaders ####
+
+string fsCopy = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    void main() {
+        gl_FragColor = toOutputFormat(sampleInput(sourceTextureCoordinate));
+    }
+";
+
+string vsFireflies = "
+    attribute float a_particleId;
+    attribute vec2 a_cornerOffset;
+
+    // Quarter-res RGBA copy of the frame. Sampled per particle, not per pixel.
+    uniform sampler2D s_srcRgba;
+
+    // Unused here, declared first as in fsFireflies. On Metal both stages read one uniform
+    // buffer laid out from this stage's struct, so the fragment stage's own uniforms must sit
+    // at the same offsets here or it reads other uniforms in their place.
+    uniform float u_softness;
+    uniform float u_haloGain;
+
+    uniform float u_progress;
+    uniform float u_time;
+    uniform float u_aspect;
+    uniform float u_seed;
+    uniform float u_cols;
+    uniform float u_rows;
+    uniform float u_jitter;
+    uniform float u_sizeScale;
+    uniform float u_lumaBias;
+    uniform float u_restGlow;
+    uniform float u_igniteSpread;
+    uniform float u_burstAt;
+    uniform float u_burstWidth;
+    uniform float u_burstGrow;
+    uniform float u_flyStart;
+    uniform float u_flyStagger;
+    uniform float u_flySpeed;
+    uniform float u_decel;
+    uniform float u_rise;
+    uniform float u_burstPush;
+    uniform float u_wander;
+    uniform float u_wanderSpeed;
+    uniform float u_flicker;
+    uniform float u_flickerRamp;
+    uniform float u_flickerSpeed;
+    uniform float u_glow;
+    uniform vec4 u_tintColor;
+    uniform float u_tintAmount;
+
+    varying vec2 vUv;
+    varying vec4 vColor;
+
+    // Hugo Elias style fract/multiply hash. A sin-based hash degrades badly
+    // once its input grows past ~1e5 on GPU, which makes a long-running
+    // particle effect quietly fade out. Inputs here are bounded by the grid
+    // size, so no cycle-index wrapping is needed.
+    vec3 hash31(float n) {
+        vec3 p3 = fract(vec3(n + u_seed) * vec3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.xxy + p3.yzz) * p3.zyx);
+    }
+
+    vec2 hash21(float n) {
+        vec3 p3 = fract(vec3(n + u_seed, n * 1.37 + u_seed * 7.13, n + u_seed) *
+                        vec3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.xx + p3.yz) * p3.zy);
+    }
+
+    void main() {
+        float pid = a_particleId;
+        float col = mod(pid, u_cols);
+        float row = floor(pid / u_cols);
+
+        vec3 rndA = hash31(pid);
+        vec2 rndB = hash21(pid + 91.7);
+        vec3 rndC = hash31(pid + 411.3);
+
+        // Home position: cell center plus a sub-cell jitter, so the grid reads
+        // as a scatter rather than a lattice while still covering every pixel.
+        vec2 grid = vec2(max(u_cols, 1.0), max(u_rows, 1.0));
+        vec2 cellUv = (vec2(col, row) + 0.5) / grid;
+        vec2 homeUv = clamp(cellUv + (rndA.xy - 0.5) * u_jitter / grid, vec2(0.0), vec2(1.0));
+
+        // The whole point of the vertex stage here: every firefly is lit in the
+        // color of the pixel it came from.
+        vec4 src = texture2D(s_srcRgba, homeUv);
+        float luma = dot(src.rgb, vec3(0.2126, 0.7152, 0.0722));
+
+        // Ignite/departure rank. Blending the random rank toward (1 - luma)
+        // makes highlights catch first, which is what sells 'the image is
+        // glowing' instead of 'random dots are glowing'.
+        float order = clamp(mix(rndA.z, rndA.z * 0.5 + (1.0 - luma) * 0.5, u_lumaBias), 0.0, 1.0);
+
+        // The swarm settles onto the frame first - dim, un-staggered, at source
+        // color - so the image visibly granulates into fireflies before any of
+        // them catch. Ramping from 0 keeps progress 0 an untouched frame.
+        float wake = smoothstep(0.0, 0.08, u_progress) * u_restGlow;
+        float ignite = smoothstep(order * u_igniteSpread,
+                                  order * u_igniteSpread + 0.14,
+                                  u_progress);
+        float lightLevel = max(ignite, wake);
+
+        // Gaussian flash centred on u_burstAt - the burst the effect hangs on.
+        float bx = (u_progress - u_burstAt) / max(u_burstWidth, 1e-3);
+        float burst = exp(-bx * bx);
+
+        // Flight, staggered by the same rank that drove the ignite wave.
+        float flyDelay = order * u_flyStagger;
+        float span = max(1.0 - u_flyStart - flyDelay, 1e-3);
+        float ft = clamp((u_progress - u_flyStart - flyDelay) / span, 0.0, 1.0);
+
+        vec2 homeNdc = homeUv * 2.0 - 1.0;
+
+        // Escape direction: random, biased upward so the swarm lifts.
+        vec2 escape = normalize(vec2(rndB.x * 2.0 - 1.0,
+                                     (rndB.y * 2.0 - 1.0) + u_rise) + vec2(1e-5));
+        vec2 radial = normalize(homeNdc + vec2(1e-4, 1e-4));
+
+        // Ease-out: they bolt the instant they lift off, then coast to a stop.
+        // u_decel of 1 is linear, higher brakes harder.
+        float ease = 1.0 - pow(1.0 - ft, max(u_decel, 1.0));
+
+        vec2 wander = vec2(
+          sin(u_time * u_wanderSpeed * (0.5 + rndC.x) + rndC.y * 6.2831),
+          cos(u_time * u_wanderSpeed * (0.4 + rndC.y) + rndC.z * 6.2831)
+        ) * u_wander * ft;
+
+        vec2 pos = homeNdc
+                 + escape * u_flySpeed * ease
+                 + radial * u_burstPush * ease
+                 + wander;
+
+        // One cell tall in NDC; aspect-correcting x keeps particles square, so
+        // u_sizeScale 1.0 is exactly one cell. The burst envelope then scales
+        // that up - it is widest at u_burstAt but never reaches zero over 0..1,
+        // so the drawn size stays above the base cell for the whole flight.
+        // Size is otherwise constant - the exit is carried by the fade.
+        float cellH = 2.0 / max(u_rows, 1.0);
+        float size = cellH * u_sizeScale * (1.0 + burst * u_burstGrow);
+        vec2 aspectCorrect = vec2(1.0 / max(u_aspect, 1e-4), 1.0);
+
+        gl_Position = vec4(pos + a_cornerOffset * size * aspectCorrect, 0.0, 1.0);
+        vUv = a_cornerOffset + 0.5;
+
+        // Flicker deepens as they travel, so they gutter out in blinks rather
+        // than dimming evenly to nothing.
+        float flickAmt = clamp(u_flicker * (1.0 + ft * u_flickerRamp), 0.0, 1.0);
+        float flick = mix(1.0,
+                          0.45 + 0.55 * sin(u_time * u_flickerSpeed * (0.5 + rndC.z) + rndA.x * 6.2831),
+                          flickAmt);
+        float fade = 1.0 - smoothstep(0.3, 1.0, ft);
+
+        float alpha = lightLevel * clamp(flick, 0.0, 1.0) * fade * (0.55 + 0.45 * rndB.y);
+        alpha = clamp(alpha, 0.0, 1.0);
+
+        // Tint and glow are keyed to how lit the particle is, so a resting
+        // firefly reads as the pixel it sits on and only turns once it catches.
+        float hot = clamp(ignite, 0.0, 1.0);
+        vec3 lit = mix(src.rgb, u_tintColor.rgb, u_tintAmount * hot)
+                 * mix(1.0, u_glow, hot)
+                 * (1.0 + burst * 1.6 * hot);
+
+        vColor = vec4(lit * alpha, alpha);
+    }
+";
+
+string fsFireflies = "
+    precision highp float;
+
+    varying vec2 vUv;
+    varying vec4 vColor;
+
+    uniform float u_softness;
+    uniform float u_haloGain;
+
+    void main() {
+        vec2 p = vUv * 2.0 - 1.0;
+        float r = length(p);
+        if (r > 1.0) {
+            discard;
+        }
+
+        float core = 1.0 - smoothstep(0.0, mix(0.25, 0.7, u_softness), r);
+        float halo = pow(max(0.0, 1.0 - r), 3.0);
+        float shape = clamp(core + halo * u_haloGain, 0.0, 1.0);
+        if (shape <= 0.002) {
+            discard;
+        }
+
+        gl_FragColor = vColor * shape;
+    }
+";
+
+string fsComposite = "
+    precision highp float;
+
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    uniform sampler2D s_particles;
+    uniform float amount;
+
+    void main() {
+        vec4 base = sampleInput(sourceTextureCoordinate);
+        vec4 particles = texture2D(s_particles, sourceTextureCoordinate);
+
+        // The particle layer is premultiplied, so alpha-over is a plain lerp by
+        // coverage. Clamp first: overlapping quads can push alpha past 1 and the
+        // base would punch through to black.
+        float coverage = clamp(particles.a, 0.0, 1.0);
+        vec3 over = base.rgb * (1.0 - coverage) + particles.rgb;
+
+        vec3 rgb = mix(base.rgb, over, amount);
+        gl_FragColor = toOutputFormat(vec4(rgb, base.a));
+    }
+";

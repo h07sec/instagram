@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "761437119203589",
+  "displayName": "Moody",
+  "description": "[IG Edits] Color filter name. With \"Moody\", the creator can apply a Spark-ported moody matte color grade with soft highlights and faint grain.",
+  "iglu": {
+    "legacyId": 3339
+  },
+  "assets": [
+    {
+      "name": "moody_lut.png",
+      "assetHash": "32a0b55d9f4e7fa1c05a163c6bbf10a0ec22d6dcb3e0467cdf7237d1bb63d14d",
+      "hubAssetId": "1828148258207928"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGTaghmoAR"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "8fc643b0",
+      "handle": "AQAFfql6iJBc",
+      "md5": "c1f041941bb6d0f6342ce410ffcd5c37"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GA4TGDTnMt0W6RsFAOHhvsa5k1RBbhQoAAAD"
+    }
+  }
+}

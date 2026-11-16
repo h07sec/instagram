@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "5DE6F00E-8F6A-47CB-A888-D37FB1B55A5E",
+  "displayName": "Kodak 🎞",
+  "description": "[IG Edits] Color filter name. With \"Kodak 🎞\", the creator gets a matte Kodak film color grade, a Kodak Portra 400 edge-print frame and a moving film grain.",
+  "iglu": {
+    "legacyId": 3318
+  },
+  "assets": [
+    {
+      "name": "kodak_film_lut.png",
+      "assetHash": "8fcab652841c8331e36b640ae33c55144a0f5da4be50a1bc8f8072024ac299d6",
+      "hubAssetId": "2241158046815143"
+    },
+    {
+      "name": "kodak_film_frame.png",
+      "assetHash": "cb46c87403fe7bd64d0b105dc8a1f567c0e068bedc10de5dcce4c73571fe094c",
+      "hubAssetId": "1830524618265436"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQBp_Zk8AWuT"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "82da488",
+      "handle": "AQAD77Xn5jID",
+      "md5": "4d71107c30e09aa443e4afdf8417e435"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GETNdzNrJPf-6jEIAN75s5WzG2IcbhQoAAAD"
+    }
+  }
+}

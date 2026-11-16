@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "8F30D5B4-EB48-4184-A107-75C29C8C4936",
+  "displayName": "Fine Tone",
+  "description": "[IG Edits] Color filter name. With \"Fine Tone\", the creator gets a bright, clean 8x8 LUT color grade applied to the camera image.",
+  "iglu": {
+    "legacyId": 3241
+  },
+  "assets": [
+    {
+      "name": "fine_tone_lut.png",
+      "assetHash": "65e317ab231e646ac3a4e43a7206b3dcbc972be8a7875969840203fcff2d8854",
+      "hubAssetId": "1127096063151809"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEDvufqEf3"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f3b30363",
+      "handle": "AQAHDHvdawiS",
+      "md5": "1bc32b866dc415a3d7623f32ac709032"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNoZETOwL8zt9hYEAMueQdWA1pVCbhQoAAAD"
+    }
+  }
+}

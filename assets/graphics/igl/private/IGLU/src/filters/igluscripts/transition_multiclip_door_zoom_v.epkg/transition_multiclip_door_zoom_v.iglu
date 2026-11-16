@@ -1,0 +1,144 @@
+[Filter TransitionMulticlipDoorZoomV]
+# Source AE collect02, checked 2026-10-22. Prototype, not a shipped Edits identity.
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.parameters={
+    {duration=0.85,min=0.1,max=5.0,description="Duration"},
+    {motionBlur=1.0,min=0.0,max=1.0,description="Motion Blur"},
+  };
+  filter.passes={
+    {name='door,inputs={'default,'transition},shaderInputNames={'default,'s_texture1},uniforms={completion0=0.0,completion1=0.0,scaleA0=1.0,scaleA1=1.0,scaleB0=1.0,scaleB1=1.0,p=0.0,aspect=1.7777778},glslShader=doorGlsl},
+  };
+}
+fun cubic(f32 a, f32 b, f32 u) f32 {
+  f32 v = 1.0 - u;
+  return 3.0*v*v*u*a + 3.0*v*u*u*b + u*u*u;
+}
+fun segment(f32 t, f32 t0, f32 v0, f32 t1, f32 v1, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 u = clamp((t-t0)/(t1-t0), 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = u;
+  f32 i = 0.0;
+  while (i < 20.0) {
+    s = (lo+hi)*0.5;
+    if (cubic(x1,x2,s) < u) { lo=s; } else { hi=s; }
+    i=i+1.0;
+  }
+  f32 r = v0+(v1-v0)*cubic(y1,y2,s);
+  if (t <= t0) { r=v0; }
+  if (t >= t1) { r=v1; }
+  return r;
+}
+fun completionAt(f32 t) f32 {
+  f32 r = 0.0;
+  if (t >= 0.65) { r=segment(t,0.65,0.0,1.2,100.0,0.6,0.0,0.4,1.0); }
+  if (t >= 1.2) { r=100.0; }
+  return r;
+}
+fun scaleAAt(f32 t) f32 {
+  f32 r = 300.0;
+  if (t >= 0.466666666667) { r=segment(t,0.466666666667,300.0,0.85,900.0,0.992106807782,(0.0 - 0.000000014029),0.98,1.0); }
+  if (t >= 0.85) { r=900.0; }
+  return r;
+}
+fun scaleBAt(f32 t) f32 {
+  f32 r = 58.0;
+  if (t >= 0.55) { r=segment(t,0.55,58.0,1.316666666667,300.0,0.370552174774,0.0,0.039303225356,0.983492497758); }
+  if (t >= 1.316666666667) { r=300.0; }
+  return r;
+}
+[PreRender]
+fun preRender(Filter filter) {
+ f32 p=clamp(max(getParameterFloat('progress),getParameterFloat('transition_progress)),0.0,1.0);f32 t=0.466666666667+p*0.85;
+ # AE 180-degree shutter at 60fps, phase0 (forward half-frame exposure).
+ f32 shutter=getParameterFloat('motionBlur)/120.0;
+ if(p<=0.0 or p>=1.0) {shutter=0.0;}
+ vec2 size=getTextureSize('default);
+ setShaderUniform('door,'aspect,size.y/max(size.x,1.0));
+ setShaderUniform('door,'completion0,completionAt(t)*0.01);
+ setShaderUniform('door,'completion1,completionAt(t+shutter)*0.01);
+ setShaderUniform('door,'scaleA0,scaleAAt(t)/300.0);
+ setShaderUniform('door,'scaleA1,scaleAAt(t+shutter)/300.0);
+ setShaderUniform('door,'scaleB0,scaleBAt(t)/300.0);
+ setShaderUniform('door,'scaleB1,scaleBAt(t+shutter)/300.0);
+ setShaderUniform('door,'p,p);
+}
+string doorGlsl="
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform sampler2D s_texture1;
+uniform float completion0;
+uniform float completion1;
+uniform float scaleA0;
+uniform float scaleA1;
+uniform float scaleB0;
+uniform float scaleB1;
+uniform float aspect;
+uniform float p;
+// CC RepeTile's checker reflections keep the small incoming layer filled.
+vec2 mirrored(vec2 q){return 1.0-abs(mod(q,2.0)-1.0);}
+void main(){
+ vec2 uv=sourceTextureCoordinate;
+ if(p<=0.0){gl_FragColor=toOutputFormat(sampleInput(uv));return;}
+ if(p>=1.0){gl_FragColor=toOutputFormat(texture2D(s_texture1,uv));return;}
+ const int N=8;
+ // Mask range over the sub-frames: a pixel that is fully outgoing (or fully incoming)
+ // in every sub-frame needs only that clip's samples.
+ float minMask=1.0;
+ float maxMask=0.0;
+ for(int i=0;i<N;i++){
+  float u=(float(i)+0.5)/float(N);
+  float sa=mix(scaleA0,scaleA1,u);
+  float completion=mix(completion0,completion1,u);
+  vec2 a=(uv-0.5)/max(sa,0.00001)+0.5;
+  // Direction90 opens horizontally; the vertical variant uses a.y here.
+  float edge=abs(a.y-0.5)*2.0;
+  float threshold=completion;
+  float mask=smoothstep(threshold-0.0007,threshold+0.0007,edge);
+  minMask=min(minMask,mask);
+  maxMask=max(maxMask,mask);
+ }
+ vec4 color=vec4(0.0);
+ if(minMask>=1.0){
+  // A zoom that is the same in every sub-frame gives coinciding samples.
+  if(scaleA0==scaleA1){
+   color=sampleInput((uv-0.5)/max(scaleA0,0.00001)+0.5)*float(N);
+  }else{
+   for(int i=0;i<N;i++){
+    float u=(float(i)+0.5)/float(N);
+    vec2 a=(uv-0.5)/max(mix(scaleA0,scaleA1,u),0.00001)+0.5;
+    color+=sampleInput(a);
+   }
+  }
+ }else if(maxMask<=0.0){
+  if(scaleB0==scaleB1){
+   color=texture2D(s_texture1,mirrored((uv-0.5)/max(scaleB0,0.00001)+0.5))*float(N);
+  }else{
+   for(int i=0;i<N;i++){
+    float u=(float(i)+0.5)/float(N);
+    vec2 b=mirrored((uv-0.5)/max(mix(scaleB0,scaleB1,u),0.00001)+0.5);
+    color+=texture2D(s_texture1,b);
+   }
+  }
+ }else{
+  for(int i=0;i<N;i++){
+   float u=(float(i)+0.5)/float(N);
+   float sa=mix(scaleA0,scaleA1,u);
+   float sb=mix(scaleB0,scaleB1,u);
+   float completion=mix(completion0,completion1,u);
+   vec2 a=(uv-0.5)/max(sa,0.00001)+0.5;
+   vec2 b=mirrored((uv-0.5)/max(sb,0.00001)+0.5);
+   // Direction90 opens horizontally; the vertical variant uses a.y here.
+   float edge=abs(a.y-0.5)*2.0;
+   float threshold=completion;
+   float mask=smoothstep(threshold-0.0007,threshold+0.0007,edge);
+   vec4 outgoing=sampleInput(a);vec4 incoming=texture2D(s_texture1,b);
+   color+=mix(incoming,outgoing,mask);
+  }
+ }
+ gl_FragColor=toOutputFormat(color/float(N));
+}";

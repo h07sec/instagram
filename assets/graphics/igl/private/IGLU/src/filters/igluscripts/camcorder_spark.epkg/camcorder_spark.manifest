@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "8887EF77-70E9-442F-91F4-6B0B07D4F18E",
+  "displayName": "𝕔𝕒𝕞𝕔𝕠𝕣𝕕𝕖𝕣",
+  "description": "[IG Edits] Color filter name. With \"𝕔𝕒𝕞𝕔𝕠𝕣𝕕𝕖𝕣\", the creator gets a VHS camcorder look: a sharpened, cool tint with a horizontal color bleed, faint tape noise and star glints on highlights.",
+  "iglu": {
+    "legacyId": 3308
+  },
+  "assets": [
+    {
+      "name": "camcorder_spark_lut.png",
+      "assetHash": "9f361429877603334666fc9e33d9db98db30f8b8bac11c410ffe942dc07ba619",
+      "hubAssetId": "1822735022393610"
+    },
+    {
+      "name": "camcorder_spark_star.png",
+      "assetHash": "62f1deda3adef6b5665d4476f157a43288446e48e6a218ac8a38b24b2ef095e0",
+      "hubAssetId": "1905296340849845"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHxtFH--Ov"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "787ecc24",
+      "handle": "AQAH6hvq-X9G",
+      "md5": "c57252f533b2a6595d1c1a7c3d776fe5"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GG8tdjNN1vo4TgAJAMchqHoCXS9_bhQoAAAD"
+    }
+  }
+}

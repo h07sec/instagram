@@ -1,0 +1,102 @@
+[Filter TransitionMulticlipHeartMaskWipe]
+
+# Clip B opens through a growing heart (the Heart Mask Wipe In effect) over an
+# untouched clip A.
+#
+# Ported from the Easel web tool's multiclip_heart_mask_wipe.iglu.
+# Easel eases progress by its [AnimationCurve quadraticInOut] tag before the
+# script sees it; the transition host passes linear progress, so the curve is
+# applied in [PreRender] instead.
+#
+# The video_mask_wipe_heart mask and the over-composite run in one pass that
+# reads both clips.
+
+fun easeInOutQuadratic(f32 t) f32 {
+  if (t < 0.5) {
+    return 2.0 * t * t;
+  }
+  return 4.0 * t - 2.0 * t * t - 1.0;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {amount = 0.5, min = 0.0, max = 1.0, description = "Edge smoothness"},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        amount = 0.1,
+        aspect = 1.0,
+        invScale = 1.0,
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = easeInOutQuadratic(max(getParameterFloat('progress), getParameterFloat('transition_progress)));
+  # remap normalized amount to shader edge range [0,0.2], kept off 0 for smoothstep
+  f32 amount = max(0.001, getParameterFloat('amount) * 0.2);
+  vec2 size = getTextureSize('default);
+  f32 aspect = size.x / size.y;
+  f32 maxR = max(aspect, 1.0) * 2.0;
+  f32 scale = max(mix(0.0 - amount, maxR + amount, p), 0.001);
+  setShaderUniform('composite, 'amount, amount);
+  setShaderUniform('composite, 'aspect, aspect);
+  setShaderUniform('composite, 'invScale, 1.0 / scale);
+}
+
+string glsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float amount;
+uniform float aspect;
+uniform float invScale;
+
+float sdHeart(vec2 p) {
+  p.x = abs(p.x);
+  if (p.y + p.x > 1.0) {
+    vec2 c = p - vec2(0.25, 0.75);
+    return sqrt(dot(c, c)) - sqrt(2.0) / 4.0;
+  }
+  float b = max(p.x + p.y, 0.0) * 0.5;
+  vec2 q1 = p - vec2(0.0, 1.0);
+  vec2 q2 = p - vec2(b, b);
+  return sqrt(min(dot(q1, q1), dot(q2, q2))) * sign(p.x - p.y);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 b = texture2D(s_texture1, uv);
+
+  // Heart geometry is authored bottom-origin; flip on top-origin
+  // backends (Metal/iOS) so the shape stays upright everywhere.
+  float my = uv.y;
+  if (UP < 0.0) { my = 1.0 - my; }
+  vec2 heartUV = vec2((uv.x - 0.5) * aspect, my - 0.5) * invScale;
+  heartUV.y += 0.55;
+  b.a *= smoothstep(amount, -amount, sdHeart(heartUV));
+  b.rgb *= b.a;
+
+  // Clip B is premultiplied by its mask, so it goes over clip A without another
+  // multiply by b.a.
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

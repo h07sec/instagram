@@ -1,0 +1,340 @@
+[Filter TextGrit]
+
+f32 BASE_FONT_SIZE = 100.0;
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('grunge);
+
+    filter.parameters = {
+        {grungeAmount = 0.85, min = 0.0, max = 1.0, description = "Grunge Amount"},
+        {grungeScale = 3.0, min = 0.5, max = 10.0, description = "Grunge Scale (in font sizes)"},
+        {shardAmount = 0.17, min = 0.0, max = 6.0, description = "Shard Amount"},
+        {shardSize = 2.0, min = 0.25, max = 4.0, description = "Shard Size"},
+        {shardSpread = 0.5, min = 0.0, max = 1.0, description = "Shard Spread"},
+        {shardShadow = 0.55, min = 0.0, max = 1.0, description = "Shard Shadow"},
+        {shardOffset = 1.8, min = 0.75, max = 2.0, description = "Shard Offset" },
+        {shardOffsetSpeed = 0.2, min = 0.0, max = 1.0, description = "Shard Offset" },
+        {shardShadowOffset = 0.5, min = 0.0, max = 1.0, description = "Shard Shadow Offset"},
+        {shardSpin = 0.35, min = 0.0, max = 1.0, description = "Shard Spin"},
+        {shardFloat = 0.5, min = 0.0, max = 1.0, description = "Shard Float"},
+    };
+
+    filter.passes = {
+        {
+            name = 'spread,
+            inputs = {'default},
+            scale = {0.25, 0.25},
+            uniforms = {
+                spreadStep = {0.02, 0.02},
+            },
+            glslShader = spreadGlsl,
+        },
+        {
+            # Vertex-stage chip layer: 4096 quads on a jittered grid, each
+            # tinted by the halo colour under it. Stateless function of
+            # (particleId, spinTime); the composite hides chips over glyphs.
+            name = 'shards,
+            inputs = {'default, 'spread},
+            shaderInputNames = {'default, 's_spread},
+            geometry = {type = 'quads, count = 4096.0},
+            blendMode = 'premultiplied,
+            clearBeforeDraw = true,
+            uniforms = {
+                canvasSize = {1920.0, 1080.0},
+                shardPx = 20.0,
+                shardScale = 1.0,
+                shardAmount = 0.5,
+                spinTime = 0.0,
+                floatAmount = 0.5,
+                driftPhase = 0.0,
+            },
+            glslVertexShader = shardsVs,
+            glslShader = shardsFs,
+        },
+        {
+            # 'default stays first so this pass renders at full scale and picks
+            # up the standard format conversion for the text texture.
+            name = 'composite,
+            inputs = {'default, 'grunge, 'shards},
+            uniforms = {
+                tileRepeats = {3.6, 6.4},
+                grungeAmount = 0.85,
+                shadowScale = 1.04,
+                shadowStrength = 0.55,
+                shardOffset = 1.0,
+            },
+            glslShader = compositeGlsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    vec2 size = getTextureSize('default);
+
+    f32 fontSize = getParameterFloat('fontSize);
+    if (fontSize < 1.0) {
+        fontSize = min(size.x, size.y) * 0.09;
+    }
+
+    f32 tileSize = max(getParameterFloat('grungeScale) * fontSize, 1.0);
+
+    setShaderUniform('composite, 'tileRepeats, size / tileSize);
+    setShaderUniform('composite, 'grungeAmount, getParameterFloat('grungeAmount));
+
+    # Radius of the halo the shards scatter into, expressed in font sizes.
+    f32 haloPx = max(fontSize * mix(0.06, 0.40, getParameterFloat('shardSpread)), 1.0);
+    vec2 spreadStep = {haloPx / size.x, haloPx / size.y};
+    setShaderUniform('spread, 'spreadStep, spreadStep);
+
+    # Shard size in pixels. The vertex stage scatters one chip per grid
+    # cell on a 64x64 lattice, so the chip half-extent is cellPx / 2.
+    f32 cellPx = max(fontSize * 0.20, 2.0);
+    setShaderUniform('shards, 'canvasSize, size);
+    setShaderUniform('shards, 'shardPx, cellPx);
+    setShaderUniform('shards, 'shardScale, max(getParameterFloat('shardSize), 0.0));
+    setShaderUniform('shards, 'shardAmount, getParameterFloat('shardAmount));
+
+    f32 time_sec = max(getParameterFloat('time_sec), 0.0);
+
+    # Spin phase, wrapped to one turn. Per-shard speeds are whole multiples of
+    # this, so the wrap is seamless for every shard rather than just the ones
+    # running at 1x.
+    f32 turns = time_sec * getParameterFloat('shardSpin) * 1.2 / 6.28318531;
+    setShaderUniform('shards, 'spinTime, (turns - floor(turns)) * 6.28318531);
+
+    # Orbit phase, wrapped to one turn. Per-shard rates are whole multiples,
+    # so the wrap is seamless and no shard ever jumps back to its origin.
+    f32 orbits = time_sec * 0.45 / 6.28318531;
+    setShaderUniform('shards, 'driftPhase, (orbits - floor(orbits)) * 6.28318531);
+    setShaderUniform('shards, 'floatAmount, getParameterFloat('shardFloat));
+
+    setShaderUniform('composite, 'shadowStrength, getParameterFloat('shardShadow));
+    setShaderUniform('composite, 'shadowScale, max(mix(1.0, 1.08, getParameterFloat('shardShadowOffset)), 1.0));
+
+    f32 shardOffsetAnim = max(getParameterFloat('shardOffset), 0.01) + time_sec * getParameterFloat('shardOffsetSpeed) / 10.0;
+    setShaderUniform('composite, 'shardOffsetAnim, shardOffsetAnim);
+}
+
+# Quarter-scale halo around the glyphs: rgb carries the average colour of the
+# nearby text so shards match whatever colour the creator picked, alpha carries
+# a proximity term that decays with distance from the glyph.
+string spreadGlsl = "
+    precision highp float;
+
+    varying vec2 sourceTextureCoordinate;
+
+    BaseUniformsOpenGL;
+
+    uniform vec2 spreadStep;
+
+    const float kTaps = 16.0;
+
+    void main() {
+        vec3 colorSum = vec3(0.0);
+        float alphaSum = 0.0;
+        float weightSum = 0.0;
+
+        for (int i = 0; i < 16; i++) {
+            float fi = float(i);
+            // Golden-angle spiral: even disc coverage from few taps.
+            float r = sqrt((fi + 0.5) / kTaps);
+            float a = fi * 2.39996323;
+            vec2 uv = sourceTextureCoordinate + vec2(cos(a), sin(a)) * r * spreadStep;
+            vec4 t = sampleInput(uv);
+            float w = 1.0 - 0.75 * r;
+            colorSum += t.rgb * mix(1.0, t.a, step(0.0, UP)) * w;
+            alphaSum += t.a * w;
+            weightSum += w;
+        }
+
+        vec3 color = vec3(1.0);
+        if (alphaSum > 0.001) {
+            color = clamp(colorSum / alphaSum, 0.0, 1.0);
+        }
+
+        gl_FragColor = toOutputFormat(vec4(color, alphaSum / weightSum));
+    }
+";
+
+# The chip layer and nothing else: premultiplied rgb = the colour a chip
+# borrows from the nearby glyph, alpha = chip coverage, both zero wherever
+# there is no chip. One quad per grid cell on a 64x64 lattice, tinted by the
+# halo colour under it. Chips exist across the whole halo INCLUDING over the
+# glyphs -- the composite hides the ones that land on a letter, but they
+# still have to exist here or they have no shadow to cast onto it.
+string shardsVs = "
+    attribute float a_particleId;
+    attribute vec2 a_cornerOffset;
+
+    // Quarter-res halo. Sampled per chip, not per pixel.
+    uniform sampler2D s_spread;
+
+    uniform vec2 canvasSize;
+    uniform float shardPx;
+    uniform float shardScale;
+    uniform float shardAmount;
+    uniform float spinTime;
+    uniform float floatAmount;
+    uniform float driftPhase;
+
+    varying vec2 vLocal;
+    varying vec4 vColor;
+    varying float vSeed;
+
+    // Hugo Elias style: stays well behaved for the cell indices we feed it,
+    // unlike a sin-based hash.
+    float hash11(float p) {
+        p = fract(p * 0.1031);
+        p *= p + 33.33;
+        p *= p + p;
+        return fract(p);
+    }
+
+    void main() {
+        float pid = a_particleId;
+        float col = mod(pid, 64.0);
+        float row = floor(pid / 64.0);
+        float seed = col + row * 131.0;
+
+        vec2 grid = vec2(64.0, 64.0);
+        vec2 cellUv = (vec2(col, row) + 0.5) / grid;
+        vec2 jitter = (vec2(hash11(seed + 23.0), hash11(seed + 29.0)) - 0.5) * 0.44 / grid;
+        vec2 homeUv = clamp(cellUv + jitter, vec2(0.0), vec2(1.0));
+
+        vec4 spread = texture2D(s_spread, homeUv);
+
+        // Chips thin out with distance from the glyph. Density carries the
+        // falloff; the clamp only stops them popping on at the hard edge of
+        // the halo.
+        float keep = hash11(seed);
+        float present = step(keep, spread.a * shardAmount * 0.6);
+        float gate = present * clamp(spread.a * 8.0, 0.0, 1.0);
+
+        float longAxis = mix(0.08, 0.22, hash11(seed + 13.0));
+        float shortAxis = longAxis * mix(0.16, 0.55, hash11(seed + 19.0));
+        // Only the chip extent scales; drift stays in shardPx so the float
+        // distance does not grow with the chip.
+        vec2 halfPx = vec2(longAxis, shortAxis) * shardPx * shardScale;
+
+        // Random start angle, random direction, and a whole-number speed
+        // multiple so spinTime can wrap at one turn without any chip jumping.
+        float spinDir = step(0.5, hash11(seed + 37.0)) * 2.0 - 1.0;
+        float spinSpeed = floor(mix(1.0, 4.0, hash11(seed + 41.0)));
+        float angle = hash11(seed + 7.0) * 6.28318531 + spinTime * spinDir * spinSpeed;
+        float c = cos(angle);
+        float s = sin(angle);
+
+        // Built in pixels so chips stay isotropic; gate = 0 collapses the
+        // quad to a point so absent chips rasterize nothing.
+        vec2 cornerPx = a_cornerOffset * 2.0 * halfPx * gate;
+        vec2 offsetPx = vec2(cornerPx.x * c - cornerPx.y * s, cornerPx.x * s + cornerPx.y * c);
+
+        // Away from the glyph is downhill on the halo's alpha ramp. Two taps
+        // reuse the centre sample for a forward difference.
+        vec2 e = 8.0 / canvasSize;
+        vec2 grad = vec2(texture2D(s_spread, homeUv + vec2(e.x, 0.0)).a,
+                         texture2D(s_spread, homeUv + vec2(0.0, e.y)).a) - spread.a;
+        float gmag = length(grad);
+        float loose = hash11(seed + 61.0) * 6.28318531;
+        vec2 outDir = mix(vec2(cos(loose), sin(loose)), -grad / max(gmag, 1e-5), step(1e-5, gmag));
+
+        // The shard set is fixed: each one sits a constant distance out from
+        // the glyph and then circles that spot at its own rate. Nothing is
+        // created, destroyed, or reset, so there is no jump.
+        float away = mix(0.5, 3.0, hash11(seed + 53.0));
+        float orbitRate = floor(mix(1.0, 4.0, hash11(seed + 59.0)));
+        float orbitAngle = hash11(seed + 67.0) * 6.28318531 + driftPhase * orbitRate;
+        vec2 driftPx = (outDir * away + vec2(cos(orbitAngle), sin(orbitAngle)) * 0.4) * shardPx * floatAmount;
+
+        vec2 posNdc = (homeUv * canvasSize + driftPx + offsetPx) / canvasSize * 2.0 - 1.0;
+        gl_Position = vec4(posNdc, 0.0, 1.0);
+
+        vLocal = a_cornerOffset * 2.0;
+        vColor = vec4(spread.rgb * gate, gate);
+        vSeed = seed;
+    }
+";
+
+string shardsFs = "
+    precision highp float;
+
+    varying vec2 vLocal;
+    varying vec4 vColor;
+    varying float vSeed;
+
+    float hash11(float p) {
+        p = fract(p * 0.1031);
+        p *= p + 33.33;
+        p *= p + p;
+        return fract(p);
+    }
+
+    void main() {
+        // Start from the chip-sized quad, then slice three random corners off
+        // it so the silhouette reads as a broken chunk rather than a rect.
+        float d = 1.0 - max(abs(vLocal.x), abs(vLocal.y));
+
+        for (int i = 0; i < 3; i++) {
+            float h = vSeed + float(i) * 17.0;
+            float a = hash11(h) * 6.28318531;
+            float off = mix(0.55, 1.05, hash11(h + 3.0));
+            d = min(d, off - dot(vLocal, vec2(cos(a), sin(a))));
+        }
+
+        gl_FragColor = vColor * smoothstep(0.0, 0.12, d);
+    }
+";
+
+string compositeGlsl = "
+    precision highp float;
+
+    varying vec2 sourceTextureCoordinate;
+
+    uniform sampler2D auxSampler1;
+    uniform sampler2D auxSampler2;
+
+    BaseUniformsOpenGL;
+
+    uniform vec2 tileRepeats;
+    uniform float grungeAmount;
+    uniform float shadowScale;
+    uniform float shadowStrength;
+    uniform float shardOffsetAnim;
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+
+        vec4 text = sampleInput(uv);
+        // OpenGL hands text passes straight alpha (UP = +1), Metal premultiplied (UP = -1).
+        vec3 premultipliedRgb = text.rgb * mix(1.0, text.a, step(0.0, UP));
+
+        float grunge = texture2D(auxSampler1, fract(uv * tileRepeats)).r;
+        float wear = mix(1.0, grunge, grungeAmount);
+        vec3 rgb = premultipliedRgb * wear;
+
+        // Fake drop shadow: the shard layer read a second time, magnified about
+        // the canvas centre, so each chip darkens the text it sits over. Reads
+        // the UNGATED field, which is why chips over the glyphs are kept alive
+        // in the shards pass. With shadowScale >= 1 the sampled uv stays inside
+        // [0,1], so no edge smear.
+        float shadowScaleFinal = shadowScale * shardOffsetAnim;
+        vec2 shadowUv = (uv - 0.5) / shadowScaleFinal + 0.5;
+        float shadow = texture2D(auxSampler2, shadowUv).a * shadowStrength;
+        rgb *= 1.0 - shadow;
+
+        // A chip is only drawn where it is not sitting on a letter.
+        float outside = 1.0 - smoothstep(0.02, 0.35, text.a);
+
+        vec2 shardUv = (uv - 0.5) / shardOffsetAnim + 0.5;
+        vec4 shard = texture2D(auxSampler2, shardUv);
+        float shardA = shard.a * outside;
+        vec3 shardRgb = shard.rgb * wear * outside;
+
+        vec3 outRgb = shardRgb + rgb * (1.0 - shardA);
+        float outA = shardA + text.a * (1.0 - shardA);
+
+        gl_FragColor = toOutputFormat(vec4(outRgb, outA));
+    }
+";

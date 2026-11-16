@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Poteče čez %1$d minut</item>
+        <item quantity="one">Poteče čez %1$d minuto</item>
+        <item quantity="two">Poteče čez %1$d minuti</item>
+        <item quantity="few">Poteče čez %1$d minute</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">Potreben je pregled %1$d opravil</item>
+        <item quantity="one">Potreben je pregled %1$d opravila</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d opravil potrebuje mnenje</item>
+        <item quantity="one">%1$d opravilo potrebuje mnenje</item>
+        <item quantity="two">%1$d opravili potrebujeta mnenje</item>
+        <item quantity="few">%1$d opravila potrebujejo pregled</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d povezovalcev</item>
+        <item quantity="one">%1$d povezovalec</item>
+        <item quantity="two">%1$d povezovalca</item>
+        <item quantity="few">%1$d povezovalci</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d torb za ročno prtljago</item>
+        <item quantity="one">%1$d torba za ročno prtljago</item>
+        <item quantity="two">%1$d torbi za ročno prtljago</item>
+        <item quantity="few">%1$d torbe za ročno prtljago</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d postankov</item>
+        <item quantity="one">%1$d postanek</item>
+        <item quantity="two">%1$d postanka</item>
+        <item quantity="few">%1$d postanki</item>
+    </plurals>
+</resources>

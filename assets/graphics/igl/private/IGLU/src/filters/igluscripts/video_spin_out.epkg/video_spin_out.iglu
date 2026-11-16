@@ -1,0 +1,51 @@
+[Filter VideoSpinOut]
+
+[Init]
+fun init(Filter filter) {
+  # An igid child reads its parameters from this pass's uniform map, and that map
+  # replaces its own [Init] defaults rather than extending them
+  # (IGLUScriptImageGraphFilter::getActiveParameterMap), so anything video_spin_in
+  # reads and is not listed here resolves to 0.0.
+  #
+  # bsiDecay is the one deliberate deviation from the intro's tuning. OUT reuses the
+  # IN curves evaluated at 1 - p, so it inherits the bsi*/wbi* shape; that puts the
+  # mirrored bounce at p = 0 as pre-launch anticipation, which reads better settling
+  # faster than the intro's.
+  # outro/direction/progress/intensity live here, not in a PreRender setShaderUniform:
+  # video_spin_in reads them with getParameterFloat, and only the pass uniforms block seeds
+  # the child's parameter map. progress/direction/intensity are declared so the wrapper
+  # parameter fan-out has a slot to write into each frame; outro is pinned to the outro
+  # branch. intensity also has to carry the intro's default, because 0.0 is a real value on
+  # its scale and means no bounce at all.
+  filter.passes = {{
+      name = 'spinOut,
+      igid = 'video_spin_in,
+      inputs = {'default},
+      uniforms = {
+        progress = 0.0,
+        direction = 0.0,
+        outro = 1.0,
+        intensity = 0.5,
+        bsiX1 = 0.7627,
+        bsiY1 = -0.3996,
+        bsiX2 = 1.0,
+        bsiY2 = 1.2273,
+        bsiFreq = 2.0,
+        bsiDecay = 4.0,
+        bsiEnd = 0.53125,
+        wbiX1 = 0.4119,
+        wbiY1 = 0.1412,
+        wbiX2 = 0.7646,
+        wbiY2 = 1.0,
+        wbiFreq = 1.5,
+        wbiDecay = 4.25,
+        wbiDelay = 0.0625,
+        wbiEnd = 0.4375,
+      },
+    }};
+
+  filter.parameters = {
+    {direction = 0.0, min = 0.0, max = 1.0, description = "0 = Counterclockwise, 1 = Clockwise"},
+    {intensity = 0.5, min = 0.0, max = 1.0, description = "Bounce and wobble energy (0.5 = authored look)"},
+  };
+}

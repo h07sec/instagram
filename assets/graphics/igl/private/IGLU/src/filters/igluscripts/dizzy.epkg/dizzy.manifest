@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "37BF0498-0FDB-4773-B504-40BD1BD337FB",
+  "displayName": "Dizzy",
+  "description": "[IG Edits] Color filter name. With \"Dizzy\", the creator gets a LUT color grade with a dreamy motion-trail echo of previous frames.",
+  "iglu": {
+    "legacyId": 3242
+  },
+  "assets": [
+    {
+      "name": "dizzy_lut.png",
+      "assetHash": "42a534fdba23c77f4ce462b59ca0a63e37390df3825199c9eac7c870e084559f",
+      "hubAssetId": "1735618470840551"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAKvCZUnbmD"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "827959b8",
+      "handle": "AQAHpAW_JPbl",
+      "md5": "9c2e08877f80c9e063e477e64a151462"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJwvADP1Z3zpSaADAF8r5xbxppw5bhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+(function(selector,increaseImageLimit){return window._META.IABInnerFrame.findElementImageUrls(selector,"true"===increaseImageLimit)})

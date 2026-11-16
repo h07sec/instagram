@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "596426760874939",
+  "displayName": "Caribbean Vibes",
+  "description": "[IG Edits] Color filter name. With \"Caribbean Vibes\", the creator can apply a Spark-ported bright tropical color grade with warm skin and turquoise blues.",
+  "iglu": {
+    "legacyId": 3362
+  },
+  "assets": [
+    {
+      "name": "caribbean_vibes_lut.png",
+      "assetHash": "34ffc674d45bec961269f7934f4b880c0e753ec860245e0e158e7e21079cf5f4",
+      "hubAssetId": "1838626147559035"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGq1Z-n_Zo"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "98e73c0d",
+      "handle": "AQAGbKAn6I3-",
+      "md5": "86b7bbf25179017551019bd6d3e38647"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJRQeTPEL5JQGvQDAM8l2SpkayZgbhQoAAAD"
+    }
+  }
+}

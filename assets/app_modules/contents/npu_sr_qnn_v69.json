@@ -1,0 +1,5 @@
+{
+  "assets/npu_sr_qnn_v69/libs.txt": "e5410c4359d88385a10125d9e94a72a4462b7901b47f43799a662d78c7be8b61",
+  "lib/arm64-v8a/libQnnHtpV69Skel.so": "c9ef587e500d671cab2847c39fcb89823614ccc93c4eec219b8e295453e6ebb8",
+  "lib/arm64-v8a/libQnnHtpV69Stub.so": "19a5f83239ccfa181414ec73c0a4bbba070780b7cab658c6852ad34ffc5e2b6a"
+}

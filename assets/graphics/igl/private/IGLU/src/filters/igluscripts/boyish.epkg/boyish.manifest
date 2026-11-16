@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1028629277689096",
+  "displayName": "Boyish 😎",
+  "description": "[IG Edits] Color filter name. With \"Boyish 😎\", the creator can apply a Spark-ported cool, brightening colour grade with an optional noise overlay.",
+  "iglu": {
+    "legacyId": 3439
+  },
+  "assets": [
+    {
+      "name": "boyish_lut.png",
+      "assetHash": "2ee5130476f75451bca8b6b1ef9f5437e6d86ec0d8e5c009c82fa6c0cdacf8c0",
+      "hubAssetId": "2034105817276242"
+    },
+    {
+      "name": "boyish_noise.png",
+      "assetHash": "21aee1a196738afe86720d3119b7ee37e89c3aaf6cebeab64275340e7210b322",
+      "hubAssetId": "1661438432383225"
+    }
+  ]
+}

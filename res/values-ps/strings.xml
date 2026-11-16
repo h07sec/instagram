@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130002">ایالت</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">پته</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">براوزر بند کړئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">%1$s غواړي ستاسو د وسیلې کیمره وکاروي.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s غواړي چې ستاسې د وسيلې موقعيت وکاروي.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">اجازه ورکړئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">بلاک کول</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">وېبپاڼې ته دوام ورکړئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">شاته وګرځئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">د %1$s لخوا په کارېدونکي امنيتي تصديق کې يوه ستونزه ده. د پاسورډونو او کريډېټ کارتونو په څېر ستاسې شخصي معلومات که له دغې وېبپاڼې سره شريک شي، نو ښايي خوندي نه وي.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">دغه وېبپاڼه يو خوندي اتصال نه کاروي</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">شاته تګ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">څه تیروتنه وشوه</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">بريښنالیک</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">هغه ویب پاڼه چې تاسو یې ګورئ د بهرنۍ اپلیکیشن د پرانستلو هڅه کوي. ایا تاسو غواړئ چې دوام ورکړئ؟</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">ادامه ورکړئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">تاسو زموږ اپلیکیشن پریږدئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">دا ممکن د هغې تخنیکي تېروتنې له امله وي، چې موږ یې د حلولو په لټه کې یو. د دې پاڼې د بیا پرانیستلو هڅه وکړئ.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">تازه یې کړئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">پاڼه اوس مهال د لاسرسي وړ نه ده</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">وروستی نوم</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">پاڼه نه شي لوډ کیدلی</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">له ... سره یې پرانیزئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">په %1$s کې یې پرانیزئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">نور اختيارونه</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">لومړی نوم</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">تاسو اوس بشپړه سکرین ګورئ. د وتلو لپاره کڼ اړخ ته کش ورکړئ یا د شاته تڼۍ ته فشار ورکړئ.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">موږ همدا اوس په %1$s کې د %2$s په ترتیب کولو کې ستونزه لرو. تاسو کولی شئ بیا هڅه وکړئ، یا د اوس لپاره په انګلیسي (امریکا) کې %2$s وکاروئ.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">یوازې د یوې شیبې لپاره منتظر اوسئ کله چې موږ %1$s ترتیب کوو...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">بیا هڅه وکړئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">په امریکايي انګلیسي دوام ورکړئ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">ټیلیفون</string>
+</resources>

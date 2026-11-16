@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Истекува за %1$d минути</item>
+        <item quantity="one">Истекува за %1$d минута</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d задачи треба да се прегледаат</item>
+        <item quantity="one">%1$d задача треба да се прегледа</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d задачи треба да се прегледаат</item>
+        <item quantity="one">%1$d задача треба да се прегледа</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d конектори</item>
+        <item quantity="one">%1$d конектор</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d торби за рачен багаж</item>
+        <item quantity="one">%1$d торба за рачен багаж</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d запирања</item>
+        <item quantity="one">%1$d запирање</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Привремената картичка истекува за %1$d часа</item>
+        <item quantity="one">Привремената картичка истекува за %1$d час</item>
+    </plurals>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "847623483010214",
+  "displayName": "Dark Fusion",
+  "description": "[IG Edits] Spark effect name. A dark, cool color grade that blends its LUT over the original image at 97 percent opacity.",
+  "iglu": {
+    "legacyId": 3402
+  },
+  "assets": [
+    {
+      "name": "dark_fusion_lut.png",
+      "assetHash": "eaa0c2b3bc6be2a9cb4dc6d5f4f1deb61b44a104aa846b72c225f09a58174cd2",
+      "hubAssetId": "4464766870333757"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFyOJQFJKj"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "9507cda1",
+      "handle": "AQADKsD6cfcg",
+      "md5": "7a490067ef05e0a5d754a15735935512"
+    }
+  }
+}

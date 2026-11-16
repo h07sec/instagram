@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2517646025083027",
+  "displayName": "The Dark",
+  "description": "[IG Edits] Lighting filter name. Applies a moody dark LUT grade with strong radial vignette darkening toward corners.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFBLRtq5V-"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e84a12b5",
+      "handle": "AQADzvU4NNP6",
+      "md5": "aecacfe88616dc32baf652eaaafe7ee9"
+    }
+  },
+  "iglu": {
+    "legacyId": 3117
+  },
+  "assets": [
+    {
+      "name": "the_dark_lut.png",
+      "assetHash": "b9daf49e646439676a65ca71e65c0236680a4edf03c1df73613f0c1c075254b6",
+      "hubAssetId": "1600078275467607"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GHOVfzFr2X44KtYDAC7aXjm4mCoEbhQoAAAD"
+    }
+  }
+}

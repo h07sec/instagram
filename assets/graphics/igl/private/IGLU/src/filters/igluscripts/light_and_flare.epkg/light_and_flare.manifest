@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "5309904239120506",
+  "displayName": "light & flare",
+  "description": "[IG Edits] Video effect name. With \"light & flare\", the creator can apply a Spark-ported color grade with drifting colored light leaks.",
+  "iglu": {
+    "legacyId": 3347
+  },
+  "assets": [
+    {
+      "name": "light_and_flare_lut.png",
+      "assetHash": "83b0093069e6e23b64513b6244fe070fda815f0659140b1589b160e15dd63d94",
+      "hubAssetId": "2362850944477851"
+    },
+    {
+      "name": "light_and_flare_leaks.png",
+      "assetHash": "fb17b959bf6f5a7453975b694d60108aa8d5f56209fa334ab5330efa93d3e08c",
+      "hubAssetId": "1150242924006196"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGkonVpWdM"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "19ef1fff",
+      "handle": "AQAFef89C1bS",
+      "md5": "740a608fdbfecc83b7cd6d7a6f38d632"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GDXbXjMPaj-Up6MFAKnlrT07sjEBbhQoAAAD"
+    }
+  }
+}

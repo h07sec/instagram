@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "517639616857095",
+  "displayName": "Light 🪴",
+  "description": "[IG Edits] Color filter name. With \"Light 🪴\", the creator can apply a Spark-ported crisp, cool, vivid colour grade.",
+  "iglu": {
+    "legacyId": 3433
+  },
+  "assets": [
+    {
+      "name": "light_plant_lut.png",
+      "assetHash": "05300546cc12958e035ee6066ce809cbfa07a6ed66db1675cb4907e932703f7c",
+      "hubAssetId": "1883741742790736"
+    }
+  ]
+}

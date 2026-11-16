@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "8773CB42-D9EF-4111-837C-CF1D8BE5E127",
+  "displayName": "Antifish Indie",
+  "description": "[IG Edits] Video effect name. With \"Antifish Indie\", the creator gets a punchy, sharpened indie color grade through a wide fisheye lens with a slight RGB split.",
+  "iglu": {
+    "legacyId": 3273
+  },
+  "assets": [
+    {
+      "name": "antifish_indie_lut.png",
+      "assetHash": "723f4797c6e8defb14f80a4a1354fcced4812ac60aedea78c1fa4e49cad2eccc",
+      "hubAssetId": "28996291073298777"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADZJSszlcK"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b80a560c",
+      "handle": "AQAJaCNbuEGg",
+      "md5": "abcffe9e27efe2a0a62fcd1a31c5c7a1"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GBqDQzRiBxadu4EDACr1sewwOQshbhQoAAAD"
+    }
+  }
+}

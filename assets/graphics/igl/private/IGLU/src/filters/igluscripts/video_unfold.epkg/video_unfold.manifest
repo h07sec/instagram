@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2dc517ef-35a8-4365-9390-2bb615582ce4",
+  "displayName": "Unfold",
+  "description": "[IG Edits] Video effect name. With \"Unfold\", the creator can reveal the subject as unfolding paper blooms into view.",
+  "iglu": {
+    "legacyId": 4013,
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 1600,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 3.0,
+        "min": 0.5,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "name": "spriteTex.png",
+      "assetHash": "3e52f21aa96d1cf649c00466685d048d79f1ccb8f565f1b0efd56ee127cca2df",
+      "hubAssetId": "1668176594910566"
+    }
+  ]
+}

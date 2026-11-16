@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_gravity="bottom" android:orientation="horizontal" android:id="@id/gallerykit_bottombar" android:background="@color/black_85_transparent" android:clickable="true" android:layout_width="fill_parent" android:layout_height="@dimen/abc_list_item_height_material" android:importantForAccessibility="no"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout android:id="@id/gallerykit_bottombar_stories" style="@style/GalleryKitBottomBarShareButton">
+        <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b5" android:drawableTop="@drawable/gallery_share_to_stories_button" style="@style/GalleryKitBottomBarShareLabel" />
+    </FrameLayout>
+    <FrameLayout android:id="@id/gallerykit_bottombar_reels" style="@style/GalleryKitBottomBarShareButton">
+        <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b4" android:drawableTop="@drawable/gallery_share_to_reels_button" style="@style/GalleryKitBottomBarShareLabel" />
+    </FrameLayout>
+    <FrameLayout android:id="@id/gallerykit_bottombar_post" style="@style/GalleryKitBottomBarShareButton">
+        <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b3" android:drawableTop="@drawable/gallery_share_to_feed_button" style="@style/GalleryKitBottomBarShareLabel" />
+    </FrameLayout>
+    <FrameLayout android:id="@id/gallerykit_bottombar_message" style="@style/GalleryKitBottomBarShareButton">
+        <TextView android:text="@string/APKTOOL_DUMMYVAL_0x7f1300b2" android:drawableTop="@drawable/gallery_share_to_direct_button" style="@style/GalleryKitBottomBarShareLabel" />
+    </FrameLayout>
+</LinearLayout>

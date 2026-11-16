@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "912463693383111",
+  "displayName": "Black Gradient",
+  "description": "[IG Edits] Video effect name. With \"Black Gradient\", the creator gets a procedural black gradient that fades in from the bottom edge of the frame.",
+  "android": {
+    "previewAsset": {
+      "key": "7c0eca44",
+      "handle": "AQADxa387Dv6",
+      "md5": "8737a6c25088654b61bd8ed559d15f0a"
+    }
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFpUxxO2RI"
+    }
+  },
+  "iglu": {
+    "legacyId": 3213
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GL8uJTJ6TVYLMcUEADvnRf8oMM0ebhQoAAAD"
+    }
+  }
+}

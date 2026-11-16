@@ -1,0 +1,296 @@
+[Filter IgluscriptVideoSpinInFilter]
+
+# AE source: POSITION_SPIN_IN / POSITION_SPIN_OUT
+# Primary rotation (112 deg) around a pivot just beyond bottom-left, secondary wobble (42.1 deg -> -20 deg -> 0 deg) around center
+# IN/OUT bezier curves are mirrors, but phase alignment between channels differs
+
+fun cssBezier(f32 time, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 t = time;
+  f32 i = 0.0;
+  while (i < 8.0) {
+    f32 u = 1.0 - t;
+    f32 xt = 3.0 * u * u * t * x1 + 3.0 * u * t * t * x2 + t * t * t;
+    f32 dxdt = 3.0 * u * u * x1 + 6.0 * u * t * (x2 - x1) + 3.0 * t * t * (1.0 - x2);
+    t = t - (xt - time) / max(dxdt, 0.0001);
+    t = clamp(t, 0.0, 1.0);
+    i = i + 1.0;
+  }
+  f32 u = 1.0 - t;
+  return 3.0 * u * u * t * y1 + 3.0 * u * t * t * y2 + t * t * t;
+}
+
+# --- IN keyframes, as authored in AE (1280ms source; this filter ships at 1500ms) ---
+# Big spin segment end is now the bsiEnd parameter (AE source value: 0.53125)
+# Both curves end at 0, so evalSpin only needs the start keyframe.
+# The start angle is what carries the frame off screen: the pivot sits beside the
+# frame's own bottom-left corner, so that corner barely moves under rotation and only
+# a large enough angle sweeps it clear. Full clearance needs 108.3 deg at 9:16,
+# 94.6 deg at 1:1 and 112.5 deg at 9:19.5, measured against this shader's transform.
+# Lowering it leaves a lit wedge along the bottom edge for the whole hold phase.
+f32 BSI_K0 = 1.9548;
+f32 WBI_K0 = 0.7349;
+# AE source: wobble held until 0.0625, swung to -0.3491 (-20 deg) by 0.4375, back to 0 by 1.0.
+# The -20 deg keyframe is now expressed as the first swing of the decaying bounce.
+
+# --- OUT, as authored in AE (1320ms source) ---
+# AE source: big spin held at 0 until 0.4848 then swung to 1.9548; wobble 0 until 0.0303,
+# to -0.3491 (-20 deg) by 0.5758, to 0.7349 by 0.9394. Those curves are gone: OUT is now
+# the IN curve evaluated at 1 - p, which has the same endpoints and shares the bsi*/wbi*
+# tuning. AE's separate OUT phase alignment is dropped as part of that trade.
+
+# Travel then bounce. The bezier drives the rotation up to the landing point, then a
+# decaying sine oscillates around the target: overshoot, undershoot, repeat, losing
+# energy each time. Splitting the two keeps bounce size, count and damping independent
+# of each other, which a single spring or bezier cannot do.
+# sin is exactly zero at both ends whenever freq is a multiple of 0.5, so the curve
+# lands on target without a snap.
+# `delay` holds t at 0 so a curve can lag the primary spin; the primary spin passes 0.
+fun evalSpin(
+  f32 p,
+  f32 k0,
+  f32 x1,
+  f32 y1,
+  f32 x2,
+  f32 y2,
+  f32 bounce,
+  f32 freq,
+  f32 decay,
+  f32 delay,
+  f32 land
+) f32 {
+  f32 d = clamp(delay, 0.0, 0.5);
+  f32 e = clamp(land, d + 0.05, 0.95);
+  f32 t = 0.0;
+  if (p >= e) {
+    f32 g = (p - e) / (1.0 - e);
+    t = 1.0 + bounce * exp(0.0 - decay * g) * sin(freq * 6.28318 * g);
+  } else if (p > d) {
+    t = cssBezier((p - d) / (e - d), x1, y1, x2, y2);
+  }
+  return k0 * (1.0 - t);
+}
+
+# Endpoints of the single Intensity slider, which drives both bounce amplitudes at once.
+# They have to move together to read as one control, but they sit at different fractions
+# of their authored ranges (0.14 of 0..0.4 against 0.675 of 0..1.2), so one linear sweep
+# cannot pass through both AE values. The slider midpoint is pinned to them instead,
+# which costs a slope change at 0.5 and buys an exactly reproducible look at the default.
+f32 BSI_BOUNCE_MIN = 0.0;
+f32 BSI_BOUNCE_MID = 0.14;
+f32 BSI_BOUNCE_MAX = 0.4;
+f32 WBI_BOUNCE_MIN = 0.0;
+f32 WBI_BOUNCE_MID = 0.675;
+f32 WBI_BOUNCE_MAX = 1.2;
+
+fun bounceFromIntensity(f32 t, f32 lo, f32 mid, f32 hi) f32 {
+  f32 v = mid + (hi - mid) * ((t - 0.5) / 0.5);
+  if (t < 0.5) {
+    v = lo + (mid - lo) * (t / 0.5);
+  }
+  return v;
+}
+
+[Init]
+fun init(Filter filter) {
+  filter.parameters = {
+    {direction = 0.0, min = 0.0, max = 1.0, description = "0 = Counterclockwise, 1 = Clockwise"},
+    {outro = 0.0, min = 0.0, max = 1.0, description = "0 = In, 1 = Out"},
+    {intensity = 0.5, min = 0.0, max = 1.0, description = "Bounce and wobble energy (0.5 = authored look)"},
+    {bsiX1 = 0.7627, min = 0.0, max = 1.0, description = "Big spin in bezier x1"},
+    {bsiY1 = -0.3996, min = -2.0, max = 2.0, description = "Big spin in bezier y1"},
+    {bsiX2 = 1.0, min = 0.0, max = 1.0, description = "Big spin in bezier x2"},
+    {bsiY2 = 1.2273, min = -2.0, max = 2.0, description = "Big spin in bezier y2"},
+    {bsiFreq = 2.0, min = 0.5, max = 4.0, description = "Bounce count (use multiples of 0.5)"},
+    {bsiDecay = 2.8, min = 0.5, max = 8.0, description = "Energy loss per bounce (low = bouncier)"},
+    {bsiEnd = 0.53125, min = 0.3, max = 0.9, description = "Landing point; bounces fill the rest"},
+    {wbiX1 = 0.4119, min = 0.0, max = 1.0, description = "Wobble in bezier x1"},
+    {wbiY1 = 0.1412, min = -2.0, max = 2.0, description = "Wobble in bezier y1"},
+    {wbiX2 = 0.7646, min = 0.0, max = 1.0, description = "Wobble in bezier x2"},
+    {wbiY2 = 1.0, min = -2.0, max = 2.0, description = "Wobble in bezier y2"},
+    {wbiFreq = 1.5, min = 0.5, max = 4.0, description = "Wobble swing count (use multiples of 0.5)"},
+    {wbiDecay = 4.25, min = 0.5, max = 8.0, description = "Wobble energy loss per swing (low = bouncier)"},
+    {wbiDelay = 0.0625, min = 0.0, max = 0.5, description = "Wobble start delay (lags the spin)"},
+    {wbiEnd = 0.4375, min = 0.15, max = 0.9, description = "Wobble landing point; swings fill the rest"},
+  };
+
+  filter.passes = {
+    {
+      name = 'spinFx,
+      inputs = {'default},
+      uniforms = {
+        bigSpinRot = 0.0,
+        wobbleRot = 0.0,
+        opacity = 1.0,
+        aspect = 1.0,
+      },
+      glslShader = glsl,
+    },
+    {
+      name = 'dirBlur,
+      inputs = {'spinFx},
+      uniforms = {
+        ghostSpread = 0.0,
+        ghostDir = {0.0, 0.0},
+      },
+      glslShader = blurGlsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = getParameterFloat('progress);
+  f32 outro = getParameterFloat('outro);
+  f32 dir = getParameterFloat('direction);
+
+  f32 sign = 0.0 - 1.0;
+  if (dir > 0.5) { sign = 1.0; }
+
+  f32 intensity = clamp(getParameterFloat('intensity), 0.0, 1.0);
+
+  f32 x1 = getParameterFloat('bsiX1);
+  f32 y1 = getParameterFloat('bsiY1);
+  f32 x2 = getParameterFloat('bsiX2);
+  f32 y2 = getParameterFloat('bsiY2);
+  f32 bounce = bounceFromIntensity(intensity, BSI_BOUNCE_MIN, BSI_BOUNCE_MID, BSI_BOUNCE_MAX);
+  f32 freq = getParameterFloat('bsiFreq);
+  f32 decay = getParameterFloat('bsiDecay);
+  f32 land = getParameterFloat('bsiEnd);
+
+  f32 wx1 = getParameterFloat('wbiX1);
+  f32 wy1 = getParameterFloat('wbiY1);
+  f32 wx2 = getParameterFloat('wbiX2);
+  f32 wy2 = getParameterFloat('wbiY2);
+  f32 wBounce = bounceFromIntensity(intensity, WBI_BOUNCE_MIN, WBI_BOUNCE_MID, WBI_BOUNCE_MAX);
+  f32 wFreq = getParameterFloat('wbiFreq);
+  f32 wDecay = getParameterFloat('wbiDecay);
+  f32 wDelay = getParameterFloat('wbiDelay);
+  f32 wLand = getParameterFloat('wbiEnd);
+
+  f32 pPrev = max(p - 0.008, 0.0);
+
+  # The IN and OUT rotations are exact mirrors, so evaluating the IN curves at 1 - p
+  # gives OUT the correct endpoints and one shared tuning set. It also puts the bounce
+  # at p = 0, reading as pre-launch anticipation before the spin away.
+  # Clamping matters: a negative argument would fall into the bezier branch, where
+  # cssBezier clamps t to 0 and returns the start keyframe, i.e. a full-rotation jump.
+  # Mirrored, so the previous frame maps to a *later* a. Harmless: angularVelocity
+  # below takes abs() of the difference.
+  f32 a = p;
+  f32 aPrev = pPrev;
+  if (outro >= 0.5) {
+    a = clamp(1.0 - p, 0.0, 1.0);
+    aPrev = clamp(1.0 - pPrev, 0.0, 1.0);
+  }
+
+  f32 bigSpin = evalSpin(a, BSI_K0, x1, y1, x2, y2, bounce, freq, decay, 0.0, land);
+  f32 bigSpinPrev = evalSpin(aPrev, BSI_K0, x1, y1, x2, y2, bounce, freq, decay, 0.0, land);
+  f32 wobble = evalSpin(a, WBI_K0, wx1, wy1, wx2, wy2, wBounce, wFreq, wDecay, wDelay, wLand);
+  f32 wobblePrev =
+      evalSpin(aPrev, WBI_K0, wx1, wy1, wx2, wy2, wBounce, wFreq, wDecay, wDelay, wLand);
+
+  f32 bigSpinRot = -sign * bigSpin;
+  f32 wobbleRot = -sign * wobble;
+
+  f32 angularVelocity = abs((bigSpin + wobble) - (bigSpinPrev + wobblePrev));
+
+  f32 opacity = clamp(a / 0.06, 0.0, 1.0);
+
+  vec2 size = getTextureSize('default);
+  f32 aspect = size.x / size.y;
+
+  f32 blurScale = 10.0;
+  f32 texelSize = 1.0 / size.y;
+  f32 ghostSpread = angularVelocity * blurScale * 10.0 * texelSize;
+  f32 rot_offset = 3.14159 / 4.0;
+  f32 tanX = 0.0 - sin(0.0 - bigSpinRot + rot_offset);
+  f32 tanY = cos(0.0 - bigSpinRot + rot_offset);
+  vec2 ghostDir = {tanX, tanY};
+
+  setShaderUniform('spinFx, 'bigSpinRot, bigSpinRot);
+  setShaderUniform('spinFx, 'wobbleRot, wobbleRot);
+  setShaderUniform('spinFx, 'opacity, opacity);
+  setShaderUniform('spinFx, 'aspect, aspect);
+  setShaderUniform('dirBlur, 'ghostSpread, ghostSpread);
+  setShaderUniform('dirBlur, 'ghostDir, ghostDir);
+}
+
+string blurGlsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform float ghostSpread;
+uniform vec2 ghostDir;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 color = vec4(0.0);
+  float totalWeight = 0.0;
+
+  for (int i = -4; i <= 4; i++) {
+    float fi = float(i);
+    vec2 offset = ghostDir * ghostSpread * fi;
+    float k = 2.0;
+    float weight = 1.0 / (1.0 + k * abs(fi));
+    color += sampleInput(uv + offset) * weight;
+    totalWeight += weight;
+  }
+
+  gl_FragColor = toOutputFormat(color / totalWeight);
+}
+";
+
+string glsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform float bigSpinRot;
+uniform float wobbleRot;
+uniform float opacity;
+uniform float aspect;
+uniform vec2 outputSize;
+
+// One-pixel antialiased frame edge. The +0.5 bias puts the ramp entirely outside the
+// first interior pixel, so an untransformed frame stays fully opaque. A fixed uv
+// epsilon instead fades a fraction of the frame regardless of resolution, which shows
+// up as a permanent margin once the animation settles.
+float clipAlpha(vec2 uv) {
+  vec2 texel = 1.0 / max(outputSize, vec2(1.0));
+  vec2 d = min(uv, 1.0 - uv);
+  vec2 a = clamp(d / texel + 0.5, 0.0, 1.0);
+  return a.x * a.y;
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  // Keep the primary pivot just beyond the visual bottom-left across GL and Metal.
+  // 0.14 clears every shipping aspect with margin; the minimum at the authored
+  // 112 deg start angle is 0.065 at 9:16 and 0.082 at 9:19.5.
+  const float kPivotOffset = 0.14;
+  vec2 primaryAnchor =
+      vec2(-kPivotOffset, (1.0 - UP) * 0.5 - UP * kPivotOffset);
+  uv -= primaryAnchor;
+  uv.x *= aspect;
+  float primaryRot = bigSpinRot * UP;
+  float cr1 = cos(primaryRot);
+  float sr1 = sin(primaryRot);
+  uv = vec2(uv.x * cr1 - uv.y * sr1, uv.x * sr1 + uv.y * cr1);
+  uv.x /= aspect;
+  uv += primaryAnchor;
+
+  // Secondary wobble around image center
+  uv -= vec2(0.5);
+  uv.x *= aspect;
+  float secondaryRot = wobbleRot * UP;
+  float cr2 = cos(secondaryRot);
+  float sr2 = sin(secondaryRot);
+  uv = vec2(uv.x * cr2 - uv.y * sr2, uv.x * sr2 + uv.y * cr2);
+  uv.x /= aspect;
+  uv += vec2(0.5);
+
+  float ca = clipAlpha(uv);
+  vec4 color = sampleInput(uv) * ca * opacity;
+  gl_FragColor = toOutputFormat(color);
+}
+";

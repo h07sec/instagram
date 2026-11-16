@@ -1,0 +1,607 @@
+[Filter IgluscriptTextSpookyFilter]
+
+# Halloween 2026 Spooky text effect. Use a canvas-sized display mode: Match Input
+# intentionally clips geometry that falls outside the text input's tight bounds.
+# Motion is a pure function of wrapped playback time; there are no historical passes.
+
+f32 ANCHOR_ROWS = 8.0;
+
+[Init]
+fun init(Filter filter) {
+  filter.parameters = {
+    {uLoopDuration = 1.6, min = 0.4, max = 8.0, description = "Loop duration in seconds"},
+    {uStopMotionFPS = 12.5, min = 1.0, max = 30.0, description = "Nominal stop-motion FPS, rounded to whole poses per loop"},
+    {uEmitterSpacing = 0.127, min = 0.08, max = 0.30, description = "Horizontal emitter spacing as a fraction of line height"},
+    {uFireProbability = 0.85, min = 0.0, max = 1.0, description = "Fixed fraction of emitter cells that fire"},
+    {uGravity = 8.1, min = 0.0, max = 20.0, description = "Downward acceleration in line heights per second squared"},
+    {uLifeFrac = 0.27, min = 0.05, max = 0.80, description = "Fraction of each loop occupied by one bead life"},
+    {uDetachFrac = 0.61, min = 0.10, max = 0.90, description = "Life fraction where pinch-off and droplet shrink begin"},
+    {uSpookyRadius = 0.047, min = 0.005, max = 0.063, description = "Travelling bead radius as a fraction of line height"},
+    {uEndRadiusScale = 0.35, min = 0.05, max = 1.0, description = "Droplet radius at the end of its life"},
+    {uDropAspect = 1.25, min = 0.60, max = 2.0, description = "Vertical-to-horizontal droplet radius ratio"},
+    {uRootRadiusScale = 0.8, min = 0.2, max = 1.0, description = "Root bead radius relative to the travelling bead"},
+    {uNubDecayFrac = 0.15, min = 0.03, max = 0.35, description = "Post-pinch life fraction used to retract the residual nub"},
+    {uMaxFallLH = 0.76, min = 0.05, max = 0.90, description = "Maximum fall distance in line heights"},
+    {smoothFraction = 0.010, min = 0.0, max = 0.05, description = "Deprecated compatibility knob; fillet comes from half-resolution field reconstruction"},
+    {uWobbleAmplitude = 0.009, min = 0.0, max = 0.03, description = "Glyph-edge wobble amplitude as a fraction of line height"},
+    {uWobbleScale = 0.25, min = 0.02, max = 0.30, description = "Glyph-edge wobble correlation length in line heights"},
+    {edgeThreshold = 0.82, min = 0.05, max = 0.95, description = "Scalar-field contour; 0.5 preserves the declared bead radius"},
+    {edgeSoftness = 0.08, min = 0.005, max = 0.30, description = "Width of the scalar-field contour band"},
+    {uKeepSharp = 1.0, min = 0.0, max = 1.0, description = "Unions the original glyph over the goo contour to preserve hairlines"},
+    {uSpookyColor = {1.0, 1.0, 1.0, 1.0}, description = "Optional tint multiplier for source text, emoji, and generated goo"},
+    {uSeed = 0.0, min = 0.0, max = 100.0, description = "Re-rolls emitter phases, sizes, and firing gates"},
+  };
+
+  filter.passes = {
+    {
+      name = 'colBottom,
+      inputs = {'default},
+      bufferType = 'float16,
+      uniforms = {
+        inputSize = {1.0, 1.0},
+        padding = {0.0, 0.0},
+        lineHeight = 1.0,
+      },
+      glslShader = colBottomGlsl,
+    },
+    {
+      name = 'premultiplySource,
+      inputs = {'default},
+      uniforms = {
+        sourceNeedsPremultiply = 0.0,
+      },
+      glslShader = premultiplySourceGlsl,
+    },
+    {
+      name = 'field,
+      inputs = {'premultiplySource, 'colBottom},
+      shaderInputNames = {'default, 's_texture1},
+      scale = {0.5, 0.5},
+      uniforms = {
+        canvasSize = {1.0, 1.0},
+        padding = {0.0, 0.0},
+        lineHeight = 1.0,
+        uNoiseOrbit = {0.375, 0.6495191},
+        uWobbleAmplitude = 0.009,
+        uWobbleScale = 0.10,
+        uTime = 0.0,
+        uAnchorRows = 8.0,
+        uLoopDuration = 1.6,
+        uEmitterSpacing = 0.127,
+        uFireProbability = 0.85,
+        uGravity = 8.1,
+        uLifeFrac = 0.27,
+        uDetachFrac = 0.61,
+        uSpookyRadius = 0.047,
+        uEndRadiusScale = 0.35,
+        uDropAspect = 1.25,
+        uRootRadiusScale = 0.8,
+        uMaxFallLH = 0.76,
+        uFallAtDetach = 0.2812433,
+        uInvLifeFrac = 3.7037037,
+        uInvDetachRemain = 2.5641026,
+        uInvNubDecay = 6.6666667,
+        uRootGrowthEdge = 0.2135,
+        uSeed = 0.0,
+      },
+      glslShader = fieldGlsl,
+    },
+    {
+      name = 'compose,
+      # field is half-resolution, so this LINEAR input upsample supplies the
+      # small fillet prefilter without a dedicated full-graph blur pass.
+      inputs = {'premultiplySource, 'field},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        canvasSize = {1.0, 1.0},
+        lineHeight = 1.0,
+        uNoiseOrbit = {0.375, 0.6495191},
+        uWobbleAmplitude = 0.009,
+        uWobbleScale = 0.10,
+        edgeThreshold = 0.82,
+        edgeSoftness = 0.08,
+        uKeepSharp = 1.0,
+        uSpookyColor = {1.0, 1.0, 1.0, 1.0},
+        textColor = {1.0, 1.0, 1.0, 1.0},
+      },
+      glslShader = composeGlsl,
+    }
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  vec2 size = getTextureSize('default);
+  vec2 anchorSize = {size.x, ANCHOR_ROWS};
+  setTextureSize('colBottom, anchorSize);
+
+  f32 lineHeight = getParameterFloat('lineHeight);
+  if (lineHeight < 1.0) {
+    lineHeight = getParameterFloat('fontSize);
+  }
+  if (lineHeight < 1.0) {
+    lineHeight = size.y * 0.09;
+  }
+  vec2 padding = getParameterVec2('padding);
+  vec4 textColor = getParameterVec4('textColor);
+  if (length(textColor) < 0.0001) {
+    textColor = {1.0, 1.0, 1.0, 1.0};
+  }
+
+  f32 loopDuration = max(getParameterFloat('uLoopDuration), 0.001);
+  f32 time = getParameterFloat('time_sec);
+  f32 wrappedTime = time - floor(time / loopDuration) * loopDuration;
+
+  # Hold the shared animation clock so glyph wobble and beads advance together.
+  # A whole pose count keeps every hold equal and preserves the loop seam.
+  f32 stopMotionFPS = max(getParameterFloat('uStopMotionFPS), 1.0);
+  f32 poseCount = max(round(loopDuration * stopMotionFPS), 1.0);
+  f32 poseDuration = loopDuration / poseCount;
+  f32 steppedTime = floor(wrappedTime / poseDuration) * poseDuration;
+
+  setShaderUniform('colBottom, 'inputSize, size);
+  setShaderUniform('colBottom, 'padding, padding);
+  setShaderUniform('colBottom, 'lineHeight, lineHeight);
+
+  # The analytic field uses one circular offset, preserving the old stop-motion
+  # cadence and closed loop without procedural hash noise or a texture lookup.
+  f32 loopPhase = 6.2831853 * steppedTime / loopDuration;
+  f32 noisePhase = loopPhase + 1.04719755;
+  vec2 noiseOrbit = {cos(noisePhase) * 0.75, sin(noisePhase) * 0.75};
+
+  f32 wobbleAmplitude = getParameterFloat('uWobbleAmplitude);
+  f32 wobbleScale = getParameterFloat('uWobbleScale);
+
+  # Everything below that depends only on uniforms is resolved here. The shader
+  # kept these as per-pixel divides and min/max chains that no driver can fold.
+  f32 lifeFrac = getParameterFloat('uLifeFrac);
+  f32 detachFrac = getParameterFloat('uDetachFrac);
+  f32 gravity = getParameterFloat('uGravity);
+  f32 maxFallLH = getParameterFloat('uMaxFallLH);
+  f32 seed = getParameterFloat('uSeed);
+
+  f32 detachRemain = max(1.0 - detachFrac, 0.001);
+  f32 lifeSeconds = lifeFrac * loopDuration;
+  f32 detachAgeSeconds = lifeSeconds * detachFrac;
+  f32 fallAtDetach = min(0.5 * gravity * detachAgeSeconds * detachAgeSeconds, maxFallLH);
+  f32 nubDecayInterval = min(getParameterFloat('uNubDecayFrac), detachRemain);
+
+  setShaderUniform('field, 'canvasSize, size);
+  setShaderUniform('field, 'padding, padding);
+  setShaderUniform('field, 'lineHeight, lineHeight);
+  setShaderUniform('field, 'uNoiseOrbit, noiseOrbit);
+  setShaderUniform('field, 'uWobbleAmplitude, wobbleAmplitude);
+  setShaderUniform('field, 'uWobbleScale, wobbleScale);
+  setShaderUniform('field, 'uTime, steppedTime);
+  # colBottom's target can be allocated at the input size before setTextureSize
+  # takes effect, so index the texture that is actually bound.
+  f32 anchorRows = ANCHOR_ROWS;
+  vec2 anchorTexSize = getTextureSize('colBottom);
+  if (anchorTexSize.y >= 1.0) {
+    anchorRows = anchorTexSize.y;
+  }
+  setShaderUniform('field, 'uAnchorRows, anchorRows);
+  setShaderUniform('field, 'uLoopDuration, loopDuration);
+  setShaderUniform('field, 'uEmitterSpacing, getParameterFloat('uEmitterSpacing));
+  setShaderUniform('field, 'uFireProbability, getParameterFloat('uFireProbability));
+  setShaderUniform('field, 'uGravity, gravity);
+  setShaderUniform('field, 'uLifeFrac, lifeFrac);
+  setShaderUniform('field, 'uDetachFrac, detachFrac);
+  setShaderUniform('field, 'uSpookyRadius, getParameterFloat('uSpookyRadius));
+  setShaderUniform('field, 'uEndRadiusScale, getParameterFloat('uEndRadiusScale));
+  setShaderUniform('field, 'uDropAspect, getParameterFloat('uDropAspect));
+  setShaderUniform('field, 'uRootRadiusScale, getParameterFloat('uRootRadiusScale));
+  setShaderUniform('field, 'uMaxFallLH, maxFallLH);
+  setShaderUniform('field, 'uFallAtDetach, fallAtDetach);
+  setShaderUniform('field, 'uInvLifeFrac, 1.0 / max(lifeFrac, 0.001));
+  setShaderUniform('field, 'uInvDetachRemain, 1.0 / detachRemain);
+  setShaderUniform('field, 'uInvNubDecay, 1.0 / max(nubDecayInterval, 0.001));
+  setShaderUniform('field, 'uRootGrowthEdge, max(detachFrac * 0.35, 0.001));
+  setShaderUniform('field, 'uSeed, seed);
+
+  setShaderUniform('compose, 'canvasSize, size);
+  setShaderUniform('compose, 'lineHeight, lineHeight);
+  setShaderUniform('compose, 'uNoiseOrbit, noiseOrbit);
+  setShaderUniform('compose, 'uWobbleAmplitude, wobbleAmplitude);
+  setShaderUniform('compose, 'uWobbleScale, wobbleScale);
+  setShaderUniform('compose, 'edgeThreshold, getParameterFloat('edgeThreshold));
+  setShaderUniform('compose, 'edgeSoftness, max(getParameterFloat('edgeSoftness), 0.005));
+  setShaderUniform('compose, 'uKeepSharp, getParameterFloat('uKeepSharp));
+  setShaderUniform('compose, 'uSpookyColor, getParameterVec4('uSpookyColor));
+  setShaderUniform('compose, 'textColor, textColor);
+}
+
+# Each reduced output row represents one top-down text line and stores that line's
+# lowest covered texel for the current x column: R = bottomV, G = valid. This keeps
+# upper-line anchors independent when the shipping text renderer supplies multi-line text.
+string colBottomGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 inputSize;
+uniform vec2 outputSize;
+uniform vec2 padding;
+uniform float lineHeight;
+
+#define COARSE_STEPS 128
+#define FINE_STEPS 8
+#define MIN_ALPHA 0.01
+
+// The drip geometry is bottom-origin, but text labels reach this filter top row
+// first on every app host and backend; this transform is its own inverse at
+// sampling boundaries.
+vec2 flipToBottomOrigin(vec2 uv) {
+  return vec2(uv.x, 1.0 - uv.y);
+}
+
+vec2 scanLine(float x, float topV, float lowerV) {
+  float bottomV = 0.0;
+  float valid = 0.0;
+  float coarseStep = max((topV - lowerV) / float(COARSE_STEPS - 1), 0.000001);
+
+  // Both scans visit the same sample positions as the original top-down scans and
+  // return the same lowest hit, but walk upward from the bottom and stop at the
+  // first hit instead of overwriting on every hit down the whole line box.
+  for (int i = COARSE_STEPS - 1; i >= 0; --i) {
+    float y = topV - float(i) * coarseStep;
+    if (sampleInput(flipToBottomOrigin(vec2(x, y))).a > MIN_ALPHA) {
+      bottomV = y;
+      valid = 1.0;
+      break;
+    }
+  }
+
+  if (valid > 0.5) {
+    float coarseHit = bottomV;
+    for (int i = FINE_STEPS; i >= 1; --i) {
+      float y = max(coarseHit - coarseStep * float(i) / float(FINE_STEPS), lowerV);
+      if (sampleInput(flipToBottomOrigin(vec2(x, y))).a > MIN_ALPHA) {
+        bottomV = y;
+        break;
+      }
+    }
+  }
+
+  return vec2(bottomV, valid);
+}
+
+void main() {
+  vec2 uv = flipToBottomOrigin(sourceTextureCoordinate);
+  float rowFromBottom = min(floor(uv.y * outputSize.y), outputSize.y - 1.0);
+  float lineIndex = outputSize.y - 1.0 - rowFromBottom;
+  float lineHeightTexels = max(lineHeight * mix(1.0, 2.0, step(UP, 0.0)), 1.0);
+  float lineTopPx = padding.y + lineIndex * lineHeightTexels;
+  vec2 anchor = vec2(0.0);
+
+  if (lineTopPx < inputSize.y && lineTopPx + lineHeightTexels > 0.0) {
+    float topV = clamp(1.0 - lineTopPx / inputSize.y, 0.0, 1.0);
+    float lowerV = clamp(1.0 - (lineTopPx + lineHeightTexels) / inputSize.y, 0.0, 1.0);
+    if (topV > lowerV) {
+      anchor = scanLine(sourceTextureCoordinate.x, topV, lowerV);
+    }
+  }
+
+  gl_FragColor = toOutputFormat(vec4(anchor, 0.0, 1.0));
+}
+";
+
+# Normalize the source once before any displaced LINEAR sample. This keeps
+# interpolation alpha-correct for colored text and emoji on every backend.
+string premultiplySourceGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform float sourceNeedsPremultiply;
+
+void main() {
+  vec4 sourceColor = sampleInput(sourceTextureCoordinate);
+  // Shipping OpenGL uses straight-alpha pass data (UP = +1); Metal supplies
+  // premultiplied data (UP = -1). Easel also opts in through the uniform.
+  float openGlNeedsPremultiply = step(0.0, UP);
+  float needsPremultiply = max(clamp(sourceNeedsPremultiply, 0.0, 1.0), openGlNeedsPremultiply);
+  float rgbScale = mix(1.0, sourceColor.a, needsPremultiply);
+  sourceColor.rgb *= rgbScale;
+  gl_FragColor = toOutputFormat(sourceColor);
+}
+";
+
+# Builds the glyph-plus-droplet scalar field.
+# range so two coincident metaballs fit in uint8; compose scales its contour by the
+# same factor. BLOB_SUPPORT_SCALE makes uSpookyRadius name the visible 0.5 contour,
+# rather than the wider compact-support boundary.
+string fieldGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform vec2 canvasSize;
+uniform vec2 padding;
+uniform float lineHeight;
+uniform vec2 uNoiseOrbit;
+uniform float uWobbleAmplitude;
+uniform float uWobbleScale;
+uniform float uTime;
+uniform float uAnchorRows;
+uniform float uLoopDuration;
+uniform float uEmitterSpacing;
+uniform float uFireProbability;
+uniform float uGravity;
+uniform float uLifeFrac;
+uniform float uDetachFrac;
+uniform float uSpookyRadius;
+uniform float uEndRadiusScale;
+uniform float uDropAspect;
+uniform float uRootRadiusScale;
+uniform float uMaxFallLH;
+uniform float uFallAtDetach;
+uniform float uInvLifeFrac;
+uniform float uInvDetachRemain;
+uniform float uInvNubDecay;
+uniform float uRootGrowthEdge;
+uniform float uSeed;
+
+#define BLOB_SUPPORT_SCALE 2.2012848
+#define PINCH_SEPARATION_SCALE 1.3222222
+
+vec2 flipToBottomOrigin(vec2 uv) {
+  return vec2(uv.x, 1.0 - uv.y);
+}
+
+float smoothTriangle(float phase) {
+  float wave = 1.0 - 4.0 * abs(fract(phase) - 0.5);
+  return wave * (1.5 - 0.5 * wave * wave);
+}
+
+vec2 wobbleOffset(vec2 uv, float lineHeightTexels) {
+  float noiseScale = 1.0 / (lineHeightTexels * max(uWobbleScale, 0.001));
+  vec2 noisePoint = uv * (canvasSize * noiseScale) + uNoiseOrbit;
+  float noiseX = smoothTriangle(dot(noisePoint, vec2(0.7548777, 0.5698403)));
+  float noiseY = smoothTriangle(dot(noisePoint, vec2(-0.4382890, 0.8987940)) + noiseX * 0.35);
+  return vec2(noiseX, noiseY) * (uWobbleAmplitude * lineHeightTexels / canvasSize);
+}
+
+float hash11(float p) {
+  p = fract(p * 0.1031);
+  p *= p + 33.33;
+  p *= p + p;
+  return fract(p);
+}
+
+float compactBead(vec2 deltaLH, vec2 visibleRadiusLH) {
+  vec2 supportRadius = max(visibleRadiusLH * BLOB_SUPPORT_SCALE, vec2(0.00001));
+  vec2 qv = deltaLH / supportRadius;
+  float q = dot(qv, qv);
+  float compact = max(1.0 - q, 0.0);
+  return compact * compact * compact;
+}
+
+float revealOutsideGlyph(float downFromAnchorLH, float verticalRadiusLH) {
+  float supportRadiusLH = verticalRadiusLH * BLOB_SUPPORT_SCALE;
+  float edgeAdvanceLH = downFromAnchorLH + supportRadiusLH;
+  return smoothstep(0.0, max(verticalRadiusLH, 0.00001), edgeAdvanceLH);
+}
+
+// Hidden metaball field is visually identical to covered field, so omit it
+// entirely until support advances through the glyph's bottom contour.
+float beadField(vec2 uv, float emitterX, float cell, float lineIndex, vec2 pxPerLH, float lhToV) {
+  if (lineIndex < 0.0 || lineIndex >= uAnchorRows) {
+    return 0.0;
+  }
+
+  float anchorRowV = 1.0 - (lineIndex + 0.5) / uAnchorRows;
+  vec4 anchor = texture2D(s_texture1, flipToBottomOrigin(vec2(emitterX, anchorRowV)));
+  if (anchor.g <= 0.5) {
+    return 0.0;
+  }
+
+  // hash11 is chaotic in its argument: folding the uSeed terms into a single
+  // uniform shifts the float addition grouping, which re-rolls which emitters
+  // fire and when. Keep these three arguments exactly as written.
+  float eventKey = cell + lineIndex * 4096.0;
+  float gate = hash11(eventKey * 0.7548777 + uSeed * 31.0 + 7.13);
+  float phase = hash11(eventKey * 1.713 + uSeed * 17.0 + 0.37);
+  float localPhase = fract(uTime / uLoopDuration + phase);
+  if (gate >= uFireProbability || localPhase >= uLifeFrac) {
+    return 0.0;
+  }
+
+  float lifeProgress = localPhase * uInvLifeFrac;
+  float ageSeconds = localPhase * uLoopDuration;
+  float sizeJitter = mix(0.85, 1.15, hash11(eventKey * 2.417 + uSeed * 11.0 + 3.71));
+  float baseRadiusLH = uSpookyRadius * sizeJitter;
+
+  // The travelling bead starts deep inside the glyph. Solving its hidden inset
+  // from the detach-time trajectory puts the two bead centers at the measured
+  // short-waist separation without changing the ballistic velocity.
+  float rootBaseRadiusLH = baseRadiusLH * uRootRadiusScale;
+  float rootInsetLH = rootBaseRadiusLH * uDropAspect * 0.20;
+  float targetPinchSeparationLH = baseRadiusLH * uDropAspect * (1.0 + uRootRadiusScale) * PINCH_SEPARATION_SCALE;
+  float minimumInsetLH = baseRadiusLH * uDropAspect * BLOB_SUPPORT_SCALE * 1.02;
+  float reachableSeparationLH = max(uFallAtDetach + rootInsetLH - minimumInsetLH, 0.0);
+  float pinchSeparationLH = min(targetPinchSeparationLH, reachableSeparationLH);
+  float spawnInsetLH = max(uFallAtDetach + rootInsetLH - pinchSeparationLH, minimumInsetLH);
+
+  float shrinkProgress = clamp((lifeProgress - uDetachFrac) * uInvDetachRemain, 0.0, 1.0);
+  float travelRadiusLH = baseRadiusLH * mix(1.0, uEndRadiusScale, shrinkProgress);
+  float fallLH = min(0.5 * uGravity * ageSeconds * ageSeconds, uMaxFallLH);
+  float travelCenterV = anchor.r + (spawnInsetLH - fallLH) * lhToV;
+  vec2 travelCenter = vec2(emitterX, travelCenterV);
+  vec2 travelDeltaLH = (uv - travelCenter) * pxPerLH;
+  vec2 travelRadiiLH = vec2(travelRadiusLH, travelRadiusLH * uDropAspect);
+  float travelField = compactBead(travelDeltaLH, travelRadiiLH);
+  float travelDownFromAnchorLH = fallLH - spawnInsetLH;
+  float travelBirthRadiusY = baseRadiusLH * uDropAspect;
+  float travelReveal = revealOutsideGlyph(travelDownFromAnchorLH, travelBirthRadiusY);
+
+  // The contour bead grows from zero, then shrinks and retracts into the glyph
+  // after pinch-off. Its field adds to the travelling bead to form the waist.
+  float rootGrowth = smoothstep(0.0, uRootGrowthEdge, lifeProgress);
+  float nubProgress = clamp((lifeProgress - uDetachFrac) * uInvNubDecay, 0.0, 1.0);
+  float rootRadiusLH = rootBaseRadiusLH * rootGrowth * (1.0 - nubProgress);
+  float rootField = 0.0;
+  float rootReveal = 0.0;
+  if (rootRadiusLH > 0.00001) {
+    float retractLH = rootBaseRadiusLH * uDropAspect * nubProgress;
+    float rootInsetFromAnchorLH = rootInsetLH + retractLH;
+    float rootCenterV = anchor.r + rootInsetFromAnchorLH * lhToV;
+    vec2 rootCenter = vec2(emitterX, rootCenterV);
+    vec2 rootDeltaLH = (uv - rootCenter) * pxPerLH;
+    vec2 rootRadiiLH = vec2(rootRadiusLH, rootRadiusLH * uDropAspect);
+    rootField = compactBead(rootDeltaLH, rootRadiiLH);
+    rootReveal = revealOutsideGlyph(-rootInsetFromAnchorLH, rootRadiiLH.y);
+  }
+
+  return rootField * rootReveal + travelField * travelReveal;
+}
+
+void main() {
+  vec2 sampleUV = sourceTextureCoordinate;
+  vec2 uv = flipToBottomOrigin(sampleUV);
+  float lineHeightTexels = max(lineHeight * mix(1.0, 2.0, step(UP, 0.0)), 1.0);
+  // Both conversions are loop-invariant but their dividends are not, so the
+  // inlined beadField calls could not hoist the divides themselves.
+  vec2 pxPerLH = canvasSize / lineHeightTexels;
+  float lhToV = lineHeightTexels / canvasSize.y;
+  float spacingLH = max(uEmitterSpacing, 0.001);
+  float spacingUv = spacingLH * lineHeightTexels / canvasSize.x;
+  float baseCell = floor(uv.x / spacingUv);
+  // Size jitter tops out at 1.15. Skip the outer pair only when compact
+  // support cannot reach it; extreme radius/spacing parameters retain radius 2.
+  float maxRadiusScale = max(1.0, max(uEndRadiusScale, uRootRadiusScale));
+  float maxSupportCells = uSpookyRadius * 1.15 * maxRadiusScale * BLOB_SUPPORT_SCALE / spacingLH;
+  float useOuterCells = step(1.0, maxSupportCells);
+  float yFromTop = canvasSize.y * (1.0 - uv.y) - padding.y;
+  float currentLine = floor(yFromTop / lineHeightTexels);
+  float blobSum = 0.0;
+
+  if (useOuterCells > 0.5) {
+    float cell = baseCell - 2.0;
+    float emitterUv = (cell + 0.5) * spacingUv;
+    if (emitterUv > 0.0 && emitterUv < 1.0) {
+      float emitterPixel = floor(emitterUv * canvasSize.x);
+      float emitterX = (emitterPixel + 0.5) / canvasSize.x;
+      blobSum += beadField(uv, emitterX, cell, currentLine, pxPerLH, lhToV);
+      blobSum += beadField(uv, emitterX, cell, currentLine - 1.0, pxPerLH, lhToV);
+    }
+  }
+
+  for (int cellOffset = -1; cellOffset <= 1; ++cellOffset) {
+    float cell = baseCell + float(cellOffset);
+    float emitterUv = (cell + 0.5) * spacingUv;
+    if (emitterUv > 0.0 && emitterUv < 1.0) {
+      float emitterPixel = floor(emitterUv * canvasSize.x);
+      float emitterX = (emitterPixel + 0.5) / canvasSize.x;
+      blobSum += beadField(uv, emitterX, cell, currentLine, pxPerLH, lhToV);
+      blobSum += beadField(uv, emitterX, cell, currentLine - 1.0, pxPerLH, lhToV);
+    }
+  }
+
+  if (useOuterCells > 0.5) {
+    float cell = baseCell + 2.0;
+    float emitterUv = (cell + 0.5) * spacingUv;
+    if (emitterUv > 0.0 && emitterUv < 1.0) {
+      float emitterPixel = floor(emitterUv * canvasSize.x);
+      float emitterX = (emitterPixel + 0.5) / canvasSize.x;
+      blobSum += beadField(uv, emitterX, cell, currentLine, pxPerLH, lhToV);
+      blobSum += beadField(uv, emitterX, cell, currentLine - 1.0, pxPerLH, lhToV);
+    }
+  }
+
+  // Only the glyph sample follows wobble; detached bead coordinates remain
+  // independent so their silhouettes do not inherit contour motion.
+  vec2 glyphUv = flipToBottomOrigin(uv + wobbleOffset(uv, lineHeightTexels));
+  float noisyGlyph = sampleInput(glyphUv).a;
+
+  float encodedGlyph = clamp(noisyGlyph * 0.5, 0.0, 1.0);
+  float encodedField = clamp(max(noisyGlyph, blobSum) * 0.5, 0.0, 1.0);
+  gl_FragColor = toOutputFormat(vec4(encodedField, noisyGlyph, encodedGlyph, encodedField));
+}
+";
+
+string composeGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform vec2 canvasSize;
+uniform float lineHeight;
+uniform vec2 uNoiseOrbit;
+uniform float uWobbleAmplitude;
+uniform float uWobbleScale;
+uniform float edgeThreshold;
+uniform float edgeSoftness;
+uniform float uKeepSharp;
+uniform vec4 uSpookyColor;
+uniform vec4 textColor;
+
+vec2 flipToBottomOrigin(vec2 uv) {
+  return vec2(uv.x, 1.0 - uv.y);
+}
+
+float smoothTriangle(float phase) {
+  float wave = 1.0 - 4.0 * abs(fract(phase) - 0.5);
+  return wave * (1.5 - 0.5 * wave * wave);
+}
+
+vec2 wobbleOffset(vec2 uv, float lineHeightTexels) {
+  float noiseScale = 1.0 / (lineHeightTexels * max(uWobbleScale, 0.001));
+  vec2 noisePoint = uv * (canvasSize * noiseScale) + uNoiseOrbit;
+  float noiseX = smoothTriangle(dot(noisePoint, vec2(0.7548777, 0.5698403)));
+  float noiseY = smoothTriangle(dot(noisePoint, vec2(-0.4382890, 0.8987940)) + noiseX * 0.35);
+  return vec2(noiseX, noiseY) * (uWobbleAmplitude * lineHeightTexels / canvasSize);
+}
+
+void main() {
+  vec2 sampleUV = sourceTextureCoordinate;
+  vec2 uv = flipToBottomOrigin(sampleUV);
+  float lineHeightTexels = max(lineHeight * mix(1.0, 2.0, step(UP, 0.0)), 1.0);
+  vec2 sourceUv = flipToBottomOrigin(uv + wobbleOffset(uv, lineHeightTexels));
+  vec4 sourceColor = sampleInput(sourceUv);
+  vec4 sampledFields = texture2D(s_texture1, sampleUV);
+  float field = sampledFields.r;
+  float glyphField = sampledFields.b;
+  float encodedThreshold = edgeThreshold * 0.5;
+  float encodedHalfBand = edgeSoftness * 0.25;
+  float gooShape = smoothstep(encodedThreshold - encodedHalfBand, encodedThreshold + encodedHalfBand, field);
+  float glyphGooShape = smoothstep(encodedThreshold - encodedHalfBand, encodedThreshold + encodedHalfBand, glyphField);
+  gooShape *= step(0.00001, field);
+  glyphGooShape *= step(0.00001, glyphField);
+
+  float sharpGlyph = sourceColor.a;
+  float addedShape = clamp(gooShape - glyphGooShape, 0.0, 1.0);
+  float coveragePreservingShape = clamp(sharpGlyph + addedShape, 0.0, 1.0);
+  float shape = mix(gooShape, coveragePreservingShape, uKeepSharp);
+
+  // premultiplySource runs before this LINEAR displacement, so this division
+  // recovers stable straight RGB without edge darkening.
+  float safeSourceAlpha = max(sourceColor.a, 0.00001);
+  vec3 straightSourceColor = sourceColor.rgb * (1.0 / safeSourceAlpha);
+  straightSourceColor *= step(0.00001, sourceColor.a);
+
+  // Canvas glyphs already contain the selected text color. Color emoji do not,
+  // so tint their source variation rather than replacing every covered pixel.
+  float flatGlyphDistance = length(straightSourceColor - textColor.rgb);
+  float flatGlyphMix = 1.0 - smoothstep(0.025, 0.125, flatGlyphDistance);
+  vec3 emojiTintedColor = straightSourceColor * textColor.rgb;
+  vec3 sourceAwareColor = mix(emojiTintedColor, textColor.rgb, flatGlyphMix);
+
+  // Preserve source/emoji color only where the original glyph exists. Coverage
+  // created by blur or metaballs inherits the user's selected text color.
+  float baseCoverage = min(sharpGlyph, shape);
+  float generatedCoverage = max(shape - baseCoverage, 0.0);
+  float baseAlpha = baseCoverage * uSpookyColor.a;
+  float generatedAlpha = generatedCoverage * textColor.a * uSpookyColor.a;
+  vec3 tint = uSpookyColor.rgb;
+  vec3 premultipliedRgb = tint * (sourceAwareColor * baseAlpha + textColor.rgb * generatedAlpha);
+  float alpha = baseAlpha + generatedAlpha;
+  gl_FragColor = toOutputFormat(vec4(premultipliedRgb, alpha));
+}
+";

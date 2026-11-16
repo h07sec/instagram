@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1597443533921831",
+  "displayName": "Luxurious",
+  "description": "[IG Edits] Color filter name. Soft luxe LUT grade with subtle saturation lift and a deep skin-tone rouge for a lipstick-leaning flush.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGQ5uECxog"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "7f838da1",
+      "handle": "AQADzCrRU0ee",
+      "md5": "3c081c1ac5c700478c54cbf24f4b88ec"
+    }
+  },
+  "iglu": {
+    "legacyId": 3108
+  },
+  "assets": [
+    {
+      "name": "luxurious_lut.png",
+      "assetHash": "119c8a7d7a0d1a0212d5daa1765da87cd6390c73fb0276b7f3c13e430647f4d6",
+      "hubAssetId": "1117809917677475"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFbIFzIRgGYqlegDAAGxx-rKxlU3bhQoAAAD"
+    }
+  }
+}

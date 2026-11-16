@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "D65C0D2D-E72E-4BB6-B7B7-68CF67A41451",
+  "displayName": "2014",
+  "description": "[IG Edits] Color filter name. With \"2014\", the creator gets a warm, faded 2014-era 8x8 LUT color grade applied to the camera image.",
+  "iglu": {
+    "legacyId": 3239
+  },
+  "assets": [
+    {
+      "name": "filter_2014_lut.png",
+      "assetHash": "f3288425291993731262a75e99252eefedbd1926d8b47893d02ee2ef8d2cdd38",
+      "hubAssetId": "2249947702239381"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQALLs_dFBux"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "9e680e9c",
+      "handle": "AQAEFq086zlR",
+      "md5": "32d711dddfea7ba33a4b2d9545bff2ca"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GI9iDzP6ma_ELFEGAB_NLYEH_QxebhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "iglu": {
+    "customization": [
+      {
+        "name": "zoom",
+        "default": 0.1851852,
+        "min": 0.0,
+        "max": 1.0,
+        "displayName": "Zoom",
+        "displayNameDescription": "[IG Edits] Slider label controlling the zoom factor (scale toward/away from the subject) of a video effect; exact range varies per effect."
+      },
+      {
+        "name": "swing",
+        "default": 0.0,
+        "min": -1.0,
+        "max": 1.0,
+        "beatReactive": {
+          "mode": "curvePlayback",
+          "curvePlayback": {
+            "durationScale": 1.0,
+            "output": "position",
+            "alternate": true
+          },
+          "range": [
+            -1.0,
+            1.0
+          ]
+        }
+      }
+    ]
+  }
+}

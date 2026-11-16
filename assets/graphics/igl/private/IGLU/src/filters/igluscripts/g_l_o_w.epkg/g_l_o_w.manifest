@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "840909253024552",
+  "displayName": "• G L O W •",
+  "description": "[IG Edits] Video effect name. With \"• G L O W •\", the creator can apply a Spark-ported vintage grade with sparkling glitter on bright highlights.",
+  "iglu": {
+    "legacyId": 3408
+  },
+  "assets": [
+    {
+      "name": "g_l_o_w_lut.png",
+      "assetHash": "eda817f652880e295e9a95fe6c700ca1ae7195aac73235ab72c64648fa94d8ec",
+      "hubAssetId": "1663937532027691"
+    },
+    {
+      "name": "g_l_o_w_star.png",
+      "assetHash": "7cd8fcc37fb00fbe770d454b0befa6bf8dab940de67400f8fc9771ae4f019b35",
+      "hubAssetId": "2000661327280074"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGA9IVTVC1"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "19be5874",
+      "handle": "AQAHOj5ACwjc",
+      "md5": "e67d33cbce290da1f21c7de0290d97c7"
+    }
+  }
+}

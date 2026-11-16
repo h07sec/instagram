@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">[%1$dd ago#f5ec065222f91180278e123a865ccdaf:1]</item>
+        <item quantity="one">[%1$dd ago#84e653356a4b7e12c99cecc5b9f5c00c:1]</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">[%1$dh ago#8765768f63ea86c9ad86f905ee034c5f:1]</item>
+        <item quantity="one">[%1$dh ago#dfbc7b6626f64f2164ab61acfdfa947c:1]</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">[%1$dm ago#5c7a82eccbdbd9865071d599d24592a9:1]</item>
+        <item quantity="one">[%1$dm ago#679bae49d9549a81d52a1868f508ec6d:1]</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">[%1$d browser tasks#77a31e12b5fba81c91c0d1962fc310ff:1]</item>
+        <item quantity="one">[%1$d browser task#719576175dee80336f7cf3c200daff85:1]</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">[Expires in %1$d hours#4760bc892292cc98572cc3b2cac86d30:1]</item>
+        <item quantity="one">[Expires in %1$d hour#1b8b67e784db468cd00e9095bb9d5dfe:1]</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">[Expires in %1$d minutes#49b48d2f6d6b1dafb32ab59719e566a1:1]</item>
+        <item quantity="one">[Expires in %1$d minute#ffddd1c11930b0430f65c3a10d60f378:1]</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">[%1$d tasks need review#a710f77696c0997e8768eda9269ba2f6:1]</item>
+        <item quantity="one">[A task needs review#c849896857b3781ccd15cb148b1f0e9e:1]</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">[%1$d passengers#f344bd55979ec9cea56e93697045e9fe:1]</item>
+        <item quantity="one">[%1$d passenger#679c94786c031a04ad90bf92ff6b6397:1]</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">[%1$d tasks need review#95988b907f7a5174e3a91f89f5ae8855:1]</item>
+        <item quantity="one">[%1$d task needs review#3604e2721c59bdb36fa2ded798120c38:1]</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">[%1$d items#568158f34d67da33529b881fef5c16ae:1]</item>
+        <item quantity="one">[%1$d item#6403b925caecce74e04d2bbed8aec42f:1]</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">[%1$d connectors#724fcd3f33cdfaf3b15d504513a777f6:1]</item>
+        <item quantity="one">[%1$d connector#2ad9a38670d965d24f3ad1a6c1b8cd32:1]</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">[%1$d carry-on bags#f7bed4225c513ee3170f28920681c9a2:1]</item>
+        <item quantity="one">[%1$d carry-on bag#0148602b9bcec46b2493b701f8a8356a:1]</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">[%1$d checked bags#cb5e49673826e898a40388fc78f1565e:1]</item>
+        <item quantity="one">[%1$d checked bag#f600230a47ed9fd56681fc5f6613bfba:1]</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">[%1$d stops#8778dfbaa35c3df6229f40f08c4d96eb:1]</item>
+        <item quantity="one">[%1$d stop#6d2d9e10d2b3557d3cb93fa96df88d90:1]</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">[%1$d stops#6f2dac54d1cecca3dfcfafdd0d5e7a1f:1]</item>
+        <item quantity="one">[%1$d stop#cc59ddd189416e2ec98bde7e9e0e9312:1]</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">[Options %1$s#2a743113642363d7e25cae01711e7d0f:1]</item>
+        <item quantity="one">[Option %1$s#c59f17e16aaccc53c7500dbc66a91ae7:1]</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">[Use %1$d images#6da320a6d08f86358e2f899cd8117cf8:1]</item>
+        <item quantity="one">[Use %1$d image#7d18f1213a1d404499f0130ad8904633:1]</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">[Free returns for %1$d days#ff43c6a7d3434755c6be2d666cb4c5c6:1]</item>
+        <item quantity="one">[Free returns for %1$d day#4787166261abe2baa119f5aab46bdb41:1]</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">[%1$d-day returns#094075cb3c2a10f25d0605ae0a38ae09:1]</item>
+        <item quantity="one">[%1$d-day returns#712cf9d8b7f111343c8b1bf76390864e:1]</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">[Temporary card expires in %1$d hours#810702b36468faf6c275e64e457fc949:1]</item>
+        <item quantity="one">[Temporary card expires in %1$d hour#ee731ee8feb3bda858553ca6a5ac64f2:1]</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">[%1$d items#f8f3e47b715b8a007f629b66889a5168:1]</item>
+        <item quantity="one">[%1$d item#8ed52bd0fd0f01e5319eb4c5c23496e0:1]</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">[%1$d items#ead488618f5634343608c3468260d2de:1]</item>
+        <item quantity="one">[%1$d item#53d27f8e27c3c16bc1259301b0ea533a:1]</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">[Follow all (%1$d)#514cb8bfc9cddca5117811e1f995641c:1]</item>
+        <item quantity="one">[Follow all (%1$d)#1f97f0877eae4aad8d35c3568c85a14f:1]</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">[Follow (%1$d)#c5bafaf967871a1a4eaf7fd2eba7c903:1]</item>
+        <item quantity="one">[Follow (%1$d)#269f976b5889554c71d306e61d720a4c:1]</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">[Every %1$d hours#4e3ecccad98092f40029160a36ca1281:1]</item>
+        <item quantity="one">[Every %1$d hour#e8df0c0484d1d76bfaa16511e4c467fc:1]</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">[Every %1$d minutes#5154b5fcd16e987a2cfbcd2126e4eb9f:1]</item>
+        <item quantity="one">[Every %1$d minute#85a5ab7abc76aa1a3acf3137af3b73a1:1]</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">[Every %1$d seconds#6f865fb333246d73e4ac27c973cb41a8:1]</item>
+        <item quantity="one">[Every %1$d second#021d2414c5c0a4778be61d79100f1fa0:1]</item>
+    </plurals>
+</resources>

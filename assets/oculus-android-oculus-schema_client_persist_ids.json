@@ -1,0 +1,30 @@
+{
+  "IGNativeBlockUser": {
+    "operation_name": "IGNativeBlockUser",
+    "operation_name_hash": "2045156111",
+    "operation_text_hash": "1764449163406192546",
+    "client_doc_id": "20451561111764449163406192546",
+    "schema": "oculus"
+  },
+  "IGNativePeopleAndCapacity": {
+    "operation_name": "IGNativePeopleAndCapacity",
+    "operation_name_hash": "2515789092",
+    "operation_text_hash": "3159529688207751317",
+    "client_doc_id": "25157890923159529688207751317",
+    "schema": "oculus"
+  },
+  "IGNativePlayerReport": {
+    "operation_name": "IGNativePlayerReport",
+    "operation_name_hash": "288111126",
+    "operation_text_hash": "11934447390289299671",
+    "client_doc_id": "28811112611934447390289299671",
+    "schema": "oculus"
+  },
+  "IGNativePlayerReportReasons": {
+    "operation_name": "IGNativePlayerReportReasons",
+    "operation_name_hash": "2972641183",
+    "operation_text_hash": "14197642501195720837",
+    "client_doc_id": "297264118314197642501195720837",
+    "schema": "oculus"
+  }
+}

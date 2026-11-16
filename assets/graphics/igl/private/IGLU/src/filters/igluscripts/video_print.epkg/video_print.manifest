@@ -1,0 +1,64 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQADa--lboeU",
+      "key": "f08d109c",
+      "md5": "0494bdc164a09f13c624902323bf290d"
+    }
+  },
+  "description": "[IG Edits] Drawing brush effect name. With \"Print\", the creator can reveal the subject with a sweeping print head that presses the image into posterized ink.",
+  "displayName": "Print",
+  "identifier": "7a1f8520-2824-43f4-a675-c32afdacb5be",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 1000,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "down",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 1.0,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "default": 0.15,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect.",
+        "max": 1.0,
+        "min": 0.0,
+        "name": "size"
+      },
+      {
+        "default": 0.0,
+        "displayName": "Hue",
+        "displayNameDescription": "[IG Edits] Slider label controlling the hue (color tint) applied by a video effect.",
+        "max": 1.0,
+        "min": 0.0,
+        "name": "variation"
+      }
+    ],
+    "legacyId": 4017
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGU3pLzcjk"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

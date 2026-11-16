@@ -1,0 +1,77 @@
+[Filter BlackAndWhiteAndBlur]
+# "black&white&blur" ported from the Spark effect (1147928238896162). No face tracking.
+#
+#   Spark draws the camera in black and white (its Adjust Colors shader, saturation 0), then eight
+#   more black-and-white copies of the camera on top at 0.18 each, fed by delay frames: a motion echo.
+#   Rebuilt as one feedback trail: each frame keeps 70% of the previous echo, which leaves the
+#   current frame the same ~25% weight Spark's eight 0.18 layers leave it.
+
+[Init]
+fun init(Filter filter)
+{
+    filter.parameters = {
+        {strength = 1.0, min = 0.0, max = 1.0, description = "Mix of the effect over the original image (1.0 = full effect)"},
+        {trail_mix = 0.7, min = 0.0, max = 0.95, description = "Share of the previous echo kept each frame"},
+    };
+
+    makeHistoricalTexture('prev_echo, 'echo);
+
+    filter.passes = {
+      {
+        name = 'echo,
+        inputs = {'default, 'prev_echo},
+        uniforms = {
+          strength = 1.0,
+          trail_mix = 0.7,
+        },
+        glslShader = glslEcho,
+      },
+      {
+        # Required: history is kept from a pass that feeds another pass, never from the last one.
+        name = 'output,
+        inputs = {'echo},
+        glslShader = glslCopy,
+      },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter){
+    setShaderUniform('echo, 'strength, getParameterFloat('strength));
+    setShaderUniform('echo, 'trail_mix, getParameterFloat('trail_mix));
+}
+
+#### GLSL shader ####
+
+string glslEcho = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    uniform sampler2D auxSampler0;  // 'default (camera)
+    uniform sampler2D auxSampler1;  // 'prev_echo (last frame's echo)
+
+    uniform bool hasHistory;
+    uniform float trail_mix;
+
+    void main() {
+      vec4 cam = sampleInput(sourceTextureCoordinate);
+      // Spark's Adjust Colors at saturation 0: Rec. 709 luma.
+      float y = dot(cam.rgb, vec3(0.2126, 0.7152, 0.0722));
+      // strength: global effect-strength uniform declared by BaseUniformsOpenGL; it scales the
+      // desaturation and the echo, so 0 is an exact passthrough.
+      vec3 bw = mix(cam.rgb, vec3(y), strength);
+
+      // The history reads transparent black until a frame exists, so start the echo from this frame.
+      vec3 previous = hasHistory ? texture2D(auxSampler1, sourceTextureCoordinate).rgb : bw;
+      gl_FragColor = toOutputFormat(vec4(mix(bw, previous, trail_mix * strength), cam.a));
+    }
+    ";
+
+string glslCopy = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    void main() {
+      gl_FragColor = toOutputFormat(sampleInput(sourceTextureCoordinate));
+    }
+    ";

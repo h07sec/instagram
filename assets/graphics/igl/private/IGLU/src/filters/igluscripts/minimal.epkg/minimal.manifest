@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1568929727246483",
+  "displayName": "Minimal",
+  "description": "[IG Edits] Color filter name. With \"Minimal\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3372
+  },
+  "assets": [
+    {
+      "name": "minimal_lut.png",
+      "assetHash": "fbb5a7f4e80a8dca5bdf85885c5d8466fee43cc85c0b1ac178ee55f2b560df5c",
+      "hubAssetId": "1812898813340064"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQBmy_C1HTmC"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "2fb727bf",
+      "handle": "AQAFJgxiSTxE",
+      "md5": "8f5084a66a268ed5e8d2c637058c2e0d"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNR5tDSLI_3VPvgDAPZr69QiWV9abhQoAAAD"
+    }
+  }
+}

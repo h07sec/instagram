@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1321635775071511",
+  "displayName": "HDRsharpen📷",
+  "description": "[IG Edits] Video effect name. With \"HDRsharpen📷\", the creator can apply a Spark-ported crisp HDR look with strong sharpening and a soft glow.",
+  "iglu": {
+    "legacyId": 3410
+  },
+  "assets": [],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAH4DpVyNHc"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ed7a8f8c",
+      "handle": "AQAEK6dRMm3Y",
+      "md5": "6a73c736bab99b5c3912c20f94fda6e9"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set android:ordering="together" xmlns:aapt="http://schemas.android.com/aapt"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__11__0" android:duration="133" android:startOffset="0" android:propertyName="translateXY" android:pathData="M 0.023,0.225C 0.023,0.225 0.023,0.225 0.023,0.225" android:propertyXName="translateX" android:propertyYName="translateY" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__11__1" android:duration="133" android:startOffset="133" android:propertyName="translateXY" android:pathData="M 0.023,0.225C 0.023,0.225 43.878,42.352 43.878,42.352" android:propertyXName="translateX" android:propertyYName="translateY" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__11__2" android:duration="167" android:startOffset="267" android:propertyName="translateXY" android:pathData="M 43.878,42.352C 43.878,42.352 43.878,42.352 43.878,42.352" android:propertyXName="translateX" android:propertyYName="translateY" />
+    <objectAnimator android:interpolator="@drawable/$$ig_splash_view_finder_animated_1s__11__3" android:duration="283" android:startOffset="433" android:propertyName="translateXY" android:pathData="M 43.878,42.352C 43.878,42.352 0.023,0.225 0.023,0.225" android:propertyXName="translateX" android:propertyYName="translateY" />
+</set>

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "725518789244320",
+  "displayName": "Glowflow.",
+  "description": "[IG Edits] Color filter name. With \"Glowflow.\", the creator can apply a Spark-ported warm, glowing colour grade with an optional noise overlay.",
+  "iglu": {
+    "legacyId": 3436
+  },
+  "assets": [
+    {
+      "name": "glowflow_lut.png",
+      "assetHash": "a214d7814550509ef88ef56e46bc533a61961815b656656f13c32a2514528e0a",
+      "hubAssetId": "1511694957675523"
+    },
+    {
+      "name": "glowflow_noise.png",
+      "assetHash": "e0517bdab76e0b7074e109629b5681dbec7282a2b6ccab4129a588e350fd4d8f",
+      "hubAssetId": "4402679419949335"
+    }
+  ]
+}

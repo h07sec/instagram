@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "918405715852001",
+  "displayName": "Dramatic Clouds",
+  "description": "[IG Edits] A dramatic color grade.",
+  "iglu": {
+    "legacyId": 3404
+  },
+  "assets": [
+    {
+      "name": "dramatic_clouds_lut.png",
+      "assetHash": "9c45e8b9d9cfee464becc2fe02d305722789e4eff1d980c82c917e088c726d12",
+      "hubAssetId": "28703392846009753"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHygzc5mmu"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ee4018a8",
+      "handle": "AQAMOTthI8qY",
+      "md5": "1a5e1c13c1a1eb7321aa390db8f91d23"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer-array name="ig_splash_pulse_gradient_geometry">
+        <item>400</item>
+        <item>400</item>
+        <item>27</item>
+        <item>27</item>
+        <item>372</item>
+        <item>373</item>
+    </integer-array>
+</resources>

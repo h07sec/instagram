@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "D1A280D0-AC10-4BFC-9846-C805E5D5183A",
+  "displayName": "BW Beauty",
+  "description": "[IG Edits] Color filter name. With \"BW Beauty\", the creator gets a soft black and white portrait grade with smoothed skin and fine film grain.",
+  "iglu": {
+    "legacyId": 3263
+  },
+  "assets": [
+    {
+      "name": "bw_beauty_lut.png",
+      "assetHash": "3ae0fc612024939b99e1709499f9fe0238bf83b5a92ddbfffc0ce112e832e4f5",
+      "hubAssetId": "3303548026522944"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAJHDU-RTOq"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "64c2e319",
+      "handle": "AQAFq1WcQQuX",
+      "md5": "004f3a11aa7e9762a01ecd42204e9898"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GDZyPjRbdWJs7woEAJwQ9OJNNzgjbhQoAAAD"
+    }
+  }
+}

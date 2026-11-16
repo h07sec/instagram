@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "221CFA05-327C-4249-A216-0D65259BB486",
+  "displayName": "Jump",
+  "description": "[IG Edits] Video effect name. Animates the clip into place with a vertical jump, rotation, bounce, and motion blur.",
+  "iglu": {
+    "legacyId": 4000,
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 1125,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "duration",
+        "default": 1.125,
+        "min": 0.9,
+        "max": 1.5,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      },
+      {
+        "name": "amount",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 1.0,
+        "displayName": "Intensity"
+      }
+    ]
+  }
+}

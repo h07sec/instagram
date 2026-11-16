@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130002">Fylki</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130003">Borg</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Heimilisfang</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130006">Íbúð/herbergi (valfrjálst)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Loka vafra</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">%1$s vill nota myndavél tækis þíns.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s vill notar staðsetningu tækis þíns.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Leyfa</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Loka á</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130038">Vandamál kom upp með öryggisvottorð þessarar síðu</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">HALDA ÁFRAM Á VEFSÍÐU</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">FARA TIL BAKA</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">Vandamál kom upp með öryggisskírteinið sem notað er af %1$s. Persónuupplýsingar þínar, til dæmis lykilorð eða kreditkortanúmer, kunna ekki að vera öruggar þegar þeim er deilt með þessari vefsíðu.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Þessi vefsíða notast ekki við örugga tengingu</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Fara til baka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003e">Öryggisvilla</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Eitthvað fór úrskeiðis</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Netfang</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Endurhlaða</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Eftirnafn</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Ekki er hægt að hlaða síðu</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">Opna með...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Opna í %1$s</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Fleiri valkostir</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Fornafn</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Við erum í erfiðleikum með að setja upp %2$s á %1$s. Þú getur reynt aftur eða notað %2$s á ensku (US) þessa stundina.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Augnablik á meðan við setjum upp %1$s...</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">Reyndu aftur</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">HALDA ÁFRAM Á ENSKU (US)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13013b">Póstnúmer</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13020f">Sími</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130213">Stilla tíma</string>
+</resources>

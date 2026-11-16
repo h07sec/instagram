@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2061442264188141",
+  "displayName": "Dazz film",
+  "description": "[IG Edits] Video effect name. With \"Dazz film\", the creator can apply a Spark-ported film look: a cool, contrasty grade, grain, a flickering orange light leak and a square film-frame border.",
+  "iglu": {
+    "legacyId": 3358
+  },
+  "assets": [
+    {
+      "name": "dazz_film_lut.png",
+      "assetHash": "b9f595011b05de943e1e30a653cab28b7db09b63b850530df4e1474208d74e26",
+      "hubAssetId": "2345080612988915"
+    },
+    {
+      "name": "dazz_film_frame.png",
+      "assetHash": "68d3cf7c0598efc1fe1234d40a0ddea99662292340ecbb53e58406b782817573",
+      "hubAssetId": "940910025522270"
+    },
+    {
+      "name": "dazz_film_leak.png",
+      "assetHash": "c340f7261eeca0cec561e0d419dfeb8c9347da4e4370949804c57878e57c0df3",
+      "hubAssetId": "1138199055242331"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAQDkOMlqca"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "62fc5dce",
+      "handle": "AQADeA0Vjc7S",
+      "md5": "2c97ad3e6f3f1bfe79889e943e85657e"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GEgsTDS9pzxN_8cMAOw6ly26Xx1cbhQoAAAD"
+    }
+  }
+}

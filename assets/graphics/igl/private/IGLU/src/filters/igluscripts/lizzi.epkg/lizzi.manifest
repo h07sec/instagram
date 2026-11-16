@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1016123822991676",
+  "displayName": "lizzi",
+  "description": "[IG Edits] Color filter name. With \"lizzi\", the creator can apply a Spark-ported low-key grade with soft skin.",
+  "iglu": {
+    "legacyId": 3400
+  },
+  "assets": [
+    {
+      "name": "lizzi_lut.png",
+      "assetHash": "4e333b7ac594825ce4695fce0402b1761c25e04960b602ce51b7330ba93eacb8",
+      "hubAssetId": "948379591433273"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGBBpZm3Jj"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "92781bd7",
+      "handle": "AQADZ6HKoOUW",
+      "md5": "b8e8a5e0730b0707b252aea178112eaa"
+    }
+  }
+}

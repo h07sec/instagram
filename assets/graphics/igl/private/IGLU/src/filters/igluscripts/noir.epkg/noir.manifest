@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "F3081846-6475-40EF-8C21-03DE511CEA33",
+  "displayName": "☾noir☾",
+  "description": "[IG Edits] Color filter name. With \"noir\", the creator gets a high-contrast black and white color grade applied to the camera image.",
+  "iglu": {
+    "legacyId": 3234
+  },
+  "assets": [
+    {
+      "name": "noir_lut.png",
+      "assetHash": "309ed5c1984d9b43dde291241b6b55a7849a8f74b85690c64889405b549f7396",
+      "hubAssetId": "1420726229613169"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHRMFLGF3v"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "88f4d45",
+      "handle": "AQAGcWvayQIR",
+      "md5": "845f4cb0b1f5bd081d1fc70e92444927"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNuu7zKJiyW-X4gGAHiAT8jXKtlpbhQoAAAD"
+    }
+  }
+}

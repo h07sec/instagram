@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d দিন আগে</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d ঘণ্টা আগে</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d মিনিট আগে</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$dটি ব্রাউজার সম্পর্কিত কাজ</item>
+        <item quantity="one">%1$dটি ব্রাউজার কাজ</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">%1$d ঘণ্টার মধ্যে মেয়াদ শেষ হবে</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">%1$d মিনিটের মধ্যে মেয়াদ শেষ হবে</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$dটি কাজের রিভিউ করতে হবে</item>
+        <item quantity="one">একটি কাজের রিভিউ করতে হবে</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d জন যাত্রী</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$dটি কাজের রিভিউ করতে হবে</item>
+        <item quantity="one">%1$dটি কাজ রিভিউ করতে হবে</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">%1$dটি আইটেম</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$dটি কানেক্টর</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$dটি ক্যারি-অন ব্যাগ</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$dটি চেক করা ব্যাগ</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$dটি স্টপ</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$dটি স্টপ</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">বিকল্প %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">%1$dটি ছবি ব্যবহার করুন</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">%1$d দিন পর্যন্ত ফ্রিতে রিটার্ন করার সুবিধা</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">%1$d দিনের মধ্যে রিটার্ন</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">%1$d ঘণ্টার মধ্যে অস্থায়ী কার্ডের মেয়াদ শেষ হয়ে যাবে</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">%1$dটি আইটেম</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">%1$dটি আইটেম</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">সবাইকে ফলো করুন (%1$d জন)</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">ফলো করুন (%1$dজন)</item>
+        <item quantity="one">ফলো করুন (%1$d জন)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">প্রতি %1$d ঘণ্টায়</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">প্রতি %1$d মিনিটে</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">প্রতি %1$d সেকেন্ডে</item>
+    </plurals>
+</resources>

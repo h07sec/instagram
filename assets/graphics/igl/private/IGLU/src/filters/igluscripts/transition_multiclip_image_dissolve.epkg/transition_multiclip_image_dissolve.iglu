@@ -1,0 +1,90 @@
+[Filter TransitionMulticlipImageDissolve]
+
+# Multiclip Image Dissolve (AE: Edits_Transition_collect_01 / image_dissolve).
+# Clip B dissolves in over clip A by its own luminance: CC Image Wipe on B,
+# Completion 1 -> 0 over 0.983s-1.533s (33% ease out / 33% ease in), Border
+# Softness 0.17. Progress spans that window; the AE ease is applied here, so
+# the behavior curve stays linear.
+#
+# Ported from the Easel web tool's multiclip_image_dissolve.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {softness = 0.17, min = 0.0, max = 1.0, description = "Border Softness"},
+  };
+
+  filter.passes = {{
+    name = 'dissolve,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      wipeEdges = {1.085, 1.255},
+    },
+    glslShader = glsl,
+  }};
+}
+
+# Cubic bezier through (0,0), (a,?), (b,?), (1,1) on one axis.
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 is = 1.0 - s;
+  return 3.0 * is * is * s * a + 3.0 * is * s * s * b + s * s * s;
+}
+
+# AE temporal ease between two keyframes, as a 0..1 fraction of the value change.
+# (x1, y1) and (x2, y2) are the out handle of the first key and the in handle of
+# the second, normalized to the segment.
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 uu = clamp(u, 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = uu;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < uu) {
+      lo = s;
+    } else {
+      hi = s;
+    }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  # Completion 1 -> 0, ease out 33% / ease in 33%.
+  f32 c = 1.0 - aeEase(p, 0.33, 0.0, 0.67, 1.0);
+  f32 s = max(getParameterFloat('softness), 0.001);
+  f32 th = mix(0.0 - s, 1.0 + s, c);
+  vec2 wipeEdges = {th - 0.5 * s, th + 0.5 * s};
+  setShaderUniform('dissolve, 'wipeEdges, wipeEdges);
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform vec2 wipeEdges;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 b = texture2D(s_texture1, uv);
+
+  // CC Image Wipe: dark areas of the gradient (clip B itself) wipe first, so as
+  // completion falls the brightest parts of B arrive first.
+  float luma = dot(b.rgb, vec3(0.299, 0.587, 0.114));
+  float m = smoothstep(wipeEdges.x, wipeEdges.y, luma) * b.a;
+
+  float outA = m + a.a * (1.0 - m);
+  vec3 rgb = (b.rgb * m + a.rgb * a.a * (1.0 - m)) / max(outA, 1e-5);
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

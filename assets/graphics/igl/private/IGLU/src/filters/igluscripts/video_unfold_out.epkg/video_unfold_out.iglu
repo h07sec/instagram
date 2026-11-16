@@ -1,0 +1,31 @@
+[Filter UnfoldOut]
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('spriteTex);
+
+    filter.parameters = {
+        {keyThreshold = 0.733696, min = 0.0, max = 1.5, description = "keyThreshold"},
+        {keySmooth = 0.022717391304347825, min = 0.001, max = 1.0, description = "keySmooth"},
+        {threshold = 0.0652174, min = 0.0, max = 1.0, description = "threshold"},
+    };
+
+    filter.passes = {{
+        name = 'base,
+        igid = 'video_unfold,
+        inputs = {'default, 'spriteTex},
+        uniforms = {
+            outro = 1.0,
+        }
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    f32 keyThreshold = getParameterFloat('keyThreshold);
+    f32 keySmooth = getParameterFloat('keySmooth);
+    f32 threshold = getParameterFloat('threshold);
+    setShaderUniform('base, 'keyThreshold, keyThreshold);
+    setShaderUniform('base, 'keySmooth, keySmooth);
+    setShaderUniform('base, 'threshold, threshold);
+}

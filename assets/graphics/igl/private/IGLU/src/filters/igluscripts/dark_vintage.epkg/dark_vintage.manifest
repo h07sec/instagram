@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1337949633737393",
+  "displayName": "Dark vintage",
+  "description": "[IG Edits] Color filter name. With \"Dark vintage\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3383
+  },
+  "assets": [
+    {
+      "name": "dark_vintage_lut.png",
+      "assetHash": "8ab91a0c43c3ee409a8450133f26fc7c5a8f4be3695d536df3b3e6265855cb09",
+      "hubAssetId": "884624208005770"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFr7AsplcH"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "534de73a",
+      "handle": "AQAEBafklI3Q",
+      "md5": "f7547acb15b8a4922787b18dbc3e477c"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJNYdTQzyzlmQBgFAMciwcJsYQ1YbhQoAAAD"
+    }
+  }
+}

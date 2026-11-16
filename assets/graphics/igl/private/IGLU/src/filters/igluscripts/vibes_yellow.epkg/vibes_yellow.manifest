@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "22DE80B3-C6B6-4088-A343-0180C8E6E363",
+  "displayName": "vibes 💛",
+  "description": "[IG Edits] Color filter name. With \"vibes 💛\", the creator gets a warm VSCO-style color grade with a light film grain and skin smoothing.",
+  "iglu": {
+    "legacyId": 3315
+  },
+  "assets": [
+    {
+      "name": "vibes_yellow_lut.png",
+      "assetHash": "8a2068f0511e98df07a9554b3f80ba4ad84e9dc1d724bba7f033786c390e9c6c",
+      "hubAssetId": "808643579010650"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGlBRnDeLm"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c0e304d0",
+      "handle": "AQAFPCSjyt6H",
+      "md5": "24e75fe324bd2c7f46f3c5fb1932d32d"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFAXVjMI1mKsfEoJAFaiZwW0dINWbhQoAAAD"
+    }
+  }
+}

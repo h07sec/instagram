@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "FF075E97-1546-4A12-8AC7-47C2B613787F",
+  "displayName": "Idyllic ⟡♡",
+  "description": "[IG Edits] Color filter name. With \"Idyllic\", the creator gets a dreamy LUT color grade with a soft horizontal glow blur and light skin smoothing.",
+  "iglu": {
+    "legacyId": 3246
+  },
+  "assets": [
+    {
+      "name": "idyllic_lut.png",
+      "assetHash": "d655ddbaca961d03a16706c3e42dd2fa15fafed057078cd18892c028215b1cfc",
+      "hubAssetId": "1668979737994999"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF1c8eioxY"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "66d37235",
+      "handle": "AQAD8XoL64MG",
+      "md5": "ed27e2a473329ffc54a628e014c502aa"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOvRDTM5nAANZmYGACK9aCP2RaxFbhQoAAAD"
+    }
+  }
+}

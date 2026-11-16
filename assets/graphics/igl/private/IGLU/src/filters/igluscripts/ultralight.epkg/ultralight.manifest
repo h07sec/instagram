@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "EE0B1C12-5293-4A84-A0F0-12F59DC02316",
+  "displayName": "ultralight",
+  "description": "[IG Edits] Color filter name. With \"ultralight\", the creator gets a crisp HD clarity look: a strong wide-radius sharpen with a soft glow lift over the camera image.",
+  "iglu": {
+    "legacyId": 3311
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADWvnQt20w"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "d1a20435",
+      "handle": "AQAD-AyOeS9N",
+      "md5": "0c553e81c90662ab329b7a5effad5cc8"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GEAG1jN10M1N684FAHTQBcj1dWpybhQoAAAD"
+    }
+  }
+}

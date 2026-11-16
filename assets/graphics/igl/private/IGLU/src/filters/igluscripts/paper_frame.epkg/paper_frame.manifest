@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "443558793314163",
+  "displayName": "Paper Frame",
+  "description": "[IG Edits] Color filter name. With \"Paper Frame\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3386
+  },
+  "assets": [
+    {
+      "name": "paper_frame_lut.png",
+      "assetHash": "171102d2dcdd2ebf98f1e4f86cc3737f1decb47f975189a4908a6d3450649ea3",
+      "hubAssetId": "29589674450639884"
+    },
+    {
+      "name": "paper_frame_paper.png",
+      "assetHash": "2b0bed712694ab2850396791e0f6524531a022869c40088805b2f40f15b2b3c3",
+      "hubAssetId": "1861202501912626"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQBoh4dSZ9MJ"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f0c5be61",
+      "handle": "AQADYSvvLtQk",
+      "md5": "353ebc692a76a7898a7745e1e76c234d"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GLoo4jQqzlyBNx0FAC21TMnIvRkFbhQoAAAD"
+    }
+  }
+}

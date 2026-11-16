@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130003">Ciutat</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Adreça</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130008">Vols emplenar-ho automàticament amb la targeta del teu compte publicitari?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Tancar el navegador</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Permet</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Bloqueja</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Torna enrere</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">"S'ha produït un error"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Correu electrònic</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Actualitza</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Cognom</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Més opcions</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Nom</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Tenim problemes per a configurar %2$s en %1$s. Ho pots tornar a provar o utilitzar %2$s en anglès (Estats Units) de moment.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">"Espera un moment mentres s'instal·la el %1$s"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">Torna-ho a provar</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010a">Tanca</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010d">Toca per afegir la targeta</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13013b">Codi postal</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1301ce">Les teves ulleres estan connectades</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13020f">Telèfon</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130213">"Defineix l'hora"</string>
+</resources>

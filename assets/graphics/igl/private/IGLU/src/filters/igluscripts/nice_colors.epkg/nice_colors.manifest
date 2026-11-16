@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "437231326935400",
+  "displayName": "NICE COLORS",
+  "description": "[IG Edits] Color filter name. With \"NICE COLORS\", the creator can apply a Spark-ported bright, warm pink colour grade.",
+  "iglu": {
+    "legacyId": 3413
+  },
+  "assets": [
+    {
+      "name": "nice_colors_lut.png",
+      "assetHash": "de01734cf2f1cbbf41c59497b831fce5ec376f530041839db0604c5d20197083",
+      "hubAssetId": "1089504384049235"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADHLEC0gX3"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c7dd7cf",
+      "handle": "AQAFJTYDdLnh",
+      "md5": "5477853899530aa7bed0f786990c7d72"
+    }
+  }
+}

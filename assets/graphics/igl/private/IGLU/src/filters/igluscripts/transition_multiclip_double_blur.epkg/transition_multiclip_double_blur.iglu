@@ -1,0 +1,231 @@
+[Filter TransitionMulticlipDoubleBlur]
+# Source AE collect02, checked 2026-10-22. Prototype, not a shipped Edits identity.
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.parameters={
+    {duration=0.783333333333,min=0.1,max=5.0,description="Duration"},
+    {blurAmount=1.0,min=0.0,max=1.0,description="Blur Amount"},
+  };
+  filter.passes={
+    {name='source,inputs={'default,'transition},shaderInputNames={'default,'s_texture1},uniforms={showB=0.0,blurOn=0.0},glslShader=sourceGlsl},
+    {name='blur0,inputs={'source},uniforms={radius=0.0,axis={1.0,0.0},verticalFactor=0.5625,blurOn=0.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=boxGlsl},
+    {name='blur1,inputs={'blur0},uniforms={radius=0.0,axis={0.0,1.0},verticalFactor=0.5625,blurOn=0.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=boxGlsl},
+    {name='blur2,inputs={'blur1},uniforms={radius=0.0,axis={1.0,0.0},verticalFactor=0.5625,blurOn=0.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=boxGlsl},
+    {name='blur3,inputs={'blur2},uniforms={radius=0.0,axis={0.0,1.0},verticalFactor=0.5625,blurOn=0.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=boxGlsl},
+    {name='blur4,inputs={'blur3},uniforms={radius=0.0,axis={1.0,0.0},verticalFactor=0.5625,blurOn=0.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=boxGlsl},
+    {name='blur5,inputs={'blur4},uniforms={radius=0.0,axis={0.0,1.0},verticalFactor=0.5625,blurOn=0.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=boxGlsl},
+    {name='out,inputs={'default,'transition,'blur5},shaderInputNames={'default,'s_texture1,'s_blurred},uniforms={p=0.0,radius=0.0,showB=0.0},glslShader=outGlsl},
+  };
+}
+fun cubic(f32 a, f32 b, f32 u) f32 {
+  f32 v = 1.0 - u;
+  return 3.0*v*v*u*a + 3.0*v*u*u*b + u*u*u;
+}
+fun segment(f32 t, f32 t0, f32 v0, f32 t1, f32 v1, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 u = clamp((t-t0)/(t1-t0), 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = u;
+  f32 i = 0.0;
+  while (i < 20.0) {
+    s = (lo+hi)*0.5;
+    if (cubic(x1,x2,s) < u) { lo=s; } else { hi=s; }
+    i=i+1.0;
+  }
+  f32 r = v0+(v1-v0)*cubic(y1,y2,s);
+  if (t <= t0) { r=v0; }
+  if (t >= t1) { r=v1; }
+  return r;
+}
+fun blurAt(f32 t) f32 {
+  f32 r = 0.0;
+  if (t >= 0.366666666667) { r=0.0+(39.0-0.0)*clamp((t-0.366666666667)/0.083333333333,0.0,1.0); }
+  if (t >= 0.45) { r=39.0+(0.0-39.0)*clamp((t-0.45)/0.116666666667,0.0,1.0); }
+  if (t >= 0.566666666667) { r=0.0; }
+  if (t >= 0.633333333333) { r=0.0+(134.0-0.0)*clamp((t-0.633333333333)/0.133333333333,0.0,1.0); }
+  if (t >= 0.766666666667) { r=134.0+(0.0-134.0)*clamp((t-0.766666666667)/0.383333333333,0.0,1.0); }
+  if (t >= 1.15) { r=0.0; }
+  return r;
+}
+# Merged bilinear taps for a pass of 25 equal bilinear samples at k*spacing texels, k=-12..12.
+# Valid when output pixels sit on input texel centers. boxWeights[j + reach] is the weight of
+# texel j; texel pairs (j, j+1) become one fetch at j + w1/(w0+w1) weighted w0+w1, packed as
+# (offset, weight) twice per vec4 in boxTaps.
+f32[32.0] boxWeights = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+vec4[8.0] boxTaps = {{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0}};
+fun buildBoxTaps(f32 spacing, f32 reach) f32 {
+  for (f32 z = 0.0; z < 32.0; z = z + 1.0) { boxWeights[z] = 0.0; }
+  for (f32 k = 0.0 - 12.0; k <= 12.0; k = k + 1.0) {
+    f32 x = k * spacing + reach;
+    f32 i0 = floor(x);
+    f32 fr = x - i0;
+    f32 i1 = i0 + 1.0;
+    boxWeights[i0] = boxWeights[i0] + (1.0 - fr) / 25.0;
+    boxWeights[i1] = boxWeights[i1] + fr / 25.0;
+  }
+  for (f32 m = 0.0; m < 8.0; m = m + 1.0) {
+    f32 j0 = 4.0 * m;
+    f32 a = boxWeights[j0] + boxWeights[j0 + 1.0];
+    f32 b = boxWeights[j0 + 2.0] + boxWeights[j0 + 3.0];
+    f32 offsetA = j0 - reach;
+    if (a > 0.0) { offsetA = offsetA + boxWeights[j0 + 1.0] / a; }
+    f32 offsetB = j0 + 2.0 - reach;
+    if (b > 0.0) { offsetB = offsetB + boxWeights[j0 + 3.0] / b; }
+    boxTaps[m] = {offsetA, a, offsetB, b};
+  }
+  return reach + 1.0;
+}
+# Last values sent to the blur passes; uniforms keep their value between frames.
+f32 sentSpacing = 0.0 - 1.0;
+f32 sentTapCount = 0.0 - 1.0;
+f32 sentBlurOn = 0.0 - 1.0;
+vec2 sentSize = {0.0, 0.0};
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p=clamp(max(getParameterFloat('progress),getParameterFloat('transition_progress)),0.0,1.0);
+  f32 t=0.366666666667+p*0.783333333333;
+  f32 r=blurAt(t)*getParameterFloat('blurAmount);
+  f32 b=0.0;
+  if (t >= 0.766666666667) { b=1.0; }
+  setShaderUniform('source,'showB,b);
+  vec2 size0=getTextureSize('default);
+  f32 blurOn=0.0;
+  if (r >= 0.001 and p > 0.0 and p < 1.0) { blurOn=1.0; }
+  # Narrow boxes: the 25 taps, 0.08 box half-widths apart, are rewritten as at most 16
+  # merged bilinear fetches over the texels they touch. Below 1/8 texel the original taps fall
+  # within the GPU's subtexel filtering precision, so the 25-tap loop is kept there.
+  f32 spacing=r/2160.0*size0.x*0.08;
+  f32 reach=0.0;
+  if (spacing > 0.0) { reach=floor(12.0*spacing)+1.0; }
+  f32 tapCount=0.0;
+  if (blurOn > 0.5 and reach <= 15.0 and spacing >= 0.125) {
+    if (spacing != sentSpacing) {
+      tapCount=buildBoxTaps(spacing,reach);
+      setShaderUniform('blur0,'taps,boxTaps);
+      setShaderUniform('blur1,'taps,boxTaps);
+      setShaderUniform('blur2,'taps,boxTaps);
+      setShaderUniform('blur3,'taps,boxTaps);
+      setShaderUniform('blur4,'taps,boxTaps);
+      setShaderUniform('blur5,'taps,boxTaps);
+      sentSpacing=spacing;
+    }
+    tapCount=reach+1.0;
+  }
+  if (tapCount != sentTapCount) {
+    setShaderUniform('blur0,'tapCount,tapCount);
+    setShaderUniform('blur1,'tapCount,tapCount);
+    setShaderUniform('blur2,'tapCount,tapCount);
+    setShaderUniform('blur3,'tapCount,tapCount);
+    setShaderUniform('blur4,'tapCount,tapCount);
+    setShaderUniform('blur5,'tapCount,tapCount);
+    sentTapCount=tapCount;
+  }
+  if (blurOn != sentBlurOn) {
+    setShaderUniform('source,'blurOn,blurOn);
+    setShaderUniform('blur0,'blurOn,blurOn);
+    setShaderUniform('blur1,'blurOn,blurOn);
+    setShaderUniform('blur2,'blurOn,blurOn);
+    setShaderUniform('blur3,'blurOn,blurOn);
+    setShaderUniform('blur4,'blurOn,blurOn);
+    setShaderUniform('blur5,'blurOn,blurOn);
+    sentBlurOn=blurOn;
+  }
+  if (size0.x != sentSize.x or size0.y != sentSize.y) {
+    setShaderUniform('blur0,'verticalFactor,size0.x/max(size0.y,1.0));
+    setShaderUniform('blur0,'kernelSize,size0);
+    setShaderUniform('blur1,'verticalFactor,size0.x/max(size0.y,1.0));
+    setShaderUniform('blur1,'kernelSize,size0);
+    setShaderUniform('blur2,'verticalFactor,size0.x/max(size0.y,1.0));
+    setShaderUniform('blur2,'kernelSize,size0);
+    setShaderUniform('blur3,'verticalFactor,size0.x/max(size0.y,1.0));
+    setShaderUniform('blur3,'kernelSize,size0);
+    setShaderUniform('blur4,'verticalFactor,size0.x/max(size0.y,1.0));
+    setShaderUniform('blur4,'kernelSize,size0);
+    setShaderUniform('blur5,'verticalFactor,size0.x/max(size0.y,1.0));
+    setShaderUniform('blur5,'kernelSize,size0);
+    sentSize=size0;
+  }
+  setShaderUniform('blur0,'radius,r/2160.0);
+  setShaderUniform('blur1,'radius,r/2160.0);
+  setShaderUniform('blur2,'radius,r/2160.0);
+  setShaderUniform('blur3,'radius,r/2160.0);
+  setShaderUniform('blur4,'radius,r/2160.0);
+  setShaderUniform('blur5,'radius,r/2160.0);
+  setShaderUniform('out,'p,p);setShaderUniform('out,'radius,r);setShaderUniform('out,'showB,b);
+}
+string sourceGlsl="
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform sampler2D s_texture1;
+uniform float showB;
+// 0 when the out pass does not read the blur chain this frame.
+uniform float blurOn;
+vec4 current(vec2 uv) {
+  if (showB > 0.5) return texture2D(s_texture1,uv);
+  return sampleInput(uv);
+}
+void main(){
+ if(blurOn<0.5){gl_FragColor=vec4(0.0);return;}
+ gl_FragColor=toOutputFormat(current(sourceTextureCoordinate));
+}";
+string boxGlsl="
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform float radius;
+uniform vec2 axis;
+uniform float verticalFactor;
+// 0 when the out pass does not read the blur this frame.
+uniform float blurOn;
+// Merged (texel offset, weight) taps, two per vec4; 0 taps selects the 25-tap loop.
+uniform float tapCount;
+uniform vec2 kernelSize;
+uniform vec4 taps[8];
+uniform vec2 inputSize;
+void main(){
+ if(blurOn<0.5){gl_FragColor=vec4(0.0);return;}
+ vec2 uv=sourceTextureCoordinate;
+ vec4 c=vec4(0.0);
+ if(tapCount>0.5&&inputSize.x==kernelSize.x&&inputSize.y==kernelSize.y){
+  vec2 texel=axis/inputSize;
+  for(int i=0;i<8;i++){
+   if(float(2*i)>=tapCount)break;
+   vec4 t=taps[i];
+   c+=sampleInput(uv+texel*t.x)*t.y;
+   if(float(2*i+1)>=tapCount)break;
+   c+=sampleInput(uv+texel*t.z)*t.w;
+  }
+ }else{
+  // radius is in original 2160-wide comp units; y also uses width for px.
+  vec2 d=axis*vec2(radius,radius*verticalFactor);
+  const int N=25;
+  for(int i=0;i<N;i++) { float u=(float(i)+0.5)/float(N)*2.0-1.0; c+=sampleInput(clamp(uv+d*u,vec2(0.0),vec2(1.0))); }
+  c/=float(N);
+ }
+ gl_FragColor=toOutputFormat(c);
+}";
+string outGlsl="
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform sampler2D s_texture1;
+uniform float showB;
+vec4 current(vec2 uv) {
+  if (showB > 0.5) return texture2D(s_texture1,uv);
+  return sampleInput(uv);
+}
+uniform sampler2D s_blurred;
+uniform float p;
+uniform float radius;
+void main(){
+ vec2 uv=sourceTextureCoordinate;
+ vec4 c;
+ if(p<=0.0){c=sampleInput(uv);}
+ else if(p>=1.0){c=texture2D(s_texture1,uv);}
+ else if(radius<0.001){c=current(uv);}
+ else{c=texture2D(s_blurred,uv);}
+ gl_FragColor=toOutputFormat(c);
+}";

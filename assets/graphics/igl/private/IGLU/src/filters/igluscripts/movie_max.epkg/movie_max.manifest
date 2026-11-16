@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "C9447592-390C-4A29-B83F-0692B16EDCF1",
+  "displayName": "Movie MaX",
+  "description": "[IG Edits] Color filter name. With \"Movie MaX\", the creator gets a moody teal and orange cinematic LUT color grade applied to the camera image.",
+  "iglu": {
+    "legacyId": 3259
+  },
+  "assets": [
+    {
+      "name": "movie_max_lut.png",
+      "assetHash": "5a2e1bc0ca24b61f7f24b39b220c8ab80569542a0d9a95ce4337e1807cdef256",
+      "hubAssetId": "4540244989624584"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAG4Jb8XuMl"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3e570c36",
+      "handle": "AQAD-BXi3E4p",
+      "md5": "66cfc4022c5ccb2a169d5250c587b41b"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFOn_DKOCakDdx4FACxd4pyO3MpSbhQoAAAD"
+    }
+  }
+}

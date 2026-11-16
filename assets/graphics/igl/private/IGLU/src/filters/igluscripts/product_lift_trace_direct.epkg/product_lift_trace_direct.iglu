@@ -1,0 +1,847 @@
+[Filter ProductLiftTraceDirect]
+[MaskBehavior composite]
+[TouchBehavior hold]
+
+[Init]
+fun init(Filter filter) {
+
+makeTexture('mask);
+
+filter.parameters = {
+    {press_x = -1.0, min = -1.0, max = 1.0, description = "press_x"},
+    {press_y = -1.0, min = -1.0, max = 1.0, description = "press_y"},
+    {release_sec = -1.0, min = -1.0, max = 1000.0, description = "release_sec"},
+    {resolve_sec = -1.0, min = -1.0, max = 1000.0, description = "resolve_sec"},
+    {found = 1.0, min = 0.0, max = 1.0, description = "found"},
+    {reduce_motion = 0.0, min = 0.0, max = 1.0, description = "reduce_motion"},
+    {expandPeak = 0.06, min = 0.0, max = 0.2, description = "expandPeak"},
+    {expandIn = 0.35, min = 0.05, max = 2.0, description = "expandIn"},
+    {expandOvershoot = 0.7, min = 0.0, max = 3.0, description = "expandOvershoot"},
+    {settleDuration = 0.35, min = 0.05, max = 2.0, description = "settleDuration"},
+    {traceStart = 0.4, min = 0.0, max = 3.0, description = "traceStart"},
+    {firstGlow = 1.0, min = 1.0, max = 3.0, description = "firstGlow"},
+    {pivotLift = 0.6, min = 0.0, max = 1.0, description = "pivotLift"},
+    {shadowOpacity = 0.25, min = 0.0, max = 1.0, description = "shadowOpacity"},
+    {shadowOffset = 5.0, min = 0.0, max = 30.0, description = "shadowOffset"},
+    {shadowBlur = 10.0, min = 0.0, max = 40.0, description = "shadowBlur"},
+    {holeReach = 2.0, min = 0.0, max = 20.0, description = "holeReach"},
+    {holeReachLift = 8.0, min = 0.0, max = 40.0, description = "holeReachLift"},
+    {restUnderlay = 0.22, min = 0.0, max = 1.0, description = "restUnderlay"},
+    {focusDim = 0.15, min = 0.0, max = 1.0, description = "focusDim"},
+    {dimOut = 0.45, min = 0.01, max = 2.0, description = "dimOut"},
+    {scanDelay = 0.02, min = 0.0, max = 2.0, description = "scanDelay"},
+    {scanDuration = 0.48, min = 0.05, max = 3.0, description = "scanDuration"},
+    {scanWidth = 1.7, min = 0.2, max = 20.0, description = "scanWidth"},
+    {scanOpacity = 0.45, min = 0.0, max = 2.0, description = "scanOpacity"},
+    {hazeOpacity = 0.05, min = 0.0, max = 1.0, description = "hazeOpacity"},
+    {hazeLength = 20.0, min = 1.0, max = 200.0, description = "hazeLength"},
+    {refraction = 3.0, min = 0.0, max = 10.0, description = "refraction"},
+    {wobble = 0.25, min = 0.0, max = 0.5, description = "wobble"},
+    {edgeTrail = 0.0, min = 0.0, max = 2.0, description = "edgeTrail"},
+    {thickness = 3.9, min = 0.0, max = 25.0, description = "thickness"},
+    {softness = 0.25, min = 0.0, max = 1.0, description = "softness"},
+    {blurRadius = 3.0, min = 0.0, max = 8.0, description = "blurRadius"},
+    {edgeWidth = 0.25, min = 0.01, max = 0.5, description = "edgeWidth"},
+    {edgeBlurOffset = 0.6, min = 0.0, max = 1.0, description = "edgeBlurOffset"},
+    {falloffLead = 47.0, min = 0.0, max = 360.0, description = "falloffLead"},
+    {falloffTrail = 360.0, min = 0.0, max = 1080.0, description = "falloffTrail"},
+    {radialMod = 1.0, min = 1.0, max = 4.0, description = "radialMod"},
+    {speed = 0.25, min = 0.0, max = 3.0, description = "speed"},
+    {firstSpeed = 1.0, min = 0.05, max = 3.0, description = "firstSpeed"},
+    {traceOpacity = 0.35, min = 0.0, max = 1.0, description = "traceOpacity"},
+    {loopDelay = 0.0, min = -2.0, max = 2.0, description = "loopDelay"},
+    {easeIn = 0.336957, min = 0.0, max = 1.0, description = "easeIn"},
+    {easeInPower = 3.77174, min = 1.0, max = 6.0, description = "easeInPower"},
+    {easeOut = 0.4, min = 0.0, max = 1.0, description = "easeOut"},
+    {easeOutPower = 4.1, min = 1.0, max = 6.0, description = "easeOutPower"},
+    {baseOpacity = 1.5, min = 0.0, max = 2.0, description = "baseOpacity"},
+    {opacity = 0.9, min = 0.0, max = 1.0, description = "opacity"},
+    {glowRadius = 5.0, min = 0.0, max = 60.0, description = "glowRadius"},
+    {glowStrength = 1.0, min = 0.0, max = 2.0, description = "glowStrength"},
+    {highlightColor = {1.0, 1.0, 1.0, 1.0}, description = "highlightColor"},
+    {baseColor = {0.0, 0.0, 0.0, 1.0}, description = "baseColor"},
+    {topColor = {0.9294117647058824, 0.9019607843137255, 0.792156862745098, 1.0}, description = "topColor"},
+    {bottomColor = {0.9137254901960784, 0.8352941176470589, 0.7529411764705882, 1.0}, description = "bottomColor"},
+    {scanColor = {1.0, 1.0, 1.0, 1.0}, description = "scanColor"},
+};
+
+  filter.passes = {
+    {
+      name = 'maskBlurH,
+      inputs = {'mask},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 2.0,
+        axis = {1.0, 0.0},
+      },
+      glslShader = maskBlurGlsl,
+    },
+    {
+      name = 'maskAA,
+      inputs = {'maskBlurH},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 2.0,
+        axis = {0.0, 1.0},
+        edgeWidth = 0.15,
+        edgeBlurOffset = 0.5,
+      },
+      glslShader = maskAAGlsl,
+    },
+    {
+      name = 'stats,
+      inputs = {'maskAA},
+      scale = {0.02, 0.01},
+      uniforms = {
+        aspect = 0.5625,
+      },
+      glslShader = statsGlsl,
+    },
+    {
+      name = 'dilate,
+      inputs = {'maskAA},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        radius = 6.0,
+        edgeFade = 0.15,
+      },
+      glslShader = dilateGlsl,
+    },
+    {
+      name = 'ring,
+      inputs = {'dilate, 'maskAA},
+      scale = {0.25, 0.25},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+      },
+      glslShader = ringGlsl,
+    },
+    {
+      name = 'glowH,
+      inputs = {'ring},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 5.0,
+        axis = {1.0, 0.0},
+      },
+      glslShader = maskBlurGlsl,
+    },
+    {
+      name = 'glowV,
+      inputs = {'glowH},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 5.0,
+        axis = {0.0, 1.0},
+      },
+      glslShader = maskBlurGlsl,
+    },
+    {
+      name = 'footprintH,
+      inputs = {'maskAA},
+      scale = {0.25, 0.25},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 20.0,
+        axis = {1.0, 0.0},
+      },
+      glslShader = maskBlurGlsl,
+    },
+    {
+      name = 'footprintV,
+      inputs = {'footprintH},
+      scale = {0.25, 0.25},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 20.0,
+        axis = {0.0, 1.0},
+      },
+      glslShader = maskBlurGlsl,
+    },
+    {
+      name = 'compose,
+      inputs = {'default, 'dilate, 'maskAA, 'stats, 'glowV, 'footprintV},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        pointSize = 0.001,
+        press = {0.5, 0.5},
+        hasPress = 0.0,
+        scale = 1.0,
+        lift = 0.0,
+        pivotLift = 0.6,
+        edgeLightAmount = 0.0,
+        shadowAmount = 0.0,
+        shadowOffset = 0.0,
+        holeReach = 2.0,
+        dimAmount = 0.0,
+        underlayAmount = 0.0,
+        scanTime = -1.0,
+        scanEased = 0.0,
+        scanDuration = 0.24,
+        scanWidth = 1.7,
+        scanOpacity = 0.75,
+        hazeOpacity = 0.05,
+        hazeLength = 20.0,
+        refraction = 3.0,
+        wobble = 0.1,
+        edgeTrail = 0.5,
+        scanColor = {1.0, 1.0, 1.0, 1.0},
+        phase = 0.0,
+        birthTravel = 0.0,
+        traceTravel = 0.0,
+        traceVisible = 0.0,
+        traceOpacity = 0.35,
+        falloffLead = 90.0,
+        falloffTrail = 90.0,
+        radialMod = 2.0,
+        glowStrength = 0.6,
+        baseOpacity = 0.25,
+        opacity = 1.0,
+        highlightColor = {1.0, 1.0, 1.0, 1.0},
+        baseColor = {1.0, 1.0, 1.0, 1.0},
+        topColor = {1.0, 1.0, 1.0, 1.0},
+        bottomColor = {1.0, 1.0, 1.0, 1.0},
+      },
+      glslShader = composeGlsl,
+    }
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  vec2 size = getTextureSize('default);
+  f32 sizeScale = min(size.x, size.y) / 1080.0;
+  f32 aspect = size.x / size.y;
+  # On-screen points, assuming a phone about 400 pt wide.
+  f32 pointPixels = size.x / 400.0;
+
+  f32 blurStep = getParameterFloat('blurRadius) * sizeScale;
+  setShaderUniform('maskBlurH, 'outputSize, size);
+  setShaderUniform('maskBlurH, 'blurStep, blurStep);
+  setShaderUniform('maskAA, 'outputSize, size);
+  setShaderUniform('maskAA, 'blurStep, blurStep);
+  setShaderUniform('maskAA, 'edgeWidth, max(getParameterFloat('edgeWidth), 0.001));
+  setShaderUniform('maskAA, 'edgeBlurOffset, getParameterFloat('edgeBlurOffset));
+
+  setShaderUniform('dilate, 'outputSize, size);
+  setShaderUniform('dilate, 'radius, getParameterFloat('thickness) * sizeScale);
+  setShaderUniform('dilate, 'edgeFade, getParameterFloat('softness));
+
+  setShaderUniform('stats, 'aspect, aspect);
+
+  f32 footprintStep = getParameterFloat('shadowBlur) * pointPixels / 1.5;
+  setShaderUniform('footprintH, 'outputSize, size);
+  setShaderUniform('footprintH, 'blurStep, footprintStep);
+  setShaderUniform('footprintV, 'outputSize, size);
+  setShaderUniform('footprintV, 'blurStep, footprintStep);
+
+  f32 clock = max(getParameterFloat('time_sec), 0.0);
+  # The press is committed when the effect starts; the finger lifting changes nothing. The host
+  # resolves it when the products are in, and the garment settles back to its place: the post-click
+  # lightbox opens around it as it lands.
+  f32 resolved = getParameterFloat('resolve_sec);
+  f32 settleAt = 1000.0;
+  if (resolved >= 0.0) {
+    settleAt = max(clock - resolved, 0.0);
+  }
+  f32 calm = clamp(getParameterFloat('reduce_motion), 0.0, 1.0);
+
+  # Lift, hold while the search runs, set down.
+  f32 peak = max(getParameterFloat('expandPeak), 0.0001);
+  f32 expandIn = max(getParameterFloat('expandIn), 0.01);
+  f32 scale = 1.0 + peak;
+  if (clock < expandIn) {
+    f32 c1 = getParameterFloat('expandOvershoot);
+    f32 x = clock / expandIn - 1.0;
+    scale = 1.0 + peak * (1.0 + (c1 + 1.0) * x * x * x + c1 * x * x);
+  }
+  # The set-down starts from wherever the lift had got to.
+  f32 heldScale = 1.0 + peak;
+  if (settleAt < expandIn) {
+    f32 c2 = getParameterFloat('expandOvershoot);
+    f32 xs = settleAt / expandIn - 1.0;
+    heldScale = 1.0 + peak * (1.0 + (c2 + 1.0) * xs * xs * xs + c2 * xs * xs);
+  }
+  if (clock >= settleAt) {
+    # Decelerating, cubic-bezier(0.4, 0, 0.2, 1), so it reads as placed rather than dropped.
+    f32 z = clamp((clock - settleAt) / max(getParameterFloat('settleDuration), 0.01), 0.0, 1.0);
+    f32 st = z;
+    for (f32 n = 0.0; n < 8.0; n = n + 1.0) {
+      f32 sm = 1.0 - st;
+      f32 sx = 1.2 * sm * sm * st + 0.6 * sm * st * st + st * st * st;
+      f32 sslope = 1.2 * sm * sm - 1.2 * sm * st + 2.4 * st * st;
+      st = clamp(st - (sx - z) / max(sslope, 0.0001), 0.0, 1.0);
+    }
+    f32 ez = 3.0 * (1.0 - st) * st * st + st * st * st;
+    scale = heldScale + (1.0 - heldScale) * ez;
+  }
+  scale = 1.0 + (scale - 1.0) * (1.0 - calm);
+  f32 lift = max((scale - 1.0) / peak, 0.0);
+
+  setShaderUniform('compose, 'outputSize, size);
+  setShaderUniform('compose, 'pointSize, pointPixels / max(size.y, 1.0));
+  f32 pressX = getParameterFloat('press_x);
+  f32 pressY = getParameterFloat('press_y);
+  f32 hasPress = 0.0;
+  if (pressX >= 0.0 and pressY >= 0.0) {
+    hasPress = 1.0;
+  }
+  vec2 press = {pressX, pressY};
+  setShaderUniform('compose, 'press, press);
+  setShaderUniform('compose, 'hasPress, hasPress);
+  setShaderUniform('compose, 'scale, scale);
+  setShaderUniform('compose, 'lift, lift);
+  setShaderUniform('compose, 'pivotLift, getParameterFloat('pivotLift));
+  setShaderUniform('compose, 'edgeLightAmount, 0.0);
+  setShaderUniform('compose, 'shadowAmount, getParameterFloat('shadowOpacity) * lift);
+  setShaderUniform('compose, 'shadowOffset, getParameterFloat('shadowOffset) * lift);
+  setShaderUniform('compose, 'holeReach, getParameterFloat('holeReach) + getParameterFloat('holeReachLift) * lift);
+  # One dim move with the outline's fade-up, then held, so the outline reads against the room; the
+  # lightbox deepens it from there.
+  f32 focusT = clamp((clock - getParameterFloat('traceStart)) / 0.25, 0.0, 1.0);
+  # The host reports a release only for a press that stays on the reel: the room comes back once the
+  # garment has settled.
+  f32 released = getParameterFloat('release_sec);
+  f32 focusKept = 1.0;
+  if (released >= 0.0) {
+    f32 fadeStart = max(clock - released, settleAt + getParameterFloat('settleDuration));
+    f32 fadeT = clamp((clock - fadeStart) / max(getParameterFloat('dimOut), 0.01), 0.0, 1.0);
+    focusKept = 1.0 - fadeT * fadeT * (3.0 - 2.0 * fadeT);
+  }
+  setShaderUniform('compose, 'dimAmount, getParameterFloat('focusDim) * focusT * focusT * (3.0 - 2.0 * focusT) * focusKept);
+  # A dark floor under the stroke, for bright backgrounds.
+  setShaderUniform('compose, 'underlayAmount, getParameterFloat('restUnderlay));
+  setShaderUniform('compose, 'scanTime, clock - getParameterFloat('scanDelay));
+  # The ripple front shoots out, then lingers at the edges: cubic-bezier(0.25, 0.1, 0.25, 1).
+  f32 scanX = clamp((clock - getParameterFloat('scanDelay)) / max(getParameterFloat('scanDuration), 0.01), 0.0, 1.0);
+  f32 bt = scanX;
+  for (f32 i = 0.0; i < 8.0; i = i + 1.0) {
+    f32 mt = 1.0 - bt;
+    f32 bx = 0.75 * mt * mt * bt + 0.75 * mt * bt * bt + bt * bt * bt;
+    f32 slope = 0.75 * mt * mt + 2.25 * bt * bt;
+    bt = clamp(bt - (bx - scanX) / max(slope, 0.0001), 0.0, 1.0);
+  }
+  f32 bmt = 1.0 - bt;
+  setShaderUniform('compose, 'scanEased, 0.3 * bmt * bmt * bt + 3.0 * bmt * bt * bt + bt * bt * bt);
+  setShaderUniform('compose, 'scanDuration, max(getParameterFloat('scanDuration), 0.01));
+  setShaderUniform('compose, 'scanWidth, getParameterFloat('scanWidth));
+  setShaderUniform('compose, 'scanOpacity, getParameterFloat('scanOpacity) * (1.0 - calm));
+  setShaderUniform('compose, 'hazeOpacity, getParameterFloat('hazeOpacity) * (1.0 - calm));
+  setShaderUniform('compose, 'hazeLength, getParameterFloat('hazeLength));
+  setShaderUniform('compose, 'refraction, getParameterFloat('refraction));
+  setShaderUniform('compose, 'wobble, getParameterFloat('wobble));
+  setShaderUniform('compose, 'edgeTrail, getParameterFloat('edgeTrail));
+  setShaderUniform('compose, 'scanColor, getParameterVec4('scanColor));
+
+  # Trace: `product_outline_two_step`'s clock, started where the ripple leaves the garment, so the
+  # wavy line becomes the outline; its two-step loop is the wait for the products. Brighter for its
+  # first turn so it reads as the payoff.
+  f32 traceStartTime = getParameterFloat('traceStart);
+  f32 traceClock = max(clock - traceStartTime, 0.0);
+  # Fades up over its first 0.25 s rather than popping on, overlapping the ripple's exit.
+  f32 traceVisible = clamp((clock - traceStartTime) / 0.25, 0.0, 1.0);
+  traceVisible = traceVisible * traceVisible * (3.0 - 2.0 * traceVisible);
+  f32 firstSpeed = max(getParameterFloat('firstSpeed), 0.0001);
+  f32 afterFirstTurn = clamp((traceClock - 1.0 / firstSpeed) / 0.5, 0.0, 1.0);
+  afterFirstTurn = afterFirstTurn * afterFirstTurn * (3.0 - 2.0 * afterFirstTurn);
+  f32 glowBoost = getParameterFloat('firstGlow) + (1.0 - getParameterFloat('firstGlow)) * afterFirstTurn;
+  # The first turn eases in and out, gently: a full smoothstep would rush the middle of the turn.
+  f32 drawn = min(traceClock * firstSpeed, 1.0);
+  f32 traceTurns = drawn + 0.5 * (drawn * drawn * (3.0 - 2.0 * drawn) - drawn);
+  f32 traceTravel = traceTurns * 6.2831853;
+
+  f32 loopTime = max(traceClock - 1.0 / firstSpeed - getParameterFloat('loopDelay), 0.0);
+  f32 adjustedTime = loopTime * max(getParameterFloat('speed), 0.0);
+  f32 halves = adjustedTime * 2.0;
+  f32 halfIndex = floor(halves);
+  f32 halfFraction = halves - halfIndex;
+  f32 easeInAmount = clamp(getParameterFloat('easeIn), 0.0, 1.0);
+  f32 easeOutAmount = clamp(getParameterFloat('easeOut), 0.0, 1.0);
+  f32 easeInPower = max(getParameterFloat('easeInPower), 1.0);
+  f32 easeOutPower = max(getParameterFloat('easeOutPower), 1.0);
+
+  f32 eased = 0.0;
+  if (halfFraction < 0.5) {
+    f32 ex = halfFraction * 2.0;
+    f32 curved = pow(ex, easeInPower);
+    eased = 0.5 * (ex + easeInAmount * (curved - ex));
+  } else {
+    f32 ex = (1.0 - halfFraction) * 2.0;
+    f32 curved = pow(ex, easeOutPower);
+    eased = 1.0 - 0.5 * (ex + easeOutAmount * (curved - ex));
+  }
+
+  f32 travelled = (halfIndex + eased) * 3.14159265;
+  f32 birthTravel = min(travelled, 7.3);
+
+  f32 turns = travelled / 6.2831853;
+  f32 wrappedPhase = (turns - floor(turns)) * 6.2831853;
+
+  setShaderUniform('compose, 'phase, wrappedPhase);
+  if (calm > 0.5) {
+    # Reduce Motion: the outline fades in whole, and nothing travels round it.
+    traceTravel = 6.2831853;
+    birthTravel = 0.0;
+    traceVisible = clamp((clock - traceStartTime) / 0.2, 0.0, 1.0);
+  }
+  # An outline promises results: when the search found none it fades out as the garment settles.
+  if (getParameterFloat('found) < 0.5) {
+    f32 unfound = clamp((clock - settleAt) / max(getParameterFloat('settleDuration), 0.01), 0.0, 1.0);
+    traceVisible = traceVisible * (1.0 - unfound * unfound * (3.0 - 2.0 * unfound));
+  }
+  setShaderUniform('compose, 'birthTravel, birthTravel);
+  setShaderUniform('compose, 'traceTravel, traceTravel);
+  setShaderUniform('compose, 'traceVisible, traceVisible);
+  setShaderUniform('compose, 'traceOpacity, getParameterFloat('traceOpacity));
+  setShaderUniform('compose, 'falloffLead, getParameterFloat('falloffLead));
+  setShaderUniform('compose, 'falloffTrail, getParameterFloat('falloffTrail));
+  setShaderUniform('compose, 'radialMod, round(getParameterFloat('radialMod)));
+  setShaderUniform('ring, 'outputSize, size);
+
+  f32 glowStep = getParameterFloat('glowRadius) * sizeScale * 0.25;
+  setShaderUniform('glowH, 'outputSize, size);
+  setShaderUniform('glowH, 'blurStep, glowStep);
+  setShaderUniform('glowV, 'outputSize, size);
+  setShaderUniform('glowV, 'blurStep, glowStep);
+
+  setShaderUniform('compose, 'glowStrength, getParameterFloat('glowStrength) * glowBoost);
+  setShaderUniform('compose, 'baseOpacity, getParameterFloat('baseOpacity));
+  setShaderUniform('compose, 'opacity, getParameterFloat('opacity));
+  setShaderUniform('compose, 'highlightColor, getParameterVec4('highlightColor));
+  setShaderUniform('compose, 'baseColor, getParameterVec4('baseColor));
+  setShaderUniform('compose, 'topColor, getParameterVec4('topColor));
+  setShaderUniform('compose, 'bottomColor, getParameterVec4('bottomColor));
+}
+
+string ringGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform vec2 outputSize;
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+float ringAt(vec2 uv) {
+  float dilated = maskCoverage(sampleInput(uv));
+  float subject = maskCoverage(texture2D(auxSampler1, uv));
+  return clamp(dilated - subject, 0.0, 1.0);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 duv = 1.0 / outputSize;
+
+  float ring = ringAt(uv + duv * vec2(1.0, 1.0));
+  ring += ringAt(uv + duv * vec2(0.0 - 1.0, 1.0));
+  ring += ringAt(uv + duv * vec2(1.0, 0.0 - 1.0));
+  ring += ringAt(uv + duv * vec2(0.0 - 1.0, 0.0 - 1.0));
+
+  gl_FragColor = toOutputFormat(vec4(vec3(ring * 0.25), 1.0));
+}
+";
+
+string maskBlurGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform vec2 axis;
+uniform float blurStep;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 offset = axis * blurStep / outputSize;
+
+  vec4 c = sampleInput(uv) * 0.2270270270;
+  c += (sampleInput(uv + offset) + sampleInput(uv - offset)) * 0.1945945946;
+  c += (sampleInput(uv + offset * 2.0) + sampleInput(uv - offset * 2.0)) * 0.1216216216;
+  c += (sampleInput(uv + offset * 3.0) + sampleInput(uv - offset * 3.0)) * 0.0540540541;
+  c += (sampleInput(uv + offset * 4.0) + sampleInput(uv - offset * 4.0)) * 0.0162162162;
+
+  gl_FragColor = toOutputFormat(c);
+}
+";
+
+string maskAAGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform vec2 axis;
+uniform float blurStep;
+uniform float edgeWidth;
+uniform float edgeBlurOffset;
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 offset = axis * blurStep / outputSize;
+
+  vec4 c = sampleInput(uv) * 0.2270270270;
+  c += (sampleInput(uv + offset) + sampleInput(uv - offset)) * 0.1945945946;
+  c += (sampleInput(uv + offset * 2.0) + sampleInput(uv - offset * 2.0)) * 0.1216216216;
+  c += (sampleInput(uv + offset * 3.0) + sampleInput(uv - offset * 3.0)) * 0.0540540541;
+  c += (sampleInput(uv + offset * 4.0) + sampleInput(uv - offset * 4.0)) * 0.0162162162;
+
+  float coverage = maskCoverage(c);
+  float aa = smoothstep(edgeBlurOffset - edgeWidth, edgeBlurOffset + edgeWidth, coverage);
+
+  gl_FragColor = toOutputFormat(vec4(vec3(aa), aa));
+}
+";
+
+string statsGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform float aspect;
+
+#define GRID_SIZE 32
+#define RADIUS_SCALE 4.0
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+// The left half carries the centroid and extent, the right half the vertical bounds, so one tiny
+// pass feeds both.
+void main() {
+  float gridStep = 1.0 / float(GRID_SIZE);
+
+  vec2 weighted = vec2(0.0);
+  float total = 0.0;
+  float lowest = 1.0;
+  float highest = 0.0;
+
+  for (int y = 0; y < GRID_SIZE; y++) {
+    for (int x = 0; x < GRID_SIZE; x++) {
+      vec2 sampleUV = (vec2(float(x), float(y)) + 0.5) * gridStep;
+      float coverage = maskCoverage(sampleInput(sampleUV));
+      weighted += sampleUV * coverage;
+      total += coverage;
+      if (coverage > 0.5) {
+        lowest = min(lowest, sampleUV.y);
+        highest = max(highest, sampleUV.y);
+      }
+    }
+  }
+
+  vec2 maskCenter = total > 0.0001 ? weighted / total : vec2(0.5);
+  if (highest <= lowest) {
+    lowest = 0.0;
+    highest = 1.0;
+  }
+
+  if (sourceTextureCoordinate.x >= 0.5) {
+    gl_FragColor = toOutputFormat(vec4(lowest, highest, 0.0, 1.0));
+    return;
+  }
+
+  float extent = 0.0;
+  for (int y = 0; y < GRID_SIZE; y++) {
+    for (int x = 0; x < GRID_SIZE; x++) {
+      vec2 sampleUV = (vec2(float(x), float(y)) + 0.5) * gridStep;
+      if (maskCoverage(sampleInput(sampleUV)) > 0.5) {
+        vec2 delta = sampleUV - maskCenter;
+        delta.x *= aspect;
+        extent = max(extent, length(delta));
+      }
+    }
+  }
+  extent = max(extent, 0.05);
+
+  gl_FragColor = toOutputFormat(vec4(maskCenter, extent / RADIUS_SCALE, 1.0));
+}
+";
+
+string dilateGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform float radius;
+uniform float edgeFade;
+
+#define MAX_RADIUS 25
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+float ramp(float edge0, float edge1, float x) {
+  return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 duv = 1.0 / outputSize;
+
+  int rad = int(radius);
+  float circleRadius = max(1.0, min(float(MAX_RADIUS), radius));
+  float fade = max(edgeFade, 0.001);
+
+  float coverage = 0.0;
+
+  for (int xi = 0; xi <= MAX_RADIUS; ++xi) {
+    if (xi > rad) break;
+    float fx = float(xi);
+
+    for (int yi = 0; yi <= MAX_RADIUS; ++yi) {
+      if (yi > rad) break;
+      float fy = float(yi);
+
+      float circle = ramp(1.0, 1.0 - fade, length(vec2(fx, fy)) / circleRadius);
+      if (circle <= coverage) continue;
+
+      coverage = max(coverage, maskCoverage(sampleInput(uv + duv * vec2(fx, fy))) * circle);
+      if (xi > 0) {
+        coverage = max(coverage, maskCoverage(sampleInput(uv + duv * vec2(0.0 - fx, fy))) * circle);
+      }
+      if (yi > 0) {
+        coverage = max(coverage, maskCoverage(sampleInput(uv + duv * vec2(fx, 0.0 - fy))) * circle);
+      }
+      if (xi > 0 && yi > 0) {
+        coverage = max(coverage, maskCoverage(sampleInput(uv + duv * vec2(0.0 - fx, 0.0 - fy))) * circle);
+      }
+    }
+  }
+
+  gl_FragColor = toOutputFormat(vec4(vec3(coverage), coverage));
+}
+";
+
+string composeGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform sampler2D auxSampler2;
+uniform sampler2D auxSampler3;
+uniform sampler2D auxSampler4;
+uniform sampler2D auxSampler5;
+
+uniform vec2 outputSize;
+uniform float pointSize;
+uniform vec2 press;
+uniform float hasPress;
+uniform float scale;
+uniform float lift;
+uniform float pivotLift;
+uniform float edgeLightAmount;
+uniform float shadowAmount;
+uniform float shadowOffset;
+uniform float holeReach;
+uniform float dimAmount;
+uniform float underlayAmount;
+uniform float scanTime;
+uniform float scanEased;
+uniform float scanDuration;
+uniform float scanWidth;
+uniform float scanOpacity;
+uniform float hazeOpacity;
+uniform float hazeLength;
+uniform float refraction;
+uniform float wobble;
+uniform float edgeTrail;
+uniform vec4 scanColor;
+uniform float phase;
+uniform float birthTravel;
+uniform float traceTravel;
+uniform float traceVisible;
+uniform float traceOpacity;
+uniform float falloffLead;
+uniform float falloffTrail;
+uniform float radialMod;
+uniform float glowStrength;
+uniform float baseOpacity;
+uniform float opacity;
+uniform vec4 highlightColor;
+uniform vec4 baseColor;
+uniform vec4 topColor;
+uniform vec4 bottomColor;
+
+#define RADIUS_SCALE 4.0
+#define TWO_PI 6.2831853
+#define REVEAL_FEATHER 0.5
+
+float maskCoverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+vec3 screenBlend(vec3 base, vec3 light) {
+  return vec3(1.0) - (vec3(1.0) - base) * (vec3(1.0) - clamp(light, 0.0, 1.0));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  float aspect = outputSize.x / outputSize.y;
+  vec2 toHeight = vec2(aspect, 1.0);
+  // One on-screen point, in texture coordinates, and the screen's up in texture coordinates.
+  vec2 point = vec2(pointSize / aspect, pointSize);
+  vec2 up = vec2(0.0, UP);
+
+  vec4 centerData = texture2D(auxSampler3, vec2(0.25, 0.5));
+  vec2 center = centerData.xy;
+  float extent = max(centerData.z * RADIUS_SCALE, 0.001);
+  vec4 boundsData = texture2D(auxSampler3, vec2(0.75, 0.5));
+  float maskBottom = boundsData.x;
+  float maskTop = boundsData.y;
+  float topEdge = UP < 0.0 ? maskBottom : maskTop;
+
+  // Host space is top-left; the texture's vertical axis follows the backend.
+  vec2 touch = hasPress > 0.5 ? vec2(press.x, 0.5 - UP * (press.y - 0.5)) : center;
+
+  // The garment grows about a point high on it, near where it attaches (collar, waistband), so
+  // that edge barely moves and the hem and cuffs travel over background instead.
+  vec2 pivot = vec2(center.x, center.y + pivotLift * (topEdge - center.y));
+  vec2 lifted = pivot + (uv - pivot) / scale;
+
+  // The ripple: one organic front from the finger at near-constant speed, leaving the garment's
+  // edge as the lift peaks.
+  vec2 fromTouch = (uv - touch) * toHeight;
+  float distanceFromTouch = length(fromTouch);
+  vec2 outward = distanceFromTouch > 0.0001 ? fromTouch / distanceFromTouch : vec2(0.0);
+  float reach = length((center - touch) * toHeight) + extent * scale;
+  float scanProgress = clamp(scanTime / scanDuration, 0.0, 1.0);
+  float front = reach * 1.05 * scanEased;
+  float theta = distanceFromTouch > 0.0001 ? atan(fromTouch.y, fromTouch.x) : 0.0;
+  float lobes = 0.6 * sin(3.0 * theta + 1.7 * scanTime) + 0.4 * sin(5.0 * theta - 2.3 * scanTime + 1.3);
+  float organicFront = front * (1.0 + wobble * lobes);
+  float offsetPoints = (distanceFromTouch - organicFront) / pointSize;
+  float width = max(scanWidth, 0.1);
+  float core = exp(0.0 - (offsetPoints * offsetPoints) / (0.25 * width * width));
+  float halo = exp(0.0 - (offsetPoints * offsetPoints) * 0.6 / (width * width));
+  float band = core * 0.7 + halo * 0.3;
+  float haze = offsetPoints < 0.0 ? exp(0.0 - max(0.0 - offsetPoints, 0.0) / max(hazeLength, 0.1)) : 0.0;
+  float scanOn = step(0.0, scanTime) * clamp(scanTime / 0.04, 0.0, 1.0);
+  float scanFade = clamp((1.0 - front / max(reach * 1.05, 0.0001)) / 0.2, 0.0, 1.0);
+  float scanVisible = scanOn * scanFade * step(scanTime, scanDuration + 0.2);
+
+  vec2 refracted = lifted - outward / toHeight * refraction * pointSize * band * scanVisible;
+
+  float scaled = maskCoverage(texture2D(auxSampler2, lifted));
+  float layer = smoothstep(0.35, 0.85, scaled);
+  float dilated = maskCoverage(texture2D(auxSampler1, lifted));
+  float outline = clamp(dilated - scaled, 0.0, 1.0);
+  float glow = texture2D(auxSampler4, lifted).r;
+
+  // Where the lifted garment no longer covers the original, show the background just outside the
+  // original silhouette, so no edge ever shows twice.
+  vec4 base = sampleInput(uv);
+  float original = maskCoverage(texture2D(auxSampler2, uv));
+  float hole = original * (1.0 - layer) * clamp(lift * 10.0, 0.0, 1.0);
+  if (hole > 0.001) {
+    vec2 tap = point * 3.0;
+    float gx = texture2D(auxSampler5, uv + vec2(tap.x, 0.0)).r - texture2D(auxSampler5, uv - vec2(tap.x, 0.0)).r;
+    float gy = texture2D(auxSampler5, uv + vec2(0.0, tap.y)).r - texture2D(auxSampler5, uv - vec2(0.0, tap.y)).r;
+    vec2 slope = vec2(gx, gy);
+    vec2 away = length(slope) > 0.00001 ? 0.0 - normalize(slope) : vec2(0.0);
+    vec3 fill = sampleInput(uv + away * point * holeReach).rgb * (1.0 - 0.25 * lift);
+    base.rgb = mix(base.rgb, fill, hole);
+  }
+
+  float shadow = texture2D(auxSampler5, uv + up * point * shadowOffset).r;
+  vec3 background = base.rgb * (1.0 - dimAmount) * (1.0 - shadowAmount * shadow * (1.0 - layer));
+  vec3 raised = sampleInput(refracted).rgb;
+  vec3 color = mix(background, raised, layer);
+
+  // Light is screened, never added, so a white garment keeps its folds.
+  float scanLight = clamp(band * scanOpacity * (1.0 - 0.6 * scanProgress) + haze * hazeOpacity, 0.0, 1.0) * scanVisible * max(scaled * 0.8, outline);
+  float behindFront = organicFront - distanceFromTouch;
+  float trail = behindFront > 0.0 ? outline * edgeTrail * exp(0.0 - behindFront / (30.0 * pointSize)) * scanOn * clamp((scanDuration + 0.35 - scanTime) / 0.35, 0.0, 1.0) : 0.0;
+  // The edge light is an inner rim lit from above: nothing spills outside the garment, nothing
+  // lights the hem, and nothing loops around a gap in the silhouette.
+  float edge = 0.0;
+  if (edgeLightAmount > 0.001) {
+    vec2 rimTap = point * 3.0;
+    float fx = texture2D(auxSampler5, lifted + vec2(rimTap.x, 0.0)).r - texture2D(auxSampler5, lifted - vec2(rimTap.x, 0.0)).r;
+    float fy = texture2D(auxSampler5, lifted + vec2(0.0, rimTap.y)).r - texture2D(auxSampler5, lifted - vec2(0.0, rimTap.y)).r;
+    vec2 rimSlope = vec2(fx, fy);
+    vec2 rimOut = length(rimSlope) > 0.00001 ? 0.0 - normalize(rimSlope) : vec2(0.0);
+    float beyond = texture2D(auxSampler5, lifted + rimOut * point * 6.0).r;
+    // The rim's position comes from the full-resolution mask; the blurred footprint only gives
+    // the direction and finds the pockets.
+    edge = scaled * (1.0 - maskCoverage(texture2D(auxSampler2, lifted + rimOut * point * 2.5)));
+    edge *= smoothstep(-0.1, 0.7, dot(rimOut, up));
+    edge *= 1.0 - smoothstep(0.5, 0.7, beyond);
+    edge *= edgeLightAmount;
+  }
+  color = screenBlend(color, scanColor.rgb * (scanLight + trail + edge));
+
+  vec2 delta = (lifted - center) * toHeight;
+  vec2 touchDelta = (touch - center) * toHeight;
+  // No press, or a press on the centroid, has no direction: start where the on-pause trace does.
+  float touchAngle = length(touchDelta) > 0.0001 ? atan(touchDelta.y, touchDelta.x) * UP : 0.0;
+  float angle = atan(delta.y, delta.x) * UP - touchAngle;
+
+  float leadSpan = max(radians(falloffLead), 0.0001);
+  float trailSpan = max(radians(falloffTrail), 0.0001);
+  float period = TWO_PI / radialMod;
+
+  float lobe = (angle - phase + leadSpan) * radialMod;
+  float cycles = lobe / TWO_PI;
+  float frac = cycles - floor(cycles);
+
+  float aheadOf = frac * period;
+  float behindOf = (1.0 - frac) * period;
+
+  float leadFalloff = 1.0 - smoothstep(0.0, leadSpan, aheadOf);
+  float trailFalloff = 1.0 - smoothstep(0.0, trailSpan, behindOf);
+
+  float sweep = max(leadFalloff, trailFalloff);
+
+  float thetaCycles = angle / period;
+  float traceTheta = (thetaCycles - floor(thetaCycles)) * period;
+
+  float revealFront = smoothstep(0.0, REVEAL_FEATHER, birthTravel - traceTheta);
+  float revealStart = smoothstep(0.0, REVEAL_FEATHER, traceTheta);
+  float revealDone = smoothstep(period, period + REVEAL_FEATHER, birthTravel);
+
+  float sweepVisible = revealFront * max(revealStart, revealDone);
+
+  float traceGap = clamp((period - traceTravel) / period, 0.0, 1.0);
+  // Once the trace has closed the loop the gap is zero, and smoothstep with equal edges is undefined.
+  float traceStart = traceGap > 0.0 ? max(smoothstep(0.0, REVEAL_FEATHER * traceGap, traceTheta), 1.0 - traceGap) : 1.0;
+  float traceReveal = smoothstep(0.0, REVEAL_FEATHER, traceTravel - traceTheta + REVEAL_FEATHER) * traceStart;
+
+  float traceLayer = traceOpacity * traceReveal;
+
+  float gradient = max(traceLayer, sweep * sweepVisible);
+  float visible = max(traceReveal, sweepVisible) * traceVisible;
+
+  vec4 gradientColor = mix(baseColor, highlightColor, gradient);
+
+  float vertical = clamp((lifted.y - maskBottom) / max(maskTop - maskBottom, 0.001), 0.0, 1.0);
+  vec4 verticalColor = mix(bottomColor, topColor, vertical);
+
+  float shared = opacity * gradientColor.a * verticalColor.a * mix(baseOpacity, 1.0, gradient) * visible;
+  float alpha = outline * shared;
+  float glowAlpha = glow * glowStrength * shared;
+
+  // A dark floor under the stroke keeps it readable on bright backgrounds once the dim has gone.
+  float backgroundLuma = dot(base.rgb, vec3(0.2126, 0.7152, 0.0722));
+  color *= 1.0 - underlayAmount * clamp(outline * 1.5, 0.0, 1.0) * visible * smoothstep(0.55, 0.8, backgroundLuma);
+  color += gradientColor.rgb * verticalColor.rgb * (alpha + glowAlpha);
+  gl_FragColor = toOutputFormat(vec4(color, base.a));
+}
+";

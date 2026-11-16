@@ -1,0 +1,1 @@
+(function(observationId){const stopObservation=window.__iabjs?.stopCookieBannerObservation;"function"==typeof stopObservation&&stopObservation(observationId)})

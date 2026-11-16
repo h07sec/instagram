@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "087059c3-cdda-4e68-8858-b121eda23c7f",
+  "displayName": "Doodle Out",
+  "description": "[IG Edits] Video effect name. With \"Doodle Out\", the creator can scribble the subject away as a hand-drawn brush stroke wipes it out with a glowing edge.",
+  "iglu": {
+    "legacyId": 4003,
+    "behavior": {
+      "type": "fixedOutro",
+      "durationMs": 2000,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "direction",
+        "defaultSelection": "down",
+        "available": [
+          "up",
+          "down"
+        ],
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down)."
+      },
+      {
+        "name": "duration",
+        "default": 2.0,
+        "min": 0.5,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      },
+      {
+        "name": "color",
+        "defaultSelection": "#E600FF",
+        "available": [
+          "#E600FF",
+          "#FFFFFF",
+          "#000000",
+          "#FFD600",
+          "#FF7A00",
+          "#FE1D37",
+          "#FF0169",
+          "#D300C5",
+          "#7638FA",
+          "#37038B",
+          "#1CD164",
+          "#0095F6",
+          "#AD88FC",
+          "#FDD5FD",
+          "#FFABE1",
+          "#FFC584",
+          "#FFF8C2",
+          "#09FF00",
+          "#FFFF00",
+          "#5AFAC7",
+          "#0000FF"
+        ],
+        "displayName": "Color",
+        "displayNameDescription": "[IG Edits] Color picker label. The user selects a color used by the video effect (e.g., glow tint, outline color, sparkle color); available palette varies per effect."
+      }
+    ]
+  },
+  "assets": [
+    {
+      "name": "brushTex.png",
+      "assetHash": "fc02e18c4b89e56365e6fba75dee5b9bf6e6795465bd55811ae416852e465b78",
+      "hubAssetId": "2104621856813108"
+    }
+  ],
+  "dependencies": [
+    "video_doodle"
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD3GOZ10EQ"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "cc1d4fc6",
+      "handle": "AQAEDykflu_Q",
+      "md5": "ed47bc09f60c870e59058907b70cc14b"
+    }
+  }
+}

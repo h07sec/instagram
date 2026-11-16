@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1138909166720743",
+  "displayName": "Colorful",
+  "description": "[IG Edits] Color filter name. With \"Colorful\", the creator gets a pure 8x8 LUT color grade applied to the camera image at full strength.",
+  "android": {
+    "previewAsset": {
+      "key": "e29d4566",
+      "handle": "AQAFu6LXoxFK",
+      "md5": "972cab92a1488343f85f7fc70289a126"
+    }
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGUhD3LGyy"
+    }
+  },
+  "iglu": {
+    "legacyId": 3205
+  },
+  "assets": [
+    {
+      "name": "colorful_lut.png",
+      "assetHash": "03194e603c7fedee6f9e1b7a0eef53c3b267d10833eb5f00245003de15e1ae46",
+      "hubAssetId": "909008325589572"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPD-hzGSP4_-IQQFAO6nVCiBMrcZbhQoAAAD"
+    }
+  }
+}

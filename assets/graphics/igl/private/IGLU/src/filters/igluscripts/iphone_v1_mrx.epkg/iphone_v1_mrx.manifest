@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "158755776390312",
+  "displayName": "iphone_v1🌈MrX",
+  "description": "[IG Edits] Color filter name. With \"iphone_v1🌈MrX\", the creator can apply a Spark-ported iPhone-style color grade.",
+  "iglu": {
+    "legacyId": 3355
+  },
+  "assets": [
+    {
+      "name": "iphone_v1_mrx_lut.png",
+      "assetHash": "2f5e9a54f383ddbb0c2ee28e11ce2fdddcdc8adba416ae69d7b66b1ebd7593de",
+      "hubAssetId": "1593763995840269"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGI76JIDl6"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "cbee29",
+      "handle": "AQAFRy5AhS5c",
+      "md5": "06001709a4994e81858dc7bb10227667"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIC69zJmmjXU6KYDAIBSI83e3EpRbhQoAAAD"
+    }
+  }
+}

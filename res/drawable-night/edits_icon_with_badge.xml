@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/edits_icon_with_badge__app_bitmap_0" />
+    <item android:left="17.0dip" android:top="0.0dip" android:right="0.0dip" android:bottom="17.0dip">
+        <shape android:shape="oval">
+            <solid android:color="@color/bds_black" />
+            <size android:height="7.0dip" android:width="7.0dip" />
+        </shape>
+    </item>
+    <item android:left="18.0dip" android:top="0.0dip" android:right="0.0dip" android:bottom="18.0dip">
+        <shape android:shape="oval">
+            <solid android:color="?igds_color_list_badge" />
+            <size android:height="6.0dip" android:width="6.0dip" />
+        </shape>
+    </item>
+</layer-list>

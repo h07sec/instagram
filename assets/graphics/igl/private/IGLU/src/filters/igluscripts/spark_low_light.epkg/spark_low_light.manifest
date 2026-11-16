@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "748349869924886",
+  "displayName": "Spark Low Light",
+  "description": "[IG Edits] Color filter name. With \"Spark Low Light\", the creator can apply a low-light LUT grade with a tunable ambient plus directional brightness lift.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFjZZ_K5U0"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "8c6db96c",
+      "handle": "AQAIAoFa22lg",
+      "md5": "be0b6f22d27662102c9ee59ada2fc46f"
+    }
+  },
+  "iglu": {
+    "legacyId": 3077
+  },
+  "assets": [
+    {
+      "name": "spark_low_light_lut.png",
+      "assetHash": "fa2c6f26a4c0ddf9767fdb27fc5326e66a9ddbc91f64612393d257273292086e",
+      "hubAssetId": "28983746021276616"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GKXSDTLH5TXdDGwDAMkBmxsH7Vl6bhQoAAAD"
+    }
+  }
+}

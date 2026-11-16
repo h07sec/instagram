@@ -1,0 +1,194 @@
+[Filter FlashWiiArt]
+# "◈Flashwiiart" — LUT grade + strobing black shape masks. Ported from the
+# Spark effect (734076818261687). Single fragment pass, no face tracking, and
+# the 51-frame overlay sequence is replaced by procedural shapes:
+#
+#   Layer 1 — LUT colour grade at 75% (Spark FastColorLUT "2", intensity 0.75).
+#   Layer 2 — A full-screen mask multiplied over the grade, as Spark's overlay
+#             material does (blend multiply): black hides the image, grey dims
+#             it, white shows it. A new mask is picked every 1/flash_fps seconds
+#             (Spark sequence: 12 fps). Like Spark's frames, each mask is either
+#             a solid grey level (about 1 in 4) or a black background with one
+#             grey shape: a rectangle, a top/bottom or left/right half, a
+#             diagonal triangle, a box outline or a centred block. Grey levels
+#             are spread uniformly from black to white, giving Spark's ~24% mean.
+#
+# The Spark face retouch (smoothing 0.28) is dropped as too subtle to see.
+# `flash_fps` and `shape_strength` are sliders so the strobe can be calmed and
+# the defaults re-locked later (Spark values: 12 fps, full strength).
+#
+# Time source: the host's time_sec parameter. GLSL only — Metal is generated
+# by shaderc.
+
+[Init]
+fun init(Filter filter)
+{
+    makeTexture('flash_wii_art_lut);
+
+    filter.parameters = {
+        {strength = 1.0, min = 0.0, max = 1.0, description = "Mix of the effect over the original image (1.0 = full effect)"},
+        {lut_strength = 0.750, min = 0.0, max = 1.0, description = "LUT mix strength (Spark FastColorLUT intensity 0.75)"},
+        {flash_fps = 12.0, min = 1.0, max = 24.0, description = "Shape changes per second (Spark sequence: 12 fps)"},
+        {shape_strength = 1.0, min = 0.0, max = 1.0, description = "How strongly the black shape masks darken the image (1 = Spark)"},
+        {time_sec = -1.0, description = "Elapsed time in seconds, sent by the host app (-1 = not sent: fall back to the filter clock)"},
+    };
+
+    filter.passes = {{
+      name = 'pass0,
+      inputs = {'default, 'flash_wii_art_lut},
+      uniforms = {
+        strength = 1.0,
+        lut_strength = 0.750,
+        flash_fps = 12.0,
+        shape_strength = 1.0,
+        time = 0.0,
+      },
+      glslShader = glslFlashWiiArt,
+    }};
+}
+
+# Custom Parameter strings for sample-app local-loading.
+string lut_path = "lut_path";
+string flash_wii_art_lut_path = "flash_wii_art_lut_path";
+string flash_wii_art_lut_filename = "";
+
+[PreRender]
+fun preRender(Filter filter){
+    f32 effect_strength = getParameterFloat('strength);
+    setShaderUniform('pass0, 'strength, effect_strength);
+
+    # iOS passes the remote LUT under the generic 'lut_path; flash_wii_art_lut_path is for local testing.
+
+    string lut_param = getParameterString(lut_path);
+
+    if (lut_param == "") {
+
+        lut_param = getParameterString(flash_wii_art_lut_path);
+
+    }
+    if (lut_param != "") {
+        string new_lut = stringAppend("textureFilePath://", lut_param);
+        if (new_lut != flash_wii_art_lut_filename) {
+            flash_wii_art_lut_filename = new_lut;
+            loadTexture('flash_wii_art_lut, flash_wii_art_lut_filename);
+        }
+    }
+
+    f32 ls = getParameterFloat('lut_strength);
+    setShaderUniform('pass0, 'lut_strength, ls);
+
+    f32 fps = getParameterFloat('flash_fps);
+    setShaderUniform('pass0, 'flash_fps, fps);
+
+    f32 ss = getParameterFloat('shape_strength);
+    setShaderUniform('pass0, 'shape_strength, ss);
+
+    # Time drives the shape sequence.
+    f32 time = getParameterFloat('time_sec);
+    # Hosts that never send time_sec (IG camera) leave the -1 default: use the filter clock.
+    if (time < 0.0) {
+        time = getLocalTime();
+    }
+    setShaderUniform('pass0, 'time, time);
+}
+
+#### GLSL shader ####
+
+string glslFlashWiiArt = "
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+
+    uniform sampler2D auxSampler0;  // 'default (camera)
+    uniform sampler2D auxSampler1;  // 'flash_wii_art_lut
+
+    uniform float lut_strength;
+    uniform float flash_fps;
+    uniform float shape_strength;
+    uniform float time;
+
+    // 8x8 grid LUT lookup (Spark FastColorLUT decode).
+    vec3 lutLookup(vec3 inRgb) {
+      vec3 c = clamp(inRgb, 0.00781, 0.98438);
+      float x = c.r / 8.0;
+      float y = c.g / 8.0;
+      float z = c.b;
+      float blueY = floor(z * 8.0) / 8.0;
+      float blueX = floor((z - blueY) * 64.0) / 8.0;
+      x += blueX;
+      y += blueY;
+      // auxSampler1 = second pass input (the LUT); pass inputs bind in order after 'default, which is auxSampler0.
+      return texture2D(auxSampler1, vec2(x, y)).xyz;
+    }
+
+    // Per-frame random value in [0, 1); `k` selects an independent stream.
+    float frameHash(float frame, float k) {
+      return fract(sin(frame * 12.9898 + k * 78.233) * 43758.5453);
+    }
+
+    // Mask value for one frame: 1 = image shows, 0 = black.
+    float shapeMask(vec2 uv, float frame) {
+      float level = frameHash(frame, 1.0);
+      float kind = floor(frameHash(frame, 2.0) * 8.0);
+      if (kind < 2.0) {
+        return level;  // solid grey frame (about 1 in 4)
+      }
+      float a = frameHash(frame, 3.0);
+      float b = frameHash(frame, 4.0);
+      float inside = 0.0;
+      if (kind < 3.0) {
+        // half: top / bottom / left / right
+        float side = floor(a * 4.0);
+        float t = side < 2.0 ? uv.y : uv.x;
+        inside = (mod(side, 2.0) < 1.0) ? step(t, 0.5) : step(0.5, t);
+      } else if (kind < 4.0) {
+        // vertical band
+        float w = 0.2 + 0.3 * b;
+        float x0 = a * (1.0 - w);
+        inside = step(x0, uv.x) * step(uv.x, x0 + w);
+      } else if (kind < 5.0) {
+        // horizontal band
+        float h = 0.2 + 0.3 * b;
+        float y0 = a * (1.0 - h);
+        inside = step(y0, uv.y) * step(uv.y, y0 + h);
+      } else if (kind < 6.0) {
+        // diagonal triangle
+        float d = a < 0.5 ? uv.x + uv.y : uv.x - uv.y + 1.0;
+        inside = (b < 0.5) ? step(d, 1.0) : step(1.0, d);
+      } else if (kind < 7.0) {
+        // box outline
+        vec2 p = abs(uv - 0.5);
+        float r = 0.25 + 0.15 * a;
+        float t = 0.03 + 0.03 * b;
+        float m = max(p.x, p.y * 0.6);
+        inside = step(m, r) * step(r - t, m);
+      } else {
+        // centred block
+        vec2 p = abs(uv - 0.5);
+        vec2 s = vec2(0.1 + 0.25 * a, 0.08 + 0.2 * b);
+        inside = step(p.x, s.x) * step(p.y, s.y);
+      }
+      return inside * level;
+    }
+
+    // Layout is top-origin, as on Metal (UP == -1). OpenGL frames arrive bottom row first (UP == 1),
+    // so flip into top-origin for positions and overlay lookups; the flip is its own inverse.
+    vec2 topUv(vec2 uv) {
+      if (UP > 0.0) { uv.y = 1.0 - uv.y; }
+      return uv;
+    }
+
+    void main() {
+      vec2 uv = sourceTextureCoordinate;
+      vec4 cam = sampleInput(uv);
+      // strength: global effect-strength uniform declared by BaseUniformsOpenGL (IGLUScript/igluscript/UniformsMacros.h:10).
+      vec3 graded = mix(cam.rgb, lutLookup(cam.rgb), strength * lut_strength);
+
+      // Bounded seed: repeats every 51 frames (Spark's 51-frame, 4.25 s sequence) so the sin hash
+      // keeps full f32 precision however long the clip runs.
+      float frame = mod(floor(time * flash_fps), 51.0);
+      float mask = shapeMask(topUv(uv), frame);
+      vec3 result = graded * mix(1.0, mask, shape_strength);
+
+      gl_FragColor = toOutputFormat(vec4(result, cam.a));
+    }
+    ";

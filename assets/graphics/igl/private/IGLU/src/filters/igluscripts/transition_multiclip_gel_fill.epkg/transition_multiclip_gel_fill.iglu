@@ -1,0 +1,335 @@
+[Filter TransitionMulticlipGelFill]
+
+# Clip B fills in as a refracting gel blob over clip A's outgoing gel surface.
+# Both surfaces share the existing reveal height field.
+#
+# Ported from the Easel web tool's multiclip_gel_fill.iglu.
+#
+# Runs video_blob_in on clip B directly: the mask pass reads clip B, and the
+# final pass runs the emboss and the over-composite onto clip A together.
+
+# Normalise the shared clock against one term's duration, so a term with a
+# duration below 1.0 lands early and holds instead of running the whole
+# transition.
+fun phase(f32 p, f32 d) f32 {
+  return clamp(p / max(d, 0.001), 0.0, 1.0);
+}
+
+fun smoothstep3(f32 e0, f32 e1, f32 x) f32 {
+  f32 t = clamp((x - e0) / (e1 - e0), 0.0, 1.0);
+  return t * t * (3.0 - 2.0 * t);
+}
+
+# Ramp 1 -> 0 across [start, end]. Clamping start below 1.0 and forcing end
+# above it keeps a value dragged past its partner from inverting the ramp.
+fun retire(f32 p, f32 start, f32 end) f32 {
+  f32 s = min(start, 0.999);
+  return 1.0 - smoothstep3(s, max(end, s + 0.001), p);
+}
+
+# Media settle: the media slides down OFFSET_Y and zooms from START_SCALE to
+# native over the first OFFSET_DURATION of the clock, on a cubic ease-out.
+f32 OFFSET_Y = 0.08;
+f32 OFFSET_DURATION = 0.35;
+f32 START_SCALE = 1.06;
+
+# Reveal ramp, padded by the smoothstep width (SOFTNESS in the mask shader) so
+# progress 0 passes nothing and 1 passes everything.
+f32 REVEAL_DURATION = 0.8;
+f32 SOFTNESS = 0.4027;
+
+f32 EMBOSS_STRENGTH = 0.5;
+f32 EMBOSS_FADE_START = 0.3;
+f32 EMBOSS_FADE_END = 0.7;
+f32 REFRACT_FADE_END = 0.6;
+f32 REFRACT_STRENGTH = -0.8;
+f32 BRIGHTNESS_BOOST = 0.22;
+f32 BRIGHTNESS_FADE_START = 0.6;
+f32 COLOR_DURATION = 0.8;
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  loadTexture('noiseTex, 'texture://TextEffectsSharedAssets/PerlinNoise);
+
+  filter.parameters = {
+    {noiseScale = 0.8782, min = 0.1, max = 8.0, description = "noiseScale"},
+  };
+
+  filter.passes = {
+    {
+      name = 'blob,
+      inputs = {'default, 'transition, 'noiseTex},
+      shaderInputNames = {'default, 's_texture1, 'noiseTex},
+      uniforms = {
+        mediaScale = 1.0,
+        mediaOffset = {0.0, 0.0},
+        noiseMul = {1.0, 1.0},
+        noiseOffset = {0.0, 0.0},
+        revealThreshold = 0.0,
+      },
+      glslShader = maskGlsl,
+    },
+    {
+      name = 'heightDown,
+      inputs = {'blob},
+      scale = {0.5, 0.5},
+      bufferType = 'uint8,
+      glslShader = downGlsl,
+    },
+    {
+      name = 'heightBlurV,
+      inputs = {'heightDown},
+      scale = {0.5, 0.5},
+      bufferType = 'uint8,
+      uniforms = {
+        blurTexel = {0.003704, 0.002083},
+        blurVector = {0.0, 1.0},
+      },
+      glslShader = boxBlurGlsl,
+    },
+    {
+      name = 'heightBlur,
+      inputs = {'heightBlurV},
+      scale = {0.5, 0.5},
+      bufferType = 'uint8,
+      uniforms = {
+        blurTexel = {0.003704, 0.002083},
+        blurVector = {1.0, 0.0},
+      },
+      glslShader = boxBlurGlsl,
+    },
+    {
+      name = 'composite,
+      inputs = {'default, 'blob, 'heightBlur},
+      shaderInputNames = {'default, 's_mask, 's_height},
+      uniforms = {
+        texel = {0.000925, 0.000520},
+        halfInvTexel = {540.0, 960.0},
+        refractStep = {0.0, 0.0},
+        brightMul = 1.0,
+        shadeGain = 0.0,
+        colorMix = 0.0,
+        aRefractStep = {0.0, 0.0},
+        aBrightMul = 1.0,
+        aShadeGain = 0.0,
+        aColorMix = 1.0,
+      },
+      glslShader = compositeGlsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  vec2 size = getTextureSize('default);
+  f32 aspect = size.x / size.y;
+
+  f32 t = phase(p, OFFSET_DURATION);
+  f32 inv = 1.0 - t;
+  f32 eased = 1.0 - inv * inv * inv;
+  f32 yOff = OFFSET_Y * (1.0 - eased);
+  # Dividing the centred uv magnifies the image, so START_SCALE above 1.0
+  # starts too big and resolves back to native.
+  f32 mediaScale = 1.0 / max(mix(START_SCALE, 1.0, eased), 0.001);
+  f32 centerShift = 0.5 - 0.5 * mediaScale;
+  vec2 mediaOffset = {centerShift, centerShift + yOff};
+
+  # Aspect-correct so globs stay round, and scale about the centre so the
+  # slider zooms into the middle of the frame.
+  f32 noiseScale = getParameterFloat('noiseScale);
+  vec2 noiseMul = {aspect * noiseScale, noiseScale};
+  vec2 noiseOffset = {0.5 - 0.5 * noiseMul.x, 0.5 - 0.5 * noiseMul.y};
+
+  setShaderUniform('blob, 'mediaScale, mediaScale);
+  setShaderUniform('blob, 'mediaOffset, mediaOffset);
+  setShaderUniform('blob, 'noiseMul, noiseMul);
+  setShaderUniform('blob, 'noiseOffset, noiseOffset);
+  setShaderUniform('blob, 'revealThreshold, phase(p, REVEAL_DURATION) * (1.0 + SOFTNESS));
+
+  # All lighting footprints use a 1080-short-side reference, not output pixels.
+  f32 s = min(size.x, size.y) / 1080.0;
+  vec2 pixel = {s / size.x, s / size.y};
+  vec2 texel = {16.0 * pixel.x, 16.0 * pixel.y};
+  vec2 blurTexel = {4.0 * pixel.x, 4.0 * pixel.y};
+  setShaderUniform('heightBlurV, 'blurTexel, blurTexel);
+  setShaderUniform('heightBlur, 'blurTexel, blurTexel);
+
+  f32 refractFade = retire(p, EMBOSS_FADE_START, REFRACT_FADE_END);
+  vec2 halfInvTexel = {0.5 / texel.x, 0.5 / texel.y};
+  vec2 refractStep = {REFRACT_STRENGTH * pixel.x * refractFade, REFRACT_STRENGTH * pixel.y * refractFade};
+  setShaderUniform('composite, 'texel, texel);
+  setShaderUniform('composite, 'halfInvTexel, halfInvTexel);
+  setShaderUniform('composite, 'refractStep, refractStep);
+  setShaderUniform('composite, 'brightMul, 1.0 + BRIGHTNESS_BOOST * retire(p, BRIGHTNESS_FADE_START, 1.0));
+  setShaderUniform('composite, 'shadeGain, EMBOSS_STRENGTH * retire(p, EMBOSS_FADE_START, EMBOSS_FADE_END));
+  setShaderUniform('composite, 'colorMix, phase(p, COLOR_DURATION));
+
+  # Blob Out uses the same treatment on the reversed clock. The outgoing
+  # surface is the complement of the incoming height field.
+  f32 aPhase = 1.0 - clamp(p, 0.0, 1.0);
+  f32 aRefractFade = retire(aPhase, EMBOSS_FADE_START, REFRACT_FADE_END);
+  vec2 aRefractStep = {REFRACT_STRENGTH * pixel.x * aRefractFade, REFRACT_STRENGTH * pixel.y * aRefractFade};
+  setShaderUniform('composite, 'aRefractStep, aRefractStep);
+  setShaderUniform('composite, 'aBrightMul, 1.0 + BRIGHTNESS_BOOST * retire(aPhase, BRIGHTNESS_FADE_START, 1.0));
+  setShaderUniform('composite, 'aShadeGain, EMBOSS_STRENGTH * retire(aPhase, EMBOSS_FADE_START, EMBOSS_FADE_END));
+  setShaderUniform('composite, 'aColorMix, phase(aPhase, COLOR_DURATION));
+}
+
+string downGlsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    BaseUniformsOpenGL;
+    void main() {
+        gl_FragColor = toOutputFormat(sampleInput(sourceTextureCoordinate));
+    }
+";
+
+string maskGlsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D s_texture1;
+    uniform sampler2D noiseTex;
+    uniform float mediaScale;
+    uniform vec2 mediaOffset;
+    uniform vec2 noiseMul;
+    uniform vec2 noiseOffset;
+    uniform float revealThreshold;
+
+    // perlin_noise.png only occupies part of the 0-1 range, so stretch it back
+    // out. Without this the mask would sit idle until the clock passed the
+    // noise minimum and finish early at its maximum, wasting the duration.
+    #define NOISE_MIN 0.19
+    #define NOISE_MAX 0.79
+
+    #define SOFTNESS 0.4027
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+
+        // Only the media moves. The noise is read at the unshifted uv so the
+        // gel pattern stays anchored to the frame instead of travelling with
+        // the content. perlin_noise.png tiles seamlessly, so fract() repeats it
+        // without a visible seam.
+        vec4 color = texture2D(s_texture1, uv * mediaScale + mediaOffset);
+        vec2 nuv = fract(uv * noiseMul + noiseOffset);
+        float n = clamp((texture2D(noiseTex, nuv).r - NOISE_MIN) * (1.0 / (NOISE_MAX - NOISE_MIN)), 0.0, 1.0);
+
+        color.a = color.a * smoothstep(n, n + SOFTNESS, revealThreshold);
+        gl_FragColor = toOutputFormat(color);
+    }
+";
+
+string compositeGlsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+
+    BaseUniformsOpenGL;
+
+    // The unmasked clip B in rgb with the reveal in alpha, full res.
+    uniform sampler2D s_mask;
+    // The blurred half-res height field.
+    uniform sampler2D s_height;
+    uniform vec2 texel;
+    uniform vec2 halfInvTexel;
+    uniform vec2 refractStep;
+    uniform float brightMul;
+    uniform float shadeGain;
+    uniform float colorMix;
+    uniform vec2 aRefractStep;
+    uniform float aBrightMul;
+    uniform float aShadeGain;
+    uniform float aColorMix;
+
+    // How steeply the alpha ramp is read as a height field. Fixed so the bevel
+    // shape stays consistent and EMBOSS_STRENGTH is a clean linear dial.
+    #define SLOPE_GAIN 0.08
+
+    #define ALPHA_CUT 0.3913
+    #define SHADE_SOFTNESS 0.02
+    #define EDGE_SMOOTH 0.2
+    #define RIM_SOFTNESS 0.03
+
+    // normalize(vec3(cos(radians(50.87)), sin(radians(50.87)), 0.6))
+    const vec3 LIGHT_DIR = vec3(0.5411484, 0.6651711, 0.5144958);
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        vec4 a = sampleInput(uv);
+
+        // Central-difference gradient of the mask alpha, divided by the sample
+        // spread so it is alpha-per-uv and the bevel looks the same at any
+        // output resolution. Taps come from the blurred height field: bilinear
+        // magnification of the noise makes the crisp alpha piecewise linear, so
+        // differentiating it directly gives a faceted, banded bevel.
+        float aL = texture2D(s_height, uv - vec2(texel.x, 0.0)).a;
+        float aR = texture2D(s_height, uv + vec2(texel.x, 0.0)).a;
+        float aD = texture2D(s_height, uv - vec2(0.0, texel.y)).a;
+        float aU = texture2D(s_height, uv + vec2(0.0, texel.y)).a;
+        vec2 grad = vec2(aR - aL, aU - aD) * halfInvTexel;
+
+        // Clip A occupies the complementary surface: its height gradient has
+        // the opposite sign. Keep its original alpha and the B rim unchanged.
+        vec2 aGrad = -grad;
+        a.rgb = sampleInput(uv - aGrad * aRefractStep).rgb * aBrightMul;
+        vec3 aNormal = normalize(vec3(-aGrad * SLOPE_GAIN, 1.0));
+        float aShade = dot(aNormal, LIGHT_DIR) - LIGHT_DIR.z;
+        aShade = aShade / (1.0 + SHADE_SOFTNESS * 4.0 * abs(aShade));
+        a.rgb = clamp(a.rgb + aShade * aShadeGain, 0.0, 1.0);
+        float aGray = dot(a.rgb, vec3(0.299, 0.587, 0.114));
+        a.rgb = mix(vec3(aGray), a.rgb, aColorMix);
+
+        // Refract clip B through the bevel: to first order a thin lens just
+        // offsets the lookup along the surface gradient. The mask pass keeps the
+        // full unmasked media in rgb, so a displaced fetch can never pull in
+        // empty pixels. Alpha is still read at the undisplaced uv, leaving the
+        // rim contour intact.
+        vec4 b = vec4(texture2D(s_mask, uv - grad * refractStep).rgb, texture2D(s_mask, uv).a);
+
+        // Lift the media then resolve back to native exposure by the end.
+        // Multiplicative so it reads as exposure and leaves true black alone.
+        b.rgb = b.rgb * brightMul;
+
+        // Light the soft glob edge as a slope. Subtracting the flat-surface
+        // response keeps the glob interiors untouched, and the roll-off avoids a
+        // hard terminator at the clamp.
+        vec3 nrm = normalize(vec3(-grad * SLOPE_GAIN, 1.0));
+        float shade = dot(nrm, LIGHT_DIR) - LIGHT_DIR.z;
+        shade = shade / (1.0 + SHADE_SOFTNESS * 4.0 * abs(shade));
+        b.rgb = clamp(b.rgb + shade * shadeGain, 0.0, 1.0);
+
+        float gray = dot(b.rgb, vec3(0.299, 0.587, 0.114));
+        b.rgb = mix(vec3(gray, gray, gray), b.rgb, colorMix);
+
+        // Everything below ALPHA_CUT is forced to a true 0, so the gel gets a
+        // defined rim instead of a long feathered tail.
+        float edge = mix(b.a, texture2D(s_height, uv).a, EDGE_SMOOTH);
+        b.a = smoothstep(ALPHA_CUT, ALPHA_CUT + RIM_SOFTNESS, edge);
+
+        // Premultiply after the bevel lighting, so highlights vanish with the
+        // glob, then go over clip A without another multiply by b.a.
+        b.rgb = b.rgb * b.a;
+        float outA = b.a + a.a * (1.0 - b.a);
+        vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+        gl_FragColor = toOutputFormat(vec4(rgb, outA));
+    }
+";
+
+string boxBlurGlsl = "
+varying vec2 sourceTextureCoordinate;
+precision highp float;
+BaseUniformsOpenGL;
+uniform vec2 blurTexel;
+uniform vec2 blurVector;
+void main() {
+  vec2 blur = blurVector * blurTexel;
+  vec4 avgValue = vec4(0.0);
+  // Offsets are in reference space, not consecutive source texel centers.
+  for (int i = -8; i <= 8; i++) {
+    avgValue += sampleInput(sourceTextureCoordinate + float(i) * blur);
+  }
+  gl_FragColor = toOutputFormat(avgValue / 17.0);
+}
+";

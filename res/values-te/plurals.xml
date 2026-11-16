@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d రోజుల క్రితం</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d గంటల క్రితం</item>
+        <item quantity="one">%1$d గంట క్రితం</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d నిమిషాల క్రితం</item>
+        <item quantity="one">%1$d నిమిషం క్రితం</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d బ్రౌజర్ టాస్క్‌లు</item>
+        <item quantity="one">%1$d బ్రౌజర్ టాస్క్</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">%1$d గంటల్లో గడువు ముగుస్తుంది</item>
+        <item quantity="one">గడువు %1$d గంటలో ముగుస్తుంది</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">గడువు %1$d నిమిషాల్లో ముగుస్తుంది</item>
+        <item quantity="one">గడువు %1$d నిమిషంలో ముగుస్తుంది</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d టాస్క్‌లను పరిశీలించాల్సి ఉంది</item>
+        <item quantity="one">టాస్క్‌ను రివ్యూ చేయాలి</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d మంది ప్రయాణీకులు</item>
+        <item quantity="one">%1$d ప్రయాణీకుడు</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d టాస్క్‌లను పరిశీలించాల్సి ఉంది</item>
+        <item quantity="one">%1$d టాస్క్‌ను రివ్యూ చేయాలి</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">%1$d ఐటెమ్‌లు</item>
+        <item quantity="one">%1$d ఐటెమ్‌</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d కనెక్టర్‌లు</item>
+        <item quantity="one">%1$d కనెక్టర్</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d క్యారీ-ఆన్ బ్యాగ్‌లు</item>
+        <item quantity="one">%1$d క్యారీ-ఆన్ బ్యాగ్‌</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d చెక్ చేసిన బ్యాగ్‌లు</item>
+        <item quantity="one">%1$d చెక్ చేసిన బ్యాగ్‌</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d స్టాప్‌లు</item>
+        <item quantity="one">%1$d స్టాప్</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d స్టాప్‌లు</item>
+        <item quantity="one">%1$d స్టాప్</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">ఆప్షన్‌లు %1$s</item>
+        <item quantity="one">ఆప్షన్ %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">%1$d ఇమేజ్‌లను ఉపయోగించండి</item>
+        <item quantity="one">%1$d ఇమేజ్‌ను ఉపయోగించండి</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">%1$d రోజుల్లో ఉచిత వాపసులు</item>
+        <item quantity="one">%1$d రోజులో ఉచిత వాపసులు</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">%1$d-రోజులలోపు వాపసులు</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">తాత్కాలిక కార్డ్ గడువు %1$d గంటలలో ముగుస్తుంది</item>
+        <item quantity="one">తాత్కాలిక కార్డ్ గడువు %1$d గంటలో ముగుస్తుంది</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">%1$d ఐటెమ్‌లు</item>
+        <item quantity="one">%1$d ఐటెమ్</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">%1$d ఐటెమ్‌లు</item>
+        <item quantity="one">%1$d ఐటెమ్‌</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">మొత్తం (%1$d) మందిని ఫాలో అవ్వండి</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">(%1$d) మందిని ఫాలో అవ్వండి</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">ప్రతి %1$d గంటలకు</item>
+        <item quantity="one">ప్రతి %1$d గంటకు</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">ప్రతి %1$d నిమిషాలకు</item>
+        <item quantity="one">ప్రతి %1$d నిమిషానికి</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">ప్రతి %1$d సెకన్‌లకు</item>
+        <item quantity="one">ప్రతి %1$d సెకను</item>
+    </plurals>
+</resources>

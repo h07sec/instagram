@@ -1,0 +1,40 @@
+[Filter BrushRevealIn]
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('brushTex);
+
+    filter.parameters = {
+        {direction = 3.0, min = 2.0, max = 3.0, description = "Stroke travel direction: 2 = up, 3 = down"},
+        {smoothParam = 0.05, min = 0.0, max = 0.5, description = "Smoothstep edge softness"},
+        {angle = 330.0, min = 0.0, max = 360.0, description = "Brush UV rotation (degrees)"},
+        {framerate = 0.05, min = 0.0, max = 1.0, description = "1 = full framerate, 0 = 1 fps (over 4s)"},
+        {size = 0.0, min = 0.0, max = 1.0, description = "Brush mask size; 0 = maskScale 1.55, 1 = maskScale 3.0"},
+    };
+
+    filter.passes = {{
+        name = 'base,
+        igid = 'video_brush_reveal,
+        inputs = {'default, 'brushTex},
+        uniforms = {
+            outro = 0.0,
+            direction = 3.0,
+            maskScale = 1.55,
+        }
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    f32 direction = getParameterFloat('direction);
+    f32 smoothParam = getParameterFloat('smoothParam);
+    f32 angle = getParameterFloat('angle);
+    f32 framerate = getParameterFloat('framerate);
+    f32 size = getParameterFloat('size);
+    f32 maskScale = 1.55 + size * (3.0 - 1.55);
+    setShaderUniform('base, 'direction, direction);
+    setShaderUniform('base, 'smoothParam, smoothParam);
+    setShaderUniform('base, 'angle, angle);
+    setShaderUniform('base, 'framerate, framerate);
+    setShaderUniform('base, 'maskScale, maskScale);
+}

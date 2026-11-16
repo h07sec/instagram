@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "BDFF262E-04DB-47C9-BC09-562220FF97E5",
+  "displayName": "ROSE PETALS",
+  "description": "[IG Edits] Video effect name. With \"ROSE PETALS\", the creator gets falling, spinning pink rose petals with light skin smoothing.",
+  "iglu": {
+    "legacyId": 3253
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGX29fG0Oi"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "546a2bc3",
+      "handle": "AQAIcLa3kxHo",
+      "md5": "fdaaa8b9de5e22c51b52f4da7678f713"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFwvADOls3okPwsFAG3IyInMgzY5bhQoAAAD"
+    }
+  }
+}

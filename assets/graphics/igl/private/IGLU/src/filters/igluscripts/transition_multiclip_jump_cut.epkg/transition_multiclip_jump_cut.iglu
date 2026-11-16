@@ -1,0 +1,115 @@
+[Filter TransitionMulticlipJumpCut]
+
+# Clip B jump-cuts in (the Jump Cut In effect) over an untouched clip A.
+#
+# Ported from the Easel web tool's multiclip_jump_cut.iglu.
+#
+# The video_scale_opacity transform and the over-composite run in one pass that
+# reads both clips, with the same stepped swing as video_jump_cut_in. The
+# inverse transform is affine and the same for every pixel, so [PreRender]
+# folds it into a 2x2 matrix.
+
+fun lerp(f32 a, f32 b, f32 t) f32 {
+  return a * (1.0 - t) + b * t;
+}
+
+f32 swingAmplitude = 0.4;
+f32 rotAmplitude = -1.5;
+f32 liftAmount = 0.18;
+f32 freq = 3.1415 * 1.5;
+f32 startScale = 0.5;
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {center = {0.5, 0.5}, min = {0.0, 0.0}, max = {1.0, 1.0}},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        opacity = 0.0,
+        center = {0.5, 0.5},
+        position = {0.0, 0.0},
+        uvMatrix = {1.0, 0.0, 0.0, 1.0},
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 steps = 8.0;
+  p = clamp(floor(p * steps) / steps, 0.0, 1.0);
+
+  # Damped sinusoid, starting at max displacement (cos-like via the phase offset)
+  f32 swing = (1.0 - p) * sin(freq * p + 1.5708);
+  f32 rotation = (1.0 - p) * sin(freq * 3.1 * p) * rotAmplitude;
+  f32 opacity = clamp(p * 8.0, 0.0, 1.0);
+
+  f32 scale = lerp(startScale, 0.8, p);
+  f32 snap = 0.0;
+  if (p >= 1.0 - 1.0 / steps) { snap = 1.0; }
+  scale = lerp(scale, 1.0, snap);
+
+  vec2 pos = {0.0, 0.0};
+  pos.x = swing * swingAmplitude;
+  pos.y = (0.0 - liftAmount) * (1.0 - p);
+
+  # Inverse rotation about center in aspect-corrected space, then inverse scale.
+  vec2 size = getTextureSize('default);
+  f32 aspect = size.x / size.y;
+  f32 invScale = 1.0 / max(scale, 0.001);
+  f32 cr = cos(0.0 - rotation) * invScale;
+  f32 sr = sin(0.0 - rotation) * invScale;
+  vec4 uvMatrix = {0.0, 0.0, 0.0, 0.0};
+  uvMatrix.x = cr;
+  uvMatrix.y = sr * aspect;
+  uvMatrix.z = (0.0 - sr) / aspect;
+  uvMatrix.w = cr;
+
+  setShaderUniform('composite, 'opacity, opacity);
+  setShaderUniform('composite, 'center, getParameterVec2('center));
+  setShaderUniform('composite, 'position, pos);
+  setShaderUniform('composite, 'uvMatrix, uvMatrix);
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float opacity;
+uniform vec2 center;
+uniform vec2 position;
+// Column-major 2x2: (m00, m10, m01, m11).
+uniform vec4 uvMatrix;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+
+  // OpenGL's bottom-left texture origin mirrors a vertical offset relative to
+  // Metal, so DOWN (-1.0 on GL) re-aligns position.y with the Metal path.
+  vec2 q = uv - vec2(position.x, DOWN * position.y) - center;
+  vec2 buv = uvMatrix.xy * q.x + uvMatrix.zw * q.y + center;
+
+  // Clip to edges: zero outside [0,1]
+  float inside = step(0.0, buv.x) * step(buv.x, 1.0) * step(0.0, buv.y) * step(buv.y, 1.0);
+  vec4 b = texture2D(s_texture1, buv) * (inside * opacity);
+
+  // Clip B is premultiplied, so it goes over clip A without another multiply by b.a.
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

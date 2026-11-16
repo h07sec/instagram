@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list android:opacity="opaque"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="?igds_color_primary_background" />
+    </item>
+    <item android:bottom="112.0dip">
+        <bitmap android:gravity="center" android:src="@drawable/instagram_monochrome_splash_logo" />
+    </item>
+    <item android:bottom="80.0dip">
+        <bitmap android:gravity="bottom" android:src="@drawable/instagram_monochrome_splash_branding" />
+    </item>
+</layer-list>

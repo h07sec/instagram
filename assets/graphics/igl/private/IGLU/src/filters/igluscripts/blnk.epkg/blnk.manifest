@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "5096010263747897",
+  "displayName": "ʙʟɴᴋ*",
+  "description": "[IG Edits] Video effect name. With \"ʙʟɴᴋ*\", the creator can apply a Spark-ported moody film grade with an RGB split, a vignette and a flickering exposure.",
+  "iglu": {
+    "legacyId": 3426
+  },
+  "assets": [
+    {
+      "name": "blnk_lut.png",
+      "assetHash": "b2a35e472ad242d79d8a98b6faf1a3c4f8c725175eacb36de825f3ba5f5de25f",
+      "hubAssetId": "4790513081166959"
+    },
+    {
+      "name": "blnk_vignette.png",
+      "assetHash": "37a11ce999aaf28221bf0af171878a487fd693c9bcbfc7029d9c3d6308656870",
+      "hubAssetId": "1574351168060721"
+    },
+    {
+      "name": "blnk_dust.png",
+      "assetHash": "b6040c4cf822132e333cb990924728be753394affe612b75321123847b176a1c",
+      "hubAssetId": "1448660717389626"
+    }
+  ]
+}

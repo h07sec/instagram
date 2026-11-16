@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "F63165B9-7D1E-45D3-89FA-99D0810151F5",
+  "displayName": "CLOUD☁️",
+  "description": "[IG Edits] Color filter name. With \"CLOUD☁️\", the creator gets a cool, moody overcast LUT color grade with skin smoothing and soft grain applied to the camera image.",
+  "iglu": {
+    "legacyId": 3289
+  },
+  "assets": [
+    {
+      "name": "cloud_lut.png",
+      "assetHash": "5d88e3ba506f5fb14391f9b1bf1eee6c3962bf6b2b4e378a7f6f24eebd71075a",
+      "hubAssetId": "1678047737236354"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAH_loXJgJX"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5769596d",
+      "handle": "AQAL2uL2R4HS",
+      "md5": "2f3512b1e8c608f163d7a0e69960e220"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GLd9lzPQJP5p2e0DAOZz2OPA_lg7bhQoAAAD"
+    }
+  }
+}

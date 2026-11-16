@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1497292140796442",
+  "displayName": "Broken TV",
+  "description": "[IG Edits] Video effect name. With \"Broken TV\", the creator can apply a Spark-ported old-TV look with scanlines, rolling sync, a slight fisheye and grain.",
+  "iglu": {
+    "legacyId": 3411
+  },
+  "assets": [
+    {
+      "name": "broken_tv_grain.png",
+      "assetHash": "3c327a7460f33ea9d626331eb7eba3f2f171e0d468cdcc0953786b42c9b45891",
+      "hubAssetId": "889700157502792"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD-P5TW_0v"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ed769152",
+      "handle": "AQAGSLJ_6WTS",
+      "md5": "a01d4ab19dafa97c7cf4e15ed1afc464"
+    }
+  }
+}

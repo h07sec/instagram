@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "3b0a0d43-1b13-4b37-a310-e012db3dc7c5",
+  "displayName": "Clone Slide Horizontal In",
+  "description": "[IG Edits] Transition name. \"Clone Slide Horizontal In\" slides the segmented subject in from the side in repeating clone passes with motion-blur ghosting as a 1-second intro.",
+  "iglu": {
+    "legacyId": 3996,
+    "behavior": {
+      "type": "stickyIntro",
+      "durationMs": 1000,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "direction",
+        "defaultSelection": "left",
+        "available": [
+          "left",
+          "right"
+        ],
+        "displayName": "Direction"
+      },
+      {
+        "name": "duration",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 5.0,
+        "displayName": "Duration",
+        "displayMethod": "time"
+      },
+      {
+        "name": "amount",
+        "displayName": "Amount",
+        "displayNameDescription": "[IG Edits] Slider label controlling how many repeated copies of the subject a video effect draws; exact range varies per effect.",
+        "default": 5,
+        "min": 1,
+        "max": 10,
+        "displayMethod": "number"
+      },
+      {
+        "name": "distance",
+        "displayName": "Spacing",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size of the gap between the repeated copies of the subject that a video effect draws; at the low end the copies sit flush against each other.",
+        "displayMethod": "percent",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0
+      }
+    ]
+  },
+  "dependencies": [
+    "video_clone_slide"
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFvZnHzOSN"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "d16b1254",
+      "handle": "AQAFoeGr2O71",
+      "md5": "80968bd1e51f336338eaa9650df9ead2"
+    }
+  }
+}

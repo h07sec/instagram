@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Мекенжай</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130008">Жарнама аккаунтында картамен автоматты толтырылсын ба?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Браузерді жабу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">%1$s құрылғыңыздың камерасын пайдаланғысы келеді.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s құрылғыңыздың геодеректерін пайдаланғысы келеді.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Рұқсат беру</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Блоктау</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130038">Бұл сайтқа арналған қауіпсіздік сертификатына қатысты мәселе туындады</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Веб-сайтқа өту</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Артқа</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">%1$s пайдаланатын қауіпсіздік сертификатына қатысты мәселе туындады. Құпия сөздеріңіз немесе несиелік карта нөмірлері сияқты жеке ақпаратыңызды осы сайтта бөліссеңіз, оған қауіп төнуі мүмкін.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Бұл сайт қауіпсіз байланысты пайдаланбайды</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003e">Қауіпсіздік қатесі</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Бірдеңе дұрыс болмады</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Электрондық пошта</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Сіз қарап отырған веб-сайт сыртқы қолданбаны ашпақ. Жалғастырғыңыз келе ме?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Жалғастыру</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Қолданбамыздан шығудасыз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Бұл техникалық қатеге байланысты болуы мүмкін. Оны түзетіп жатырмыз. Осы бетті қайта жүктеп көріңіз.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Жаңарту</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Дәл қазір бет қолжетімді емес</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Тегіңіз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Бетті жүктеу мүмкін емес</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">… арқылы ашу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">%1$s қолданбасында ашу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Қосымша опциялар</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Есіміңіз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Толық экран режимі қосылды. Одан шығу үшін солға сырғыту немесе \"Артқа\" түймесін басу керек.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Дәл қазір %2$s үшін %1$s тілін орнату мүмкін емес. Қайталап көруіңізге немесе %2$s қолданбасын әзірше ағылшын (АҚШ) тілінде пайдалануыңызға болады.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Кішкене күте тұрыңыз. %1$s орнатылуда…</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Қайталап көру</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">Ағылшын тілінде (АҚШ) жалғастыру</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">Жабу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010a">Карта қосу үшін түртіңіз</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13010d">Көзілдіріктер қосулы</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1301ce">Телефон</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13020f">Уақытты орнату</string>
+</resources>

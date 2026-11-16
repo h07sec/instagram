@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "B5D80568-6D5F-4D3D-9E62-FCFA212943C2",
+  "displayName": "𝖌𝖗𝖚𝖓𝖌𝖊",
+  "description": "[IG Edits] Color filter name. With \"𝖌𝖗𝖚𝖓𝖌𝖊\", the creator gets a muted, desaturated grunge color grade with skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3307
+  },
+  "assets": [
+    {
+      "name": "grunge_lut.png",
+      "assetHash": "ffe5de296c13f1f086db9e352e4d920ece1b3c9bf4d9ec9ab2e95e4dc244c044",
+      "hubAssetId": "1150952077497262"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGqY_p8yg8"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c60d798c",
+      "handle": "AQAEJZqMGaMO",
+      "md5": "688b26d96398658fd18505bc092147c7"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GHWZeDM1CkRMn9wDAILU-Z1DVyQZbhQoAAAD"
+    }
+  }
+}

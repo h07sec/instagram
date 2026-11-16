@@ -1,0 +1,94 @@
+[Filter PopMagicIn]
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('particles_all);
+
+    filter.parameters = {
+        {bandWidth = 0.297609, min = -2.0, max = 2.0, description = "bandWidth"},
+        {alphaBandWidth = 0.1325, min = 0.01, max = 0.5, description = "alphaBandWidth"},
+        {glowEdgeOffset = 0.0, min = -1.0, max = 1.0, description = "glowEdgeOffset"},
+        {glowBrightness = 13.0, min = 0.0, max = 50.0, description = "glowBrightness"},
+        {particleBrightness = 0.804348, min = 0.0, max = 2.0, description = "particleBrightness"},
+        {radius = 25.0, min = 0.0, max = 25.0, description = "radius"},
+        {blurSize = 1.91304, min = 0.0, max = 10.0, description = "blurSize"},
+        {transitionBlurStrength = 2.93478, min = 0.0, max = 10.0, description = "transitionBlurStrength"},
+        {edgeSharpness = 0.0, min = 0.0, max = 1.0, description = "edgeSharpness"},
+        {outro = 0.0, min = 0.0, max = 1.0, description = "outro"},
+        {easing = 0.630435, min = 0.0, max = 1.0, description = "easing"},
+        {wipeScale = 0.57663, min = 0.05, max = 1.0, description = "wipeScale"},
+        {distortion = 0.206522, min = 0.0, max = 1.0, description = "distortion"},
+        {overallExposure = 2.152173913043478, min = 0.0, max = 3.0, description = "overallExposure"},
+        {particleExposure = 1.66304, min = 0.0, max = 3.0, description = "particleExposure"},
+        {glowTrail = 0.0543478, min = 0.0, max = 1.0, description = "glowTrail"},
+        {particleSize = 39.0, min = 4.0, max = 50.0, description = "particleSize"},
+        {particleSpeed = 0.391304, min = 0.0, max = 2.0, description = "particleSpeed"},
+        {particleGlow = 1.0, min = 0.0, max = 1.0, description = "particleGlow"},
+        {particleOffset = 0.36, min = -0.5, max = 0.5, description = "particleOffset"},
+        {positionJitter = 1.0, min = 0.0, max = 1.0, description = "positionJitter"},
+        {particleRotationSpeed = 0.0, min = -10.0, max = 10.0, description = "particleRotationSpeed"},
+        {particleRotationRandomness = 0.804348, min = 0.0, max = 1.0, description = "particleRotationRandomness"},
+        {particleScaleWindow = {0.6, 1.0}, description = "particleScaleWindow"},
+        {directionRandomness = 1.0, min = 0.0, max = 1.0, description = "directionRandomness"},
+        {initialVelocity = 2.11957, min = 0.0, max = 5.0, description = "initialVelocity"},
+        {particleDrift = {0.15, 0.1}, description = "particleDrift"},
+        {particleColor = {1.0, 1.0, 1.0}, description = "particleColor"},
+        {useCustomColor = 0.0, min = 0.0, max = 1.0, description = "useCustomColor"},
+        {directionBias = {0.0, 0.0}, description = "directionBias"},
+        {particleIndex = 0.0, min = 0.0, max = 3.0, description = "particleIndex"},
+        {color = {1.0, 1.0, 1.0, 1.0}, description = "color"},
+        {amount = 0.26087, min = 0.0, max = 1.0, description = "amount"},
+        {size = 0.96, min = -1.04, max = 2.96, description = "size"},
+    };
+
+    filter.passes = {{
+        name = 'base,
+        igid = 'video_particles_pop,
+        inputs = {'default, 'particles_all},
+        uniforms = {
+            bandWidth = 0.29760869565217396,
+            alphaBandWidth = 0.1325,
+            glowEdgeOffset = 0.0,
+            glowColor = {1.0, 1.0, 1.0},
+            glowBrightness = 8.152173913043478,
+            particleBrightness = 0.5,
+            radius = 4.89,
+            blurSize = 1.5217391304347827,
+            transitionBlurStrength = 3.0,
+            edgeSharpness = 0.0,
+            outro = 0.0,
+            easing = 1.0,
+            wipeScale = 1.0,
+            distortion = 0.20652173913043478,
+            overallExposure = 0.0,
+            particleExposure = 0.0,
+            glowTrail = 0.0,
+            particleSize = 31.000000000000004,
+            particleSpeed = 0.43478260869565216,
+            particleGlow = 0.5,
+            particleOffset = 0.1,
+            sparsity = 0.73913,
+            positionJitter = 0.5,
+            particleRotationSpeed = 0.0,
+            particleRotationRandomness = 0.0,
+            particleScale = 0.96,
+            particleScaleWindow = {0.6, 1.0},
+            directionRandomness = 0.5217391304347826,
+            initialVelocity = 1.0,
+            particleDrift = {0.14, 0.09},
+            particleColor = {1.0, 1.0, 1.0},
+            useCustomColor = 0.0,
+            directionBias = {0.0, 0.0},
+            particleIndex = 0.0,
+        }
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    vec4 color = getParameterVec4('color);
+    vec3 glowColor = {color.r, color.g, color.b};
+    setShaderUniform('base, 'glowColor, glowColor);
+    setShaderUniform('base, 'sparsity, clamp(1.0 - getParameterFloat('amount), 0.0, 0.95));
+    setShaderUniform('base, 'particleScale, max(getParameterFloat('size), 0.1));
+}

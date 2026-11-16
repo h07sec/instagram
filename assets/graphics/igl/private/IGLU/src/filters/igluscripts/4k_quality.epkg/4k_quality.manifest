@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "3722318788051842",
+  "displayName": "4K Quality",
+  "description": "[IG Edits] Color filter name. With \"4K Quality\", the creator can apply a Spark-ported crisp colour grade with a light sharpen.",
+  "iglu": {
+    "legacyId": 3446
+  },
+  "assets": [
+    {
+      "name": "4k_quality_lut.png",
+      "assetHash": "a77a21e0e862c8ee66bde94da06403780f2e108c734554fed181c2f2dbd448fc",
+      "hubAssetId": "1355207946579421"
+    }
+  ]
+}

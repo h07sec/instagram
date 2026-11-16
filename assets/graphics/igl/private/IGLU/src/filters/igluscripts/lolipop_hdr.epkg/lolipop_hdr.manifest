@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "149378598114435",
+  "displayName": "Lolipop HDR",
+  "description": "[IG Edits] Color filter name. With \"Lolipop HDR\", the creator can apply a Spark-ported bright, soft HDR-style color grade.",
+  "iglu": {
+    "legacyId": 3359
+  },
+  "assets": [
+    {
+      "name": "lolipop_hdr_lut.png",
+      "assetHash": "66a0f73c392a254eb56d1bfd931d7da0a21241e226646508e9a7c1be5e77a64c",
+      "hubAssetId": "1255591996998264"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD5KC5Zy_J"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b9de383a",
+      "handle": "AQAFR4OfwLUX",
+      "md5": "9b229cb9029993544c5db9ed80334a9b"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGwOwDM9QQ58diQJAApufuL2p8kAbhQoAAAD"
+    }
+  }
+}

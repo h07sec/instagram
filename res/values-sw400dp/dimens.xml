@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="dimen" name="su_card_redesign_avatar_width_percent">0.575</item>
+    <dimen name="su_card_redesign_facepile_size">21.5dip</dimen>
+</resources>

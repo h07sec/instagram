@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector android:drawable="@drawable/$ig_splash_view_finder_animated_1s__0" xmlns:aapt="http://schemas.android.com/aapt"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <target android:name="_R_G_L_4_G_N_1_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__1" />
+    <target android:name="_R_G_L_4_VISIBILITY" android:animation="@drawable/$ig_splash_view_finder_animated_1s__2" />
+    <target android:name="_R_G_L_3_G" android:animation="@drawable/$ig_splash_view_finder_animated_1s__3" />
+    <target android:name="_R_G_L_3_G_N_1_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__4" />
+    <target android:name="_R_G_L_2_G" android:animation="@drawable/$ig_splash_view_finder_animated_1s__5" />
+    <target android:name="_R_G_L_2_G_N_1_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__6" />
+    <target android:name="_R_G_L_1_G_N_1_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__7" />
+    <target android:name="_R_G_L_1_VISIBILITY" android:animation="@drawable/$ig_splash_view_finder_animated_1s__8" />
+    <target android:name="_R_G_L_0_G_D_0_P_0_G_0_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__9" />
+    <target android:name="_R_G_L_0_G_D_1_P_0_G_0_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__10" />
+    <target android:name="_R_G_L_0_G_D_2_P_0_G_0_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__11" />
+    <target android:name="_R_G_L_0_G_D_3_P_0_G_0_T_0" android:animation="@drawable/$ig_splash_view_finder_animated_1s__12" />
+    <target android:name="_R_G_L_0_G" android:animation="@drawable/$ig_splash_view_finder_animated_1s__13" />
+    <target android:name="_R_G_L_0_VISIBILITY" android:animation="@drawable/$ig_splash_view_finder_animated_1s__14" />
+    <target android:name="_R_G_L_0_VISIBILITY" android:animation="@drawable/$ig_splash_view_finder_animated_1s__15" />
+    <target android:name="time_group" android:animation="@drawable/$ig_splash_view_finder_animated_1s__16" />
+</animated-vector>

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2611334449045085",
+  "displayName": "2 EM 1 FILTER ✨",
+  "description": "[IG Edits] Color filter name. With \"2 EM 1 FILTER ✨\", the creator can apply a Spark-ported warm, tan-skin grade with punchy blues.",
+  "iglu": {
+    "legacyId": 3357
+  },
+  "assets": [
+    {
+      "name": "f_2_em_1_filter_lut.png",
+      "assetHash": "b9f5d2b889a14f1618d75524d78990d0b4abb35e7dc1d508eae7d2c0416a649b",
+      "hubAssetId": "1773833647228821"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAQhqOzaPeG"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c0f0d56e",
+      "handle": "AQAMEdXpTiqb",
+      "md5": "7115388b5e9960897aa51455bc98166b"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GCqDKTM-5LvOkx8GAPqMG9c2STVdbhQoAAAD"
+    }
+  }
+}

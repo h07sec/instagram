@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1141714769781221",
+  "displayName": "LIGHTUP X HDR TV",
+  "description": "[IG Edits] Video effect name. With \"LIGHTUP X HDR TV\", the creator can apply a Spark-ported bright HDR colour grade with sharpening, a soft glow and a subtle TV scanline drift.",
+  "iglu": {
+    "legacyId": 3441
+  },
+  "assets": [
+    {
+      "name": "lightup_x_hdr_tv_lut.png",
+      "assetHash": "c0ff528a22df69d2c3270deae7964c85a345192c726dcee704e6b23e185dd5f6",
+      "hubAssetId": "1476199751271902"
+    }
+  ]
+}

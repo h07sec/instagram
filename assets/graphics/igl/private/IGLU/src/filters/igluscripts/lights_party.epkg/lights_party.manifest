@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2756933607963885",
+  "displayName": "Lights Party",
+  "description": "[IG Edits] Video effect name. With \"Lights Party\", the creator can apply Spark-ported colored light leaks that flare in from the edges of the frame.",
+  "iglu": {
+    "legacyId": 3333
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEAQLdCJuA"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "482494db",
+      "handle": "AQAGqJfcWMma",
+      "md5": "ccf0111ad195fc38661585f954ba3412"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPm8dTM6TUGMb8QKAFJjyp3I8VtbbhQoAAAD"
+    }
+  }
+}

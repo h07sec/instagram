@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "06A90EE3-D79D-43A0-BD83-43072468C753",
+  "displayName": "♥︎Favorites ⌵",
+  "description": "[IG Edits] Video effect name. With \"Favorites\", the creator's video becomes a black and white 3x3 grid of zoomed and flipped copies under a phone photo-album header.",
+  "iglu": {
+    "legacyId": 3272
+  },
+  "assets": [
+    {
+      "name": "favorites_lut.png",
+      "assetHash": "9545c94dde6d9bf939fd1dd668f35c0affd29bd18c925610bf2dc5b28969e9e8",
+      "hubAssetId": "1779423579947604"
+    },
+    {
+      "name": "favorites_overlay.png",
+      "assetHash": "ba00d2430b792aa13dbf19637e165e4bae93ee869f02ce15089e952703e5904d",
+      "hubAssetId": "2085755305478877"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAI7tcufeN7"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3a6d6594",
+      "handle": "AQAEC3eSy2VX",
+      "md5": "0b7133a764d0ed371a516f6f40031f4a"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GM1uXjO8QhKz-GQHACtc7RWVyWsIbhQoAAAD"
+    }
+  }
+}

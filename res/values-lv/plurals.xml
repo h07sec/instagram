@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">pirms %1$d min.</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Derīgums beigsies pēc %1$d minūtēm</item>
+        <item quantity="one">Derīgums beigsies pēc %1$d minūtes</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">Jāpārskata %1$d uzdevumi</item>
+        <item quantity="zero">Jāpārskata %1$d uzdevumu</item>
+        <item quantity="one">Jāpārskata %1$d uzdevums</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">Jāpārskata %1$d uzdevumi</item>
+        <item quantity="zero">Jāpārskata %1$d uzdevumu</item>
+        <item quantity="one">Jāpārskata %1$d uzdevums</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d savienotāji</item>
+        <item quantity="zero">%1$d savienotāju</item>
+        <item quantity="one">%1$d savienotājs</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d rokas bagāžas vienības</item>
+        <item quantity="zero">%1$d rokas bagāžas vienību</item>
+        <item quantity="one">%1$d rokas bagāžas vienība</item>
+    </plurals>
+</resources>

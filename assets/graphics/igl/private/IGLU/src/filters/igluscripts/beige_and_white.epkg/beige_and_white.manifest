@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "523103749888044",
+  "displayName": "Beige&White",
+  "description": "[IG Edits] Color filter name. With \"Beige&White\", the creator can apply a Spark-ported bright, airy beige-and-white grade.",
+  "iglu": {
+    "legacyId": 3354
+  },
+  "assets": [
+    {
+      "name": "beige_and_white_lut.png",
+      "assetHash": "6b89d1d1fddead2556986e800e0c8446f52c77cde59874d18f7d4f7ad8041701",
+      "hubAssetId": "1115795164155772"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGDe9Wku9p"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3fd8185e",
+      "handle": "AQAGkLFmEEzN",
+      "md5": "209188004c0d0ed3b93273e3ff8d260c"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GHMOWDOIxL7YLhwEAL-kd8GTL9hNbhQoAAAD"
+    }
+  }
+}

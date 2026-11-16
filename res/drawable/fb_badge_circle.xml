@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <size android:height="34.0dip" android:width="34.0dip" />
+            <solid android:color="?igds_color_background_elevated" />
+        </shape>
+    </item>
+    <item android:height="34.0dip" android:width="34.0dip" android:drawable="@drawable/fb_badge_circle__app_bitmap_0" android:left="5.0dip" android:top="5.0dip" android:right="5.0dip" android:bottom="5.0dip" />
+</layer-list>

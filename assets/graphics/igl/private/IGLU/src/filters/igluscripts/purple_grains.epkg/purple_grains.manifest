@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "884676869115109",
+  "displayName": "purple grains",
+  "description": "[IG Edits] Video effect name. With \"purple grains\", the creator can apply a Spark-ported purple film-grain tint.",
+  "iglu": {
+    "legacyId": 3429
+  },
+  "assets": [
+    {
+      "name": "purple_grains_texture.png",
+      "assetHash": "a0ee75a6300eaca607fcd4a7bacd59f48b80c1212a587e3f0c43b674c9305033",
+      "hubAssetId": "3377995572390720"
+    }
+  ]
+}

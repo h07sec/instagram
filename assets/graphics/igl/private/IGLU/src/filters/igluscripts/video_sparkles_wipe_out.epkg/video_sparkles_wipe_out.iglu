@@ -1,0 +1,93 @@
+[Filter InOutV2ProcSparklesWipeOut]
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('particles_all);
+
+    filter.parameters = {
+        {bandWidth = 0.5, min = 0.01, max = 0.5, description = "bandWidth"},
+        {alphaBandWidth = 0.0792391, min = 0.01, max = 0.5, description = "alphaBandWidth"},
+        {wipeScale = 0.569565, min = 0.1, max = 1.0, description = "wipeScale"},
+        {glowEdgeOffset = 0.322065, min = 0.01, max = 1.0, description = "glowEdgeOffset"},
+        {glowBrightness = 17.3913, min = 0.0, max = 50.0, description = "glowBrightness"},
+        {particleBrightness = 1.8, min = 0.0, max = 2.0, description = "particleBrightness"},
+        {radius = 4.07609, min = 0.0, max = 25.0, description = "radius"},
+        {blurSize = 1.52174, min = 0.0, max = 10.0, description = "blurSize"},
+        {wipeDirection = {0.0, 0.796509}, description = "wipeDirection"},
+        {outro = 1.0, min = 0.0, max = 1.0, description = "outro"},
+        {distortion = 0.173913, min = 0.0, max = 1.0, description = "distortion"},
+        {glowTrail = 0.076087, min = 0.0, max = 1.0, description = "glowTrail"},
+        {overallExposure = 3.5869565217391304, min = 0.0, max = 10.0, description = "overallExposure"},
+        {particleExposure = 0.0, min = 0.0, max = 10.0, description = "particleExposure"},
+        {particleSize = 11.0, min = 4.0, max = 50.0, description = "particleSize"},
+        {particleFadeInStart = 0.5, min = 0.0, max = 0.5, description = "particleFadeInStart"},
+        {particleSpeed = 0.0, min = 0.0, max = 2.0, description = "particleSpeed"},
+        {particleGlow = 0.597826, min = 0.0, max = 1.0, description = "particleGlow"},
+        {particleOffset = -0.1, min = -0.1, max = 0.1, description = "particleOffset"},
+        {particleRotationSpeed = 2.39, min = -10.0, max = 10.0, description = "particleRotationSpeed"},
+        {particleRotationRandomness = 0.619565, min = 0.0, max = 1.0, description = "particleRotationRandomness"},
+        {particleScaleWindow = {0.7, 1.0}, description = "particleScaleWindow"},
+        {directionRandomness = 0.0, min = 0.0, max = 1.0, description = "directionRandomness"},
+        {particleColor = {1.0, 1.0, 1.0}, description = "particleColor"},
+        {useCustomColor = 1.0, min = 0.0, max = 1.0, description = "useCustomColor"},
+        {directionBias = {0.40625, 0.437134}, description = "directionBias"},
+        {particleIndex = 3.0, min = 0.0, max = 3.0, description = "particleIndex"},
+        {color = {1.0, 0.866667, 0.419608, 1.0}, description = "color"},
+        {amount = 0.28, min = 0.0, max = 1.0, description = "amount"},
+        {size = 6.0, min = 4.0, max = 8.0, description = "size"},
+        {direction = 2.0, min = 2.0, max = 3.0, description = "Wipe travel direction: 2 = up, 3 = down"},
+    };
+
+    filter.passes = {{
+        name = 'base,
+        igid = 'video_particles,
+        inputs = {'default, 'particles_all},
+        uniforms = {
+            bandWidth = 0.5,
+            alphaBandWidth = 0.07391304347826086,
+            wipeScale = 0.8,
+            glowEdgeOffset = 0.28978260869565214,
+            glowColor = {1.0, 0.866667, 0.419608},
+            glowBrightness = 11.956521739130435,
+            particleBrightness = 1.8,
+            radius = 4.89,
+            blurSize = 2.48,
+            wipeDirection = {0.0, 0.7965087890625},
+            outro = 1.0,
+            distortion = 0.17391304347826086,
+            glowTrail = 0.06521739130434782,
+            overallExposure = 10.0,
+            particleExposure = 10.0,
+            particleSize = 10.0,
+            particleSpeed = 0.0,
+            particleGlow = 0.0,
+            particleFadeInStart = 0.0,
+            particleOffset = 0.1,
+            sparsity = 0.72,
+            particleRotationSpeed = -1.74,
+            particleRotationRandomness = 0.6195652173913043,
+            particleScale = 6.0,
+            particleScaleWindow = {0.7, 1.0},
+            directionRandomness = 0.0,
+            particleColor = {1.0, 1.0, 1.0},
+            useCustomColor = 1.0,
+            directionBias = {0.40625, 0.4371337890625},
+            particleIndex = 3.0,
+        }
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    vec4 color = getParameterVec4('color);
+    vec3 glowColor = {color.r, color.g, color.b};
+    setShaderUniform('base, 'glowColor, glowColor);
+    setShaderUniform('base, 'sparsity, clamp(1.0 - getParameterFloat('amount), 0.0, 1.0));
+    setShaderUniform('base, 'particleScale, max(getParameterFloat('size), 0.1));
+    # The authored wipe travels up; down mirrors the layout vertically.
+    f32 mirrorY = 0.0;
+    if (getParameterFloat('direction) > 2.5) {
+        mirrorY = 1.0;
+    }
+    setShaderUniform('base, 'mirrorY, mirrorY);
+}

@@ -1,0 +1,102 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAFErybS5xd",
+      "key": "a148fbc8",
+      "md5": "9be03738cb0bd5df314a40fe90b7b1ca"
+    }
+  },
+  "dependencies": [
+    "video_particles"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Magic Wipe Out\", the creator can wipe the subject away in a trail of magical glow.",
+  "displayName": "Magic Wipe Out",
+  "identifier": "ce781d10-d2fb-484a-9d69-e25c906a82fb",
+  "iglu": {
+    "behavior": {
+      "curve": "linear",
+      "durationMs": 3000,
+      "type": "fixedOutro"
+    },
+    "customization": [
+      {
+        "name": "color",
+        "defaultSelection": "#FFFFFF",
+        "available": [
+          "#FFFFFF",
+          "#000000",
+          "#FFD600",
+          "#FF7A00",
+          "#FE1D37",
+          "#FF0169",
+          "#D300C5",
+          "#7638FA",
+          "#37038B",
+          "#1CD164",
+          "#0095F6",
+          "#AD88FC",
+          "#FDD5FD",
+          "#FFABE1",
+          "#FFC584",
+          "#FFF8C2",
+          "#09FF00",
+          "#FFFF00",
+          "#5AFAC7",
+          "#0000FF"
+        ],
+        "displayName": "Color",
+        "displayNameDescription": "[IG Edits] Color picker label. The user selects a color used by the video effect (e.g., glow tint, outline color, sparkle color); available palette varies per effect."
+      },
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "up",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 3.0,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "name": "amount",
+        "default": 0.282609,
+        "min": 0.0,
+        "max": 1.0,
+        "displayName": "Amount",
+        "displayNameDescription": "[IG Edits] Slider label controlling the magnitude or quantity of a video effect. Generic across many effects; exact range varies per effect."
+      },
+      {
+        "name": "size",
+        "default": 1.0,
+        "min": 0.89783,
+        "max": 4.89783,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect."
+      }
+    ],
+    "legacyId": 4022
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAIcSrqpMMu"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "assets": [
+    {
+      "name": "particles_all.png",
+      "assetHash": "cdf344b5c3fad4da88e8ff75b5fc50e5b87773ba46590e1cad7747fe1c20688b",
+      "hubAssetId": "1426924909460606"
+    }
+  ]
+}

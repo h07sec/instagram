@@ -1,0 +1,105 @@
+[Filter IgluscriptVideoCardFlyInBounceFilter]
+[MaskBehavior alpha]
+
+fun eased(f32 t) f32 {
+  f32 clamped = clamp(t, 0.0, 1.0);
+  return clamped * clamped * (3.0 - 2.0 * clamped);
+}
+
+[Init]
+fun init(Filter filter) {
+  filter.parameters = {
+    {effect_strength = 0.8, min = 0.0, max = 1.0},
+    {direction = 1.0, min = 0.0, max = 1.0},
+  };
+
+  filter.passes = {{
+      name = 'flyFx,
+      igid = 'video_scale_opacity,
+      inputs = {'default},
+      uniforms = {
+        progress = 0.0,
+        scale = 0.88,
+        opacity = 0.0,
+        rotation = 0.0,
+        center = {0.5, 0.5},
+        position = {0.0, 0.0},
+      }
+    }, {
+      name = 'blurFx,
+      inputs = {'flyFx},
+      uniforms = {
+        blur_angle = 0.0,
+        aspect = 1.0,
+      },
+      glslShader = blurGlsl
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = getParameterFloat('progress);
+  f32 effectStrength = getParameterFloat('effect_strength);
+  f32 direction = 1.0;
+  if (getParameterFloat('direction) < 0.5) {
+    direction = -1.0;
+  }
+  vec2 center = {0.5, 0.5};
+  f32 landingProgress = 0.78;
+  f32 travel = mix(0.9, 1.2, effectStrength);
+  f32 rotation = direction * mix(0.1745, 0.3142, effectStrength);
+  f32 scale = 1.0;
+  f32 positionX = 0.0;
+  f32 rotationValue = 0.0;
+  if (p < landingProgress) {
+    f32 t = eased(p / landingProgress);
+    positionX = mix(direction * travel, 0.0, t);
+    rotationValue = mix(-rotation, 0.0, t);
+    scale = mix(0.88, 1.04, t);
+  } else {
+    f32 settle = eased((p - landingProgress) / (1.0 - landingProgress));
+    scale = mix(1.04, 1.0, settle);
+  }
+  f32 blurAngle = rotation * (1.0 - eased(min(1.0, p / landingProgress))) * 0.10;
+  vec2 position = {positionX, 0.0};
+
+  setShaderUniform('flyFx, 'progress, p);
+  setShaderUniform('flyFx, 'scale, scale);
+  setShaderUniform('flyFx, 'opacity, clamp(p * 24.0, 0.0, 1.0));
+  setShaderUniform('flyFx, 'rotation, rotationValue);
+  setShaderUniform('flyFx, 'center, center);
+  setShaderUniform('flyFx, 'position, position);
+  setShaderUniform('blurFx, 'blur_angle, blurAngle);
+  vec2 size = getTextureSize('flyFx);
+  setShaderUniform('blurFx, 'aspect, size.x / size.y);
+}
+
+string blurGlsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform float blur_angle;
+uniform float aspect;
+
+vec2 rotateUV(vec2 uv, float angle) {
+  uv -= vec2(0.5);
+  uv.x *= aspect;
+  float c = cos(angle);
+  float s = sin(angle);
+  uv = vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
+  uv.x /= aspect;
+  return uv + vec2(0.5);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 color = sampleInput(rotateUV(uv, blur_angle * -1.0));
+  color += sampleInput(rotateUV(uv, blur_angle * -0.6667));
+  color += sampleInput(rotateUV(uv, blur_angle * -0.3333));
+  color += sampleInput(uv);
+  color += sampleInput(rotateUV(uv, blur_angle * 0.3333));
+  color += sampleInput(rotateUV(uv, blur_angle * 0.6667));
+  color += sampleInput(rotateUV(uv, blur_angle));
+  gl_FragColor = toOutputFormat(color / 7.0);
+}
+";

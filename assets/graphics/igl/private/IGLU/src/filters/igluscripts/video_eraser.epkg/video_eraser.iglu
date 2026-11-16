@@ -1,0 +1,208 @@
+[Filter TransitionEraser]
+
+[Init]
+fun init(Filter filter) {
+filter.parameters = {
+    {direction = 3.0, min = 2.0, max = 3.0, description = "Direction the erase travels: 2 = up, 3 = down"},
+    {lineScale = 206.522, min = 100.0, max = 300.0, description = "lineScale"},
+    {lineVariation = 1.5, min = 0.0, max = 1.5, description = "lineVariation"},
+    {size = 0.70588235, min = 0.0, max = 1.0, description = "0 = 20 bands, 1 = 3 bands"},
+    {bandStagger = 0.358695652173913, min = 0.0, max = 1.0, description = "bandStagger"},
+    {stagger = 0.320109, min = 0.0, max = 0.95, description = "stagger"},
+    {verticalFade = 1.0, min = 0.0, max = 1.0, description = "verticalFade"},
+    {verticalSoftness = 1.0, min = 0.01, max = 1.0, description = "verticalSoftness"},
+    {softness = 0.4136304347826087, min = 0.001, max = 1.0, description = "softness"},
+    {alphaNoise = 1.0, min = 0.0, max = 1.0, description = "alphaNoise"},
+    {alphaNoiseScale = 20.206521739130434, min = 1.0, max = 32.0, description = "alphaNoiseScale"},
+    {seed = 0.0, min = 0.0, max = 100.0, description = "seed"},
+    {framerate = 0.05, min = 0.0, max = 1.0, description = "1 = full framerate, 0 = 1 fps (over 4s)"},
+};
+
+    filter.passes = {
+        {
+            name = 'pass0,
+            inputs = {'default},
+            uniforms = {
+                progress = 0.0,
+                direction = 3.0,
+                lineScale = 24.0,
+                lineVariation = 1.0,
+                bands = 4.0,
+                bandStagger = 1.0,
+                stagger = 0.7,
+                verticalFade = 1.0,
+                verticalSoftness = 0.35,
+                softness = 0.05,
+                alphaNoise = 0.35,
+                alphaNoiseScale = 8.0,
+                seed = 0.0,
+                framerate = 1.0,
+                outputSize = {1080.0, 1920.0},
+            },
+            glslShader = glsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    setShaderUniform('pass0, 'direction, getParameterFloat('direction));
+    setShaderUniform('pass0, 'lineScale, getParameterFloat('lineScale));
+    setShaderUniform('pass0, 'lineVariation, getParameterFloat('lineVariation));
+    f32 bands = 20.0 - getParameterFloat('size) * 17.0;
+    setShaderUniform('pass0, 'bands, round(bands));
+    setShaderUniform('pass0, 'bandStagger, getParameterFloat('bandStagger));
+    setShaderUniform('pass0, 'stagger, getParameterFloat('stagger));
+    setShaderUniform('pass0, 'verticalFade, getParameterFloat('verticalFade));
+    setShaderUniform('pass0, 'verticalSoftness, getParameterFloat('verticalSoftness));
+    setShaderUniform('pass0, 'softness, getParameterFloat('softness));
+    setShaderUniform('pass0, 'alphaNoise, getParameterFloat('alphaNoise));
+    setShaderUniform('pass0, 'alphaNoiseScale, getParameterFloat('alphaNoiseScale));
+    setShaderUniform('pass0, 'seed, getParameterFloat('seed));
+    setShaderUniform('pass0, 'framerate, getParameterFloat('framerate));
+}
+
+string glsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform vec2 outputSize;
+    uniform float progress;
+    uniform float direction;
+    uniform float lineScale;
+    uniform float lineVariation;
+    uniform float bands;
+    uniform float bandStagger;
+    uniform float stagger;
+    uniform float verticalFade;
+    uniform float verticalSoftness;
+    uniform float softness;
+    uniform float alphaNoise;
+    uniform float alphaNoiseScale;
+    uniform float seed;
+    uniform float framerate;
+
+    // Per-pixel 2D white noise, same one used by transition_print.
+    float hash12(vec2 p) {
+        vec3 p3 = fract(vec3(p.x, p.y, p.x) * 0.1031);
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.x + p3.y) * p3.z);
+    }
+
+    float hash11(float p) {
+        p = fract(p * 0.1031);
+        p *= p + 33.33;
+        p *= p + p;
+        return fract(p);
+    }
+
+    // Smooth 2D value noise: bilinear blend of the hash on a lattice, so the
+    // alpha grain comes out as soft blobs rather than hard per-pixel specks.
+    float vnoise2(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = hash12(i);
+        float b = hash12(i + vec2(1.0, 0.0));
+        float c = hash12(i + vec2(0.0, 1.0));
+        float d = hash12(i + vec2(1.0, 1.0));
+        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+    }
+
+    // Smooth 1D value noise, used to warp the line grid.
+    float vnoise(float x) {
+        float i = floor(x);
+        float f = fract(x);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(hash11(i), hash11(i + 1.0), f);
+    }
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        vec4 color = sampleInput(uv);
+
+        // Quantize progress to simulate lower framerate.
+        // Treat 0-1 progress range as 4 seconds:
+        //   framerate = 1 -> 60 fps -> 240 frames (effectively smooth)
+        //   framerate = 0 -> 1 fps  -> 4 frames over 4s (step = 0.25)
+        float fps = 1.0 + framerate * 59.0;
+        float totalFrames = max(floor(fps * 4.0), 1.0);
+        float p = floor(clamp(progress, 0.0, 1.0) * totalFrames) / totalFrames;
+
+        // Warp y with smooth noise before quantizing so line heights vary
+        // randomly. lineVariation is capped so the warp stays monotonic and
+        // line boundaries never cross.
+        // guv.y is 1 at the edge the erase starts from: the top of the frame
+        // for down (3), the bottom for up (2). Up mirrors the whole layout
+        // vertically, so it is the down render flipped.
+        vec2 guv = vec2(uv.x, direction < 2.5
+            ? max(UP, 0.0) + DOWN * uv.y
+            : max(DOWN, 0.0) + UP * uv.y);
+        float y = guv.y * lineScale;
+        float warp = (vnoise(y * 0.35 + seed) - 0.5) * lineVariation;
+        float warpedY = y + warp;
+        float row = floor(warpedY);
+
+        // Position inside the line, normalized so every line behaves the same
+        // regardless of its height: 0 at the two edges, 1 at the centre.
+        float edgeDist = min(fract(warpedY), 1.0 - fract(warpedY)) * 2.0;
+
+        // Group whole lines into bands. Grouping by row (not by uv.y) keeps a
+        // line entirely inside one band, so bands never split a line in half.
+        float linesPerBand = max(lineScale / bands, 0.001);
+        float band = clamp(floor(row / linesPerBand), 0.0, bands - 1.0);
+
+        // Count the bands from the start edge.
+        float bandOrder = (bands - 1.0) - band;
+
+        // bandStagger sets how far each band is offset from the previous one,
+        // as a fraction of a band's own window. 1 = the next band starts as
+        // this one ends (sequential), 0 = every band runs at once. Solving
+        // (bands - 1) * step + window = 1 keeps the last band ending exactly
+        // at progress 1 for any setting.
+        float bandWindow = 1.0 / ((bands - 1.0) * bandStagger + 1.0);
+        float bandStep = bandStagger * bandWindow;
+
+        // Inside its window a band spends part of the time staggering line
+        // starts and the rest erasing, so the two always sum to the window.
+        float lineDur = bandWindow * mix(1.0, 0.05, stagger);
+        float startSpread = bandWindow - lineDur;
+        float start = bandOrder * bandStep + hash11(row * 1.7 + seed * 13.0) * startSpread;
+        float local = clamp((p - start) / max(lineDur, 0.0001), 0.0, 1.0);
+
+        // Bands alternate sweep direction, so the erase snakes back and forth
+        // across the frame: the first band goes left to right, the next right
+        // to left, and so on. Keying off bandOrder rather than the raw band
+        // index means the alternation is counted from the start edge, matching
+        // the order the bands actually fire in.
+        float flip = mod(bandOrder, 2.0);
+        float xw = mix(uv.x, 1.0 - uv.x, flip);
+        float soft = max(softness, 0.001);
+        float erased = smoothstep(xw, xw + soft, local * (1.0 + soft));
+
+        // Over the same window the line also eats inward from its top and
+        // bottom edges, so it thins towards its centreline as it is wiped.
+        float vSoft = max(verticalSoftness, 0.01);
+        float vErased = smoothstep(edgeDist, edgeDist + vSoft, local * (1.0 + vSoft));
+
+        float wipe = (1.0 - erased) * (1.0 - vErased * verticalFade);
+
+        // Roughen the alpha with per-pixel noise so the lines crumble away
+        // instead of sliding off cleanly. The 4a(1-a) window collapses to 0 at
+        // both a = 0 and a = 1, so the noise only bites where the alpha is
+        // mid-transition - fully visible pixels never speckle and fully erased
+        // ones never come back, whatever the noise amount.
+        // alphaNoiseScale is the lattice spacing in pixels: the noise varies
+        // smoothly between points that far apart, so larger values give bigger
+        // soft blobs rather than bigger hard blocks.
+        float window = 4.0 * wipe * (1.0 - wipe);
+        float ns = max(alphaNoiseScale, 1.0);
+        // Pixel-centre coordinate built from uv; shaderc has no Metal translation
+        // for the fragment-coordinate builtin.
+        vec2 pixel = floor(guv * outputSize) + 0.5;
+        float n = vnoise2(pixel / ns + seed);
+        wipe = clamp(wipe + (n - 0.5) * alphaNoise * window, 0.0, 1.0);
+
+        color *= wipe;
+        gl_FragColor = toOutputFormat(color);
+    }
+";

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape android:paddingLeft="@dimen/hatch_jollybot_bubble_min_width" android:paddingTop="@dimen/abc_edit_text_inset_top_material" android:paddingRight="@dimen/hatch_jollybot_bubble_min_width" android:paddingBottom="@dimen/abc_edit_text_inset_top_material" android:shape="rectangle"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/bds_white_20_transparent" />
+    <corners android:radius="15.0dip" />
+    <stroke android:width="1.0px" android:color="#ff000000" />
+</shape>

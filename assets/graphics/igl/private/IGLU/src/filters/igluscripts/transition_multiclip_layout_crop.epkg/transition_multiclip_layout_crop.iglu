@@ -1,0 +1,95 @@
+[Filter TransitionMulticlipLayoutCrop]
+
+# Multiclip Layout Crop (AE: Edits_Transition_collect_01 / PRE_TRANSITION_LAYOUT_CROP).
+# A letterbox blink: clip A is cropped to a horizontal band that collapses to
+# the centre line (0.5s-1.0s, accelerating), the frame is black for an instant,
+# then the band reopens on clip B (1.0s-1.467s, decelerating). In AE this is a
+# track-matte solid whose Y Scale goes 100% -> 0% -> 100%. Progress spans
+# 0.5s-1.467s.
+#
+# Ported from the Easel web tool's multiclip_layout_crop.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.passes = {{
+    name = 'crop,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      band = 1.0,
+      showB = 0.0,
+    },
+    glslShader = glsl,
+  }};
+}
+
+f32 T0 = 0.5;
+f32 T1 = 1.467;
+f32 T_CUT = 1.0;
+
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 is = 1.0 - s;
+  return 3.0 * is * is * s * a + 3.0 * is * s * s * b + s * s * s;
+}
+
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 uu = clamp(u, 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = uu;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < uu) {
+      lo = s;
+    } else {
+      hi = s;
+    }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 t = T0 + p * (T1 - T0);
+  f32 band = 1.0;
+  f32 showB = 0.0;
+  if (t < T_CUT) {
+    # Y Scale 100 -> 0: ease in 100% out of the first key, 33% into the second.
+    band = 1.0 - aeEase((t - T0) / (T_CUT - T0), 1.0, 0.0, 0.67, 1.0);
+  } else {
+    # Y Scale 0 -> 100: 33% out, 100% into the last key.
+    band = aeEase((t - T_CUT) / (T1 - T_CUT), 0.33, 0.0, 0.0, 1.0);
+    showB = 1.0;
+  }
+  if (p >= 1.0) {
+    band = 1.0;
+  }
+  setShaderUniform('crop, 'band, band);
+  setShaderUniform('crop, 'showB, showB);
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float band;
+uniform float showB;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 col = showB > 0.5 ? texture2D(s_texture1, uv) : sampleInput(uv);
+  // Band of height 'band' (fraction of the frame) centred vertically, 1px soft.
+  float halfH = 0.5 * band;
+  float d = abs(uv.y - 0.5);
+  float aa = 1.0 / 1280.0;
+  float m = 1.0 - smoothstep(halfH - aa, halfH + aa, d);
+  gl_FragColor = toOutputFormat(vec4(col.rgb * m, 1.0));
+}
+";

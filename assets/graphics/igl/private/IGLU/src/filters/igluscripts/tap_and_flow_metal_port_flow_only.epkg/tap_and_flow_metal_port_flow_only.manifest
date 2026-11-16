@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "6d665dce-ae83-43a5-88b3-3f4225fb463a",
+  "displayName": "Tap And Flow — Flow Only",
+  "description": "[IG Visual Discovery] Product highlight effect name. Ambient garment lighting fades in over two seconds, with background focus and dimming on a paused reel.",
+  "iglu": {
+    "customization": [
+      {"name": "waveDuration", "default": 0.3, "min": 0.3, "max": 6},
+      {"name": "waveStrength", "default": 0, "min": 0, "max": 1},
+      {"name": "leak", "default": 1, "min": 0, "max": 1},
+      {"name": "relief", "default": 0.847, "min": 0, "max": 3},
+      {"name": "focusBlur", "default": 2.6, "min": 0, "max": 4},
+      {"name": "dim", "default": 0.1, "min": 0, "max": 1},
+      {"name": "restStartAt", "default": 0, "min": 0, "max": 2},
+      {"name": "restFadeIn", "default": 2, "min": 0, "max": 6},
+      {"name": "gain", "default": 1.608, "min": 1, "max": 3},
+      {"name": "burn", "default": 0.9, "min": 0.5, "max": 1},
+      {"name": "noiseScale", "default": 6.50815, "min": 0.25, "max": 12},
+      {"name": "flowSpeed", "default": 0.65, "min": 0, "max": 4},
+      {"name": "warmth", "default": 0.315, "min": 0, "max": 1}
+    ]
+  }
+}

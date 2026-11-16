@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "840666160641238",
+  "displayName": "HDR Sharpen",
+  "description": "[IG Edits] Color filter name. With \"HDR Sharpen\", the creator gets a lighting boost: unsharp-mask sharpening, a midtone contrast lift, soft highlight glow, and a gentle radial vignette.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQCIiChF98kf"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "6c24ae9c",
+      "handle": "AQAE9flJeu49",
+      "md5": "fb05b78c559a8a77a0fa84bdd43219a6"
+    }
+  },
+  "iglu": {
+    "legacyId": 3098
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GLMuEzJuTvgkuGwGAGTpjo3vrZUubhQoAAAD"
+    }
+  }
+}

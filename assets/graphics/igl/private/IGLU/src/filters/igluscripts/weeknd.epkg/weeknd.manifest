@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "CFF91791-B1A0-408A-A817-F9DD5D0506B4",
+  "displayName": "𝐖𝐄𝐄𝐊𝐍𝐃",
+  "description": "[IG Edits] Color filter name. With \"𝐖𝐄𝐄𝐊𝐍𝐃\", the creator gets a warm, faded Kodak-style film color grade with a faint film grain over the camera image.",
+  "iglu": {
+    "legacyId": 3301
+  },
+  "assets": [
+    {
+      "name": "weeknd_lut.png",
+      "assetHash": "be4374d009a55f5e7198a06abecaea80a3e41907970218c83a2a2ff95579c888",
+      "hubAssetId": "28915044631458048"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFAXl44iuT"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "176dfdb5",
+      "handle": "AQAD8On2yXUL",
+      "md5": "919202c90f838b7b7681fb2c91b354c8"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GArbRDPedJr3yREOAL7e2ocYjm0AbhQoAAAD"
+    }
+  }
+}

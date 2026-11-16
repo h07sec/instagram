@@ -1,0 +1,1 @@
+(function(selectorsByFieldJSON){try{const resolved=window._META.IABInnerFrame.resolveSelectorTexts(JSON.parse(selectorsByFieldJSON)),entriesByField={};for(const field of Object.keys(resolved))resolved[field].length>0&&(entriesByField[field]=JSON.stringify(resolved[field]));return entriesByField}catch{return{}}})

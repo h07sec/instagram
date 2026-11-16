@@ -1,0 +1,92 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAD71imndmS",
+      "key": "d8274868",
+      "md5": "00232941646dcd5382ce4a5fb840cb1e"
+    }
+  },
+  "dependencies": [
+    "video_particles_pop"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Pop Magic In\", the creator can reveal the subject with a radial pop that bursts it into view on sparkling magic dust.",
+  "displayName": "Pop Magic In",
+  "identifier": "be29ae57-ba1f-4d9f-8423-2de58888f8c3",
+  "iglu": {
+    "behavior": {
+      "curve": "quadraticOut",
+      "durationMs": 1500,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "name": "color",
+        "defaultSelection": "#FFFFFF",
+        "available": [
+          "#FFFFFF",
+          "#000000",
+          "#FFD600",
+          "#FF7A00",
+          "#FE1D37",
+          "#FF0169",
+          "#D300C5",
+          "#7638FA",
+          "#37038B",
+          "#1CD164",
+          "#0095F6",
+          "#AD88FC",
+          "#FDD5FD",
+          "#FFABE1",
+          "#FFC584",
+          "#FFF8C2",
+          "#09FF00",
+          "#FFFF00",
+          "#5AFAC7",
+          "#0000FF"
+        ],
+        "displayName": "Color",
+        "displayNameDescription": "[IG Edits] Color picker label. The user selects a color used by the video effect (e.g., glow tint, outline color, sparkle color); available palette varies per effect."
+      },
+      {
+        "default": 1.5,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "name": "amount",
+        "default": 0.26087,
+        "min": 0.0,
+        "max": 1.0,
+        "displayName": "Amount",
+        "displayNameDescription": "[IG Edits] Slider label controlling the magnitude or quantity of a video effect. Generic across many effects; exact range varies per effect."
+      },
+      {
+        "name": "size",
+        "default": 0.96,
+        "min": -1.04,
+        "max": 2.96,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect."
+      }
+    ],
+    "legacyId": 4027
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAKOkVP9maM"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "assets": [
+    {
+      "name": "particles_all.png",
+      "assetHash": "cdf344b5c3fad4da88e8ff75b5fc50e5b87773ba46590e1cad7747fe1c20688b",
+      "hubAssetId": "1426924909460606"
+    }
+  ]
+}

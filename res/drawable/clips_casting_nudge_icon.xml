@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/clips_casting_nudge_icon_ring" />
+    <item android:drawable="@drawable/instagram_casting_outline_24" android:left="@dimen/abc_edit_text_inset_top_material" android:top="@dimen/abc_edit_text_inset_top_material" android:right="@dimen/abc_edit_text_inset_top_material" android:bottom="@dimen/abc_edit_text_inset_top_material" />
+</layer-list>

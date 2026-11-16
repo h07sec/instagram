@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Expires in %1$d hours</item>
+        <item quantity="one">පැය %1$dකින් කල් ඉකුත් වේ</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">මිනිත්තු %1$dකින් කල් ඉකුත් වේ</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">කාර්යයන් %1$dක් සඳහා සමාලෝචනය අවශ්‍යයි</item>
+        <item quantity="one">A task needs review</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d passengers</item>
+        <item quantity="one">ගමන් මගී %1$dක්</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">කාර්යයන් %1$dක් සඳහා සමාලෝචනය අවශ්‍යයි</item>
+        <item quantity="one">%1$d task needs review</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">සම්බන්ධක %1$d</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">අතේ-ගෙනි යන බෑග %1$dක්</item>
+        <item quantity="one">%1$d carry-on bag</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d checked bags</item>
+        <item quantity="one">පරීක්ෂා කළ බෑග් %1$d</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d stops</item>
+        <item quantity="one">නැවතුම් %1$d</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Use %1$d images</item>
+        <item quantity="one">රූප %1$dක් භාවිත කරන්න</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">තාවකාලික කාඩ්පත පැය %1$d කින් කල් ඉකුත් වේ</item>
+        <item quantity="one">Temporary card expires in %1$d hour</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Every %1$d hours</item>
+        <item quantity="one">සෑම පැය %1$d</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">සෑම මිනිත්තු %1$dකට ම</item>
+        <item quantity="one">සෑම මිනිත්තු %1$d</item>
+    </plurals>
+</resources>

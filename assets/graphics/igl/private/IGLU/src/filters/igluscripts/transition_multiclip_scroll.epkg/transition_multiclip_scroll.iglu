@@ -1,0 +1,181 @@
+[Filter TransitionMulticlipScroll]
+
+# Clip A and clip B travel as one strip, B exactly one frame behind A. Both ride
+# the Scroll In curve (video_scroll_in's IN keyframes), normalised so B starts a
+# full frame away and settles at rest; composing the separate In/Out effects
+# would drift apart since their curves differ.
+#
+# Ported from the Easel web tool's multiclip_scroll.iglu.
+
+fun mix(f32 a, f32 b, f32 t) f32 {
+  return a * (1.0 - t) + b * t;
+}
+
+fun cssBezier(f32 time, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 t = time;
+  f32 i = 0.0;
+  while (i < 8.0) {
+    f32 u = 1.0 - t;
+    f32 xt = 3.0 * u * u * t * x1 + 3.0 * u * t * t * x2 + t * t * t;
+    f32 dxdt = 3.0 * u * u * x1 + 6.0 * u * t * (x2 - x1) + 3.0 * t * t * (1.0 - x2);
+    t = t - (xt - time) / max(dxdt, 0.0001);
+    t = clamp(t, 0.0, 1.0);
+    i = i + 1.0;
+  }
+  f32 u = 1.0 - t;
+  return 3.0 * u * u * t * y1 + 3.0 * u * t * t * y2 + t * t * t;
+}
+
+f32 IPT1 = 0.2308;
+f32 IPT2 = 0.6538;
+f32 IPT3 = 1.0;
+
+f32 IPK0 = 778.09;
+f32 IPK1 = 261.49;
+f32 IPK2 = 125.62;
+f32 IPK3 = 0.0;
+
+# Remaining distance of clip B from rest, in frames (1 at start, 0 at end).
+fun remaining(f32 p) f32 {
+  f32 pos = IPK3;
+  f32 f = 0.0;
+  f32 t = 0.0;
+
+  if (p < IPT1) {
+    f = p / IPT1;
+    t = cssBezier(f, 0.6309, 0.2222, 0.6074, 0.7145);
+    pos = mix(IPK0, IPK1, t);
+  } else if (p < IPT2) {
+    f = (p - IPT1) / (IPT2 - IPT1);
+    t = cssBezier(f, 0.2291, 1.1612, 0.8136, 0.3643);
+    pos = mix(IPK1, IPK2, t);
+  } else if (p < IPT3) {
+    f = (p - IPT2) / (IPT3 - IPT2);
+    t = cssBezier(f, 0.3906, 1.1791, 0.5909, 1.1635);
+    pos = mix(IPK2, IPK3, t);
+  }
+
+  return pos / IPK0;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {direction = 2.0, min = 2.0, max = 3.0, description = "Direction code: 2 = Scroll up, 3 = Scroll down"},
+  };
+
+  filter.passes = {
+    {
+      name = 'scroll,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        offsetA = 0.0,
+        offsetB = 1.0,
+        ghostSpread = 0.0,
+        edgeScale = {1080.0, 1920.0},
+        reach = 0.0,
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 dir = getParameterFloat('direction);
+
+  # Same sign convention as video_scroll_in's IN branch: up = 2, down = 3.
+  f32 sign = 1.0;
+  if (dir > 2.5) { sign = 0.0 - 1.0; }
+
+  f32 r = remaining(p);
+  f32 rPrev = remaining(max(p - 0.008, 0.0));
+
+  vec2 size = getTextureSize('default);
+  f32 ghostSpread = abs(r - rPrev) * 150.0 / size.y;
+
+  # Texels per uv for the antialiased frame edge.
+  vec2 edgeScale = {max(size.x, 1.0), max(size.y, 1.0)};
+
+  setShaderUniform('scroll, 'offsetB, sign * r);
+  setShaderUniform('scroll, 'offsetA, sign * (r - 1.0));
+  setShaderUniform('scroll, 'ghostSpread, ghostSpread);
+  setShaderUniform('scroll, 'edgeScale, edgeScale);
+  # A clip's taps all miss the frame once its center tap is this far outside it.
+  setShaderUniform('scroll, 'reach, 4.0 * ghostSpread + 0.5 / edgeScale.y);
+}
+
+string glsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform float offsetA;
+uniform float offsetB;
+uniform float ghostSpread;
+uniform vec2 edgeScale;
+uniform float reach;
+
+// Sum of the tap weights 1 / (1 + 2|i|) for i = -4..4; dividing each weight by
+// it normalizes the kernel.
+#define TOTAL_WEIGHT 2.5746032
+
+// One-pixel antialiased frame edge along y; the x half is the same for every
+// tap, so the caller applies it once.
+float clipY(float y) {
+  return clamp(min(y, 1.0 - y) * edgeScale.y + 0.5, 0.0, 1.0);
+}
+
+// The vertical motion blur of clip A, without its x edge.
+vec4 blurA(vec2 c) {
+  vec4 sum = sampleInput(c) * (clipY(c.y) / TOTAL_WEIGHT);
+  for (int i = 1; i <= 4; i++) {
+    float fi = float(i);
+    float w = 1.0 / ((1.0 + 2.0 * fi) * TOTAL_WEIGHT);
+    vec2 g = vec2(0.0, ghostSpread * fi);
+    sum += sampleInput(c + g) * (clipY(c.y + g.y) * w);
+    sum += sampleInput(c - g) * (clipY(c.y - g.y) * w);
+  }
+  return sum;
+}
+
+vec4 blurB(vec2 c) {
+  vec4 sum = texture2D(s_texture1, c) * (clipY(c.y) / TOTAL_WEIGHT);
+  for (int i = 1; i <= 4; i++) {
+    float fi = float(i);
+    float w = 1.0 / ((1.0 + 2.0 * fi) * TOTAL_WEIGHT);
+    vec2 g = vec2(0.0, ghostSpread * fi);
+    sum += texture2D(s_texture1, c + g) * (clipY(c.y + g.y) * w);
+    sum += texture2D(s_texture1, c - g) * (clipY(c.y - g.y) * w);
+  }
+  return sum;
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  // DOWN (-1.0 on OpenGL, +1.0 on Metal) matches video_scroll_in's direction.
+  vec2 uvA = vec2(uv.x, uv.y - DOWN * offsetA);
+  vec2 uvB = vec2(uv.x, uv.y - DOWN * offsetB);
+  float clipX = clamp(min(uv.x, 1.0 - uv.x) * edgeScale.x + 0.5, 0.0, 1.0);
+
+  // The clips sit one frame apart, so away from the seam one of them has every
+  // tap outside the frame and contributes exactly vec4(0). Skip its nine
+  // fetches; the regions are contiguous bands, so the branch is coherent.
+  vec4 a = vec4(0.0);
+  if (min(uvA.y, 1.0 - uvA.y) > -reach) {
+    a = blurA(uvA) * clipX;
+  }
+  vec4 b = vec4(0.0);
+  if (min(uvB.y, 1.0 - uvB.y) > -reach) {
+    b = blurB(uvB) * clipX;
+  }
+
+  // a and b are premultiplied by their frame edges; composite B over A.
+  gl_FragColor = toOutputFormat(b + a * (1.0 - b.a));
+}
+";

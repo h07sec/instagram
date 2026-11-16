@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "D7B53D7A-24AC-47E7-BD97-B095C8966D54",
+  "displayName": "Kodak frame ✧",
+  "description": "[IG Edits] Video effect name. With \"Kodak frame\", the creator gets two scrolling Kodak film strips, one black and white and one in color, over the camera image.",
+  "iglu": {
+    "legacyId": 3233
+  },
+  "assets": [
+    {
+      "name": "kodak_frame_lut.png",
+      "assetHash": "343f53e0b6dc32605253ce40c582e746e6243e56b4dc99cef9e2d67fe4927780",
+      "hubAssetId": "1412597147155613"
+    },
+    {
+      "name": "kodak_frame_border.png",
+      "assetHash": "77e762ab739f138929fc1554b6aca042fcd47cc5090f1750502e9b686704ac41",
+      "hubAssetId": "1583637022999976"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEBehjDuWE"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3cbdf2d",
+      "handle": "AQAFZXw_9x8z",
+      "md5": "15e2932a27cb1538bd28ec20364a964e"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GEpADDM5tz_AYgoGACE8lvCYrB59bhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2E10D9D7-245B-405A-8286-3773964FA8C4",
+  "displayName": "Glowing Skin",
+  "description": "[IG Edits] Color filter name. With \"Glowing Skin\", the creator gets a bright, soft skin-glow LUT color grade with skin smoothing, pink lips and a light blush applied to the camera image.",
+  "iglu": {
+    "legacyId": 3295
+  },
+  "assets": [
+    {
+      "name": "glowing_skin_lut.png",
+      "assetHash": "3fd84ea3438eb8a9e1644a8a03070c5232b1eb8b2244f5562334a397ba06afc7",
+      "hubAssetId": "1625334742407431"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFFQzmV7Xw"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "87459dd2",
+      "handle": "AQAFZ9J1JnOU",
+      "md5": "a32fb54baa3202ca005e5139827c0f59"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMMlRzPh-Xg5vuoDAMlTjPdvbll2bhQoAAAD"
+    }
+  }
+}

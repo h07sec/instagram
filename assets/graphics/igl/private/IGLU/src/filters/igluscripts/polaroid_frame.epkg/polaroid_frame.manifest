@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "768820121628618",
+  "displayName": "🎞️ 𝐩𝐨𝐥𝐚𝐫𝐨𝐢𝐝",
+  "description": "[IG Edits] Video effect name. With \"🎞️ 𝐩𝐨𝐥𝐚𝐫𝐨𝐢𝐝\", the creator can place the video inside a Spark-ported instant-photo frame with a soft film grade and grain.",
+  "iglu": {
+    "legacyId": 3427
+  },
+  "assets": [
+    {
+      "name": "polaroid_frame_lut.png",
+      "assetHash": "17b52b4d8d800967c5d822a7fa3c10a66365c22b321acbfd8ba087c581288e28",
+      "hubAssetId": "987608870561561"
+    },
+    {
+      "name": "polaroid_frame_grain.png",
+      "assetHash": "c19ac9c34264ddeded62f7af5191bc89b70f3113241689464a90882cd34fe1c8",
+      "hubAssetId": "4512618528953875"
+    },
+    {
+      "name": "polaroid_frame_frame.png",
+      "assetHash": "ed96b3f421b19b4db2eb25396f3fab5aaa259303a2d68dc3a0d20ad7f3c8dc89",
+      "hubAssetId": "2270953453479009"
+    }
+  ]
+}

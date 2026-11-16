@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "B65E9522-AD36-4F1D-A537-A63BEBC6BB2D",
+  "displayName": "♡ frame ♡",
+  "description": "[IG Edits] Video effect name. With \"frame\", the creator gets a 2x2 photo grid of the camera image with a LUT color grade, white dividers and small hearts.",
+  "iglu": {
+    "legacyId": 3235
+  },
+  "assets": [
+    {
+      "name": "frame_lut.png",
+      "assetHash": "e37d48a5fc48b386eed6d6b0eae0e5da92a9e32d8d3e9c9ffe46c299e8e9b7c5",
+      "hubAssetId": "1455268656669552"
+    },
+    {
+      "name": "frame_overlay.png",
+      "assetHash": "d3b2fffd9475b5f635d65a75ded93a3bccc5579674c1f69ceba256b1375e522d",
+      "hubAssetId": "2166573000921209"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF5LtNNtAR"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5fa518f4",
+      "handle": "AQAF2TG4Y3u6",
+      "md5": "c590f867a954a80af075b99858c780f1"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMRoCzNsoCqIb-EDAH9wIpXlvGoMbhQoAAAD"
+    }
+  }
+}

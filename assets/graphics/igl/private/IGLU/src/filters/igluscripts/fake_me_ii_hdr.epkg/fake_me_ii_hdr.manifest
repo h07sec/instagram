@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "14B3F871-B2C1-4520-A373-7F57F10D71C9",
+  "displayName": "Fake Me II HDR 🌺",
+  "description": "[IG Edits] Color filter name. With \"Fake Me II HDR 🌺\", the creator gets a punchy HDR look: a large-radius sharpen with a warm pink color grade and skin smoothing.",
+  "iglu": {
+    "legacyId": 3319
+  },
+  "assets": [
+    {
+      "name": "fake_me_ii_hdr_lut.png",
+      "assetHash": "daeda477a3a5f20f9f62ca9cf2c93f3946a99d0c7772c41b413c740ca7230a7a",
+      "hubAssetId": "1088668520599162"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAE43QbV5al"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "a8733abc",
+      "handle": "AQAD9W05d9Bp",
+      "md5": "1aac77de9c08729d54922eb2458a49f7"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GAKdizO1IV8lN0oGALGQ9e2ZBfZ4bhQoAAAD"
+    }
+  }
+}

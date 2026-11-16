@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "791431368514207",
+  "displayName": "low expo",
+  "description": "[IG Edits] Color filter name. With \"low expo\", the creator can apply a Spark-ported dark, flat, low-exposure matte look.",
+  "iglu": {
+    "legacyId": 3348
+  },
+  "assets": [
+    {
+      "name": "low_expo_lut.png",
+      "assetHash": "ae13bd6fcfa82d7fd52ac8156a8ad5264cc007c888876c6f97c2b5c7d5f15a7b",
+      "hubAssetId": "1452512180356283"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGCFaAojPs"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "90bfa09d",
+      "handle": "AQBq48R_jLji",
+      "md5": "6af821c8c5a6fef0d18d19e09744692c"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPFupTOvJeLOhLAQAAlYinta27EPbhQoAAAD"
+    }
+  }
+}

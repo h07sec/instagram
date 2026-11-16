@@ -1,0 +1,24 @@
+[Filter VideoRockVerticalOut]
+
+[Init]
+fun init(Filter filter) {
+  filter.passes = {{
+      name = 'rockVOut,
+      igid = 'video_rock_vertical_in,
+      inputs = {'default},
+      uniforms = {},
+    }};
+
+  filter.parameters = {
+    {intensity = 0.5, min = 0.0, max = 1.0, description = "Amount of sympathetic rotation"},
+    {direction = 2.0, min = 2.0, max = 3.0, description = "Direction code: 2 = Center-to-up, 3 = Center-to-down"},
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  setShaderUniform('rockVOut, 'progress, getParameterFloat('progress));
+  setShaderUniform('rockVOut, 'direction, getParameterFloat('direction));
+  setShaderUniform('rockVOut, 'intensity, getParameterFloat('intensity));
+  setShaderUniform('rockVOut, 'outro, 1.0);
+}

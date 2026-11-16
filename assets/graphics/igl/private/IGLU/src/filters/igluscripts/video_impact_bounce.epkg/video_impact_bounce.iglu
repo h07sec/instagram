@@ -1,0 +1,61 @@
+[Filter IgluscriptVideoImpactBounceFilter]
+[MaskBehavior alpha]
+
+fun eased(f32 t) f32 {
+  f32 clamped = clamp(t, 0.0, 1.0);
+  return clamped * clamped * (3.0 - 2.0 * clamped);
+}
+
+[Init]
+fun init(Filter filter) {
+  filter.parameters = {
+    {effect_strength = 0.75, min = 0.0, max = 1.0},
+  };
+
+  filter.passes = {{
+      name = 'impactFx,
+      igid = 'video_scale_opacity,
+      inputs = {'default},
+      uniforms = {
+        progress = 0.0,
+        scale = 1.0,
+        opacity = 1.0,
+        rotation = 0.0,
+        center = {0.5, 0.5},
+        position = {0.0, 0.0},
+      }
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = getParameterFloat('progress);
+  f32 effectStrength = getParameterFloat('effect_strength);
+  vec2 center = {0.5, 0.5};
+  vec2 position = {0.0, 0.0};
+  f32 minimumScale = 0.92;
+  f32 overshootScale = 1.0;
+  if (effectStrength >= 0.88) {
+    minimumScale = 0.75;
+    overshootScale = 1.07;
+  } else if (effectStrength >= 0.72) {
+    minimumScale = 0.84;
+    overshootScale = 1.03;
+  }
+
+  f32 scale = 1.0;
+  if (p < 0.34) {
+    scale = mix(1.0, minimumScale, eased(p / 0.34));
+  } else if (p < 0.68) {
+    scale = mix(minimumScale, overshootScale, eased((p - 0.34) / 0.34));
+  } else {
+    scale = mix(overshootScale, 1.0, eased((p - 0.68) / 0.32));
+  }
+
+  setShaderUniform('impactFx, 'progress, p);
+  setShaderUniform('impactFx, 'scale, scale);
+  setShaderUniform('impactFx, 'opacity, 1.0);
+  setShaderUniform('impactFx, 'rotation, 0.0);
+  setShaderUniform('impactFx, 'center, center);
+  setShaderUniform('impactFx, 'position, position);
+}

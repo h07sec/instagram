@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "80A67747-EC31-462F-9C25-4E46DCDC305C",
+  "displayName": "classic negative",
+  "description": "[IG Edits] Color filter name. With \"classic negative\", the creator gets a retro film color grade with fine film grain and softly smoothed skin.",
+  "iglu": {
+    "legacyId": 3236
+  },
+  "assets": [
+    {
+      "name": "classic_negative_lut.png",
+      "assetHash": "cbe7e9d395c1847db75473a4d84736d70dd940bcc20ee71ad3b1b3dd20ee4845",
+      "hubAssetId": "1091930320232526"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAK3YVNtTmh"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "56f151b4",
+      "handle": "AQAGf90nKBLe",
+      "md5": "797e8b9fb6d3a5e741271b646966d296"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GEvQEDM-M0e_Vs4FAK95vNcbLfY1bhQoAAAD"
+    }
+  }
+}

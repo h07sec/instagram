@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "605643626770471",
+  "displayName": "Freshly Warm",
+  "description": "[IG Edits] Color filter name. With \"Freshly Warm\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3370
+  },
+  "assets": [
+    {
+      "name": "freshly_warm_lut.png",
+      "assetHash": "e5dc7f3cf3e879ed5afb2c42feaa844489139e8a9aa589c432a20e8c4aad28d8",
+      "hubAssetId": "1667243345039476"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGs18Hfgbj"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "477d88df",
+      "handle": "AQAIoNb3NHfa",
+      "md5": "c324fc94c5401c38f04081b11a37f399"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOkPzjS6FSCAmhgGAPOGrGEcXPcObhQoAAAD"
+    }
+  }
+}

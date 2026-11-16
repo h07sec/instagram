@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "156266537409215",
+  "displayName": "brighter day.",
+  "description": "[IG Edits] Color filter name. With \"brighter day.\", the creator can apply a Spark-ported brightening grade that lifts midtones and adds gentle vibrance.",
+  "iglu": {
+    "legacyId": 3396
+  },
+  "assets": [
+    {
+      "name": "brighter_day_lut.png",
+      "assetHash": "c3c5a40b764786eff548ce9373064c934f050db1d9ce8f808e8c184cade0e002",
+      "hubAssetId": "1418929193750990"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHu5CtOjjp"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5321b0d1",
+      "handle": "AQAG8zHEEWDa",
+      "md5": "f75e7ce37ef321a237ca41b97025e4d7"
+    }
+  }
+}

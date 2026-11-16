@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "461748375318411",
+  "displayName": "BLVCK PARIS",
+  "description": "[IG Edits] Color filter name. With \"BLVCK PARIS\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3382
+  },
+  "assets": [
+    {
+      "name": "blvck_paris_lut.png",
+      "assetHash": "462c6c263a81e496e1a75ee73421d27d00dce3a3ff0bfd7e85fb1b9e8ed653cb",
+      "hubAssetId": "1756362599830977"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHKfHlkhCG"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5db11cd1",
+      "handle": "AQAFId_EdH4v",
+      "md5": "6c1ac18f407224c98d179428e93c9361"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GI611zRH-xlVkfcFAAxyxyZaQv9gbhQoAAAD"
+    }
+  }
+}

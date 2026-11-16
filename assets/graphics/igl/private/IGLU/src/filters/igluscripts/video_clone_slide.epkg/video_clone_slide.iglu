@@ -1,0 +1,313 @@
+[Filter IgluscriptVideoCloneSlideFilter]
+
+# Hermite smoothstep -- ease-in-out
+fun smoothstep(f32 t) f32 {
+  return t * t * (3.0 - 2.0 * t);
+}
+
+[Init]
+fun init(Filter filter) {
+  filter.parameters = {
+    {directionX = 0.0, min = -1.0, max = 1.0, description = "Horizontal slide direction (-1=left, 1=right, 0=none)"},
+    {directionY = -1.0, min = -1.0, max = 1.0, description = "Vertical slide direction (-1=up, 1=down, 0=none)"},
+    {intensity = 0.5, min = 0.0, max = 1.0, description = "Motion blur magnitude"},
+    {distance = 0.5, min = 0.0, max = 1.0, description = "Gap between clones: 0 = flush, 1 = one frame of blank between"},
+    {iterations = 5.0, min = 1.0, max = 10.0, description = "Number of clones in the train"},
+    {outro = 0.0, min = 0.0, max = 1.0, description = "0 = In, 1 = Out"},
+  };
+
+  # slideFx lays out the clone train on the raw input first; dirBlur then runs as
+  # the FINAL pass so the directional blur softens the composited clone edges
+  # instead of blurring the source before those edges exist.
+  # slideFx renders at half res because its tap is the expensive one -- it carries
+  # the colour-space conversion of the source -- and dirBlur reconstructs the
+  # settled frame from the full-res source, so the half-res detail only ever shows
+  # while the train is moving and already heavily smeared.
+  filter.passes = {
+    {
+      name = 'slideFx,
+      inputs = {'default},
+      scale = {0.5, 0.5},
+      uniforms = {
+        position = {0.0, 0.0},
+        ghostDir = {0.0, 0.0},
+        cloneCount = 5.0,
+        gap = 1.5,
+      },
+      glslShader = glsl,
+    },
+    {
+      name = 'dirBlur,
+      # 'default stays first so sampleInput() keeps its format conversion - the
+      # source can be YUV. 'slideFx arrives as auxSampler1, already RGBA.
+      inputs = {'default, 'slideFx},
+      uniforms = {
+        position = {0.0, 0.0},
+        ghostSpread = 0.0,
+        blurMix = 0.0,
+        trainExtent = 6.0,
+        ghostDir = {0.0, 0.0},
+      },
+      glslShader = blurGlsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = getParameterFloat('progress);
+  f32 outro = getParameterFloat('outro);
+  if (outro > 0.5) { p = 1.0 - p; }
+
+  f32 eased = smoothstep(p);
+  f32 dirX = getParameterFloat('directionX);
+  f32 dirY = getParameterFloat('directionY);
+
+  # dirBlur hoists the cross-axis half of its edge feather out of its tap loop,
+  # which only holds while the taps move along a single axis. Snap the direction
+  # to its dominant axis; every shipping wrapper already passes a pure axis.
+  if (abs(dirX) >= abs(dirY)) {
+    dirY = 0.0;
+  } else {
+    dirX = 0.0;
+  }
+  vec2 dir = {dirX, dirY};
+
+  # 'iterations is the size of the clone train now, not a count of sequential
+  # crossings. The name is kept deliberately: setShaderUniform creates a uniform
+  # rather than failing when it does not recognise the name, so renaming this
+  # would break all four wrappers with no diagnostic at all.
+  f32 cloneCount = clamp(floor(getParameterFloat('iterations) + 0.5), 1.0, 10.0);
+
+  # Host UIs render every control as 0-100% whatever range the manifest declares,
+  # so 'distance ships as 0-1 and the real gap is remapped here.
+  #
+  # A translated full-frame copy spans exactly one frame extent, so this is the
+  # centre-to-centre distance in frame extents and 1.0 is the point where
+  # consecutive clones are exactly flush: touching, never overlapping. The top of
+  # the range leaves one whole frame of blank between them, which is the spacing
+  # the effect shipped with. Below 1.0 clones would start occluding each other,
+  # which is why the range stops there.
+  f32 gapAmount = clamp(getParameterFloat('distance), 0.0, 1.0);
+  f32 gap = mix(1.0, 2.0, gapAmount);
+
+  # The clones lead the hero, so the hero starts a whole train further back for
+  # the train to be genuinely offscreen at p = 0; the last clone sits exactly at
+  # the frame edge there. That extension is what stands in for a fade-in.
+  #
+  # Nothing needs to stand in for a fade-out: a clone k gaps ahead of a settled
+  # hero covers [gap*k, gap*k + 1], and gap >= 1.0, so at the settle every clone
+  # has already slid exactly out of frame on its own. That matters because sticky
+  # behaviour holds whatever is on screen at the settle for the rest of the clip.
+  f32 trainExtent = gap * (cloneCount - 1.0);
+  f32 travel = 1.0 + trainExtent;
+  f32 offset = travel * (eased - 1.0);
+
+  f32 posX = dir.x * offset;
+  f32 posY = dir.y * offset;
+  vec2 pos = {posX, posY};
+
+  # Tangent of the movement curve drives the blur, and that is what makes the
+  # blur converge for free: d(smoothstep)/dp = 6p(1-p) is 0 at both ends, so the
+  # spread is pinned to 0 there and dirBlur takes its sharp path. The tangent
+  # peaks at 1.5, so normalizing by that puts the peak spread at the top of the
+  # 10-texel range below.
+  f32 dpdt = 6.0 * p * (1.0 - p);
+  f32 tangentNorm = clamp(dpdt / 1.5, 0.0, 1.0);
+
+  # Ghost spread: 0 to 10 texels of the slide axis, in UV space.
+  vec2 size = getTextureSize('default);
+  f32 texelSize = abs(dir.x) / size.x + abs(dir.y) / size.y;
+  f32 ghostSpread = tangentNorm * 10.0 * texelSize;
+
+  f32 axisSize = size.y;
+  if (abs(dir.x) > 0.0) { axisSize = size.x; }
+
+  # Spread measured in texels of the slide axis. Below a quarter texel all nine
+  # taps land on the same pixel, so pin the spread to exactly 0 and let the
+  # shader take its single-tap path.
+  #
+  # 'intensity scales the kernel step and nothing else - in particular never
+  # blurMix. The blurMix <= 0 path reconstructs the hero from the full-res
+  # source, so an intensity of 0 that also zeroed blurMix would discard the clone
+  # train for the whole animation and leave one plain sliding frame. Zeroing only
+  # the step collapses the nine taps onto one texel, which makes the blur a no-op
+  # and passes the train through untouched.
+  f32 intensity = clamp(getParameterFloat('intensity), 0.0, 1.0);
+  f32 blurSpread = ghostSpread * intensity;
+  if (blurSpread * axisSize < 0.25) { blurSpread = 0.0; }
+
+  # Crossfade dirBlur between the sharp full-res hero and the half-res clone
+  # train. Driven by the geometric spread, so it reaches exactly 0 only at the two
+  # ends of the sweep - and at both ends the hero is the only thing on screen, so
+  # it is the correct reconstruction of the train in both places. That is what
+  # keeps the settle pixel-sharp despite slideFx rendering at half res.
+  f32 blurMix = clamp((ghostSpread * axisSize - 0.25) / 0.75, 0.0, 1.0);
+
+  setShaderUniform('dirBlur, 'trainExtent, trainExtent);
+  setShaderUniform('dirBlur, 'ghostSpread, blurSpread);
+  setShaderUniform('dirBlur, 'ghostDir, dir);
+  setShaderUniform('dirBlur, 'position, pos);
+  setShaderUniform('dirBlur, 'blurMix, blurMix);
+  setShaderUniform('slideFx, 'position, pos);
+  setShaderUniform('slideFx, 'ghostDir, dir);
+  setShaderUniform('slideFx, 'cloneCount, cloneCount);
+  setShaderUniform('slideFx, 'gap, gap);
+}
+
+string blurGlsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+// The half-res clone train from 'slideFx. sampleInput() is the full-res source.
+uniform sampler2D auxSampler1;
+
+uniform vec2 position;
+uniform float ghostSpread;
+uniform float blurMix;
+uniform float trainExtent;
+uniform vec2 ghostDir;
+uniform vec2 inputSize;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  // directionY is a screen direction (-1 = up). UP is +1 where images run bottom-up (OpenGL) and
+  // -1 where they run top-down (Metal), so this keeps the OpenGL path as authored and flips the
+  // uv-space motion elsewhere to match it on screen.
+  vec2 pos = vec2(position.x, UP * position.y);
+  vec2 dir = vec2(ghostDir.x, UP * ghostDir.y);
+
+  // preRender snaps ghostDir to its dominant axis, so the taps move along one
+  // coordinate only. Fall back to y when the direction is zero: the step is zero
+  // there anyway, so either choice yields the same feather.
+  vec2 axis = vec2(0.0, 1.0);
+  if (abs(ghostDir.x) > 0.0) { axis = vec2(1.0, 0.0); }
+
+  vec2 stepUV = dir * ghostSpread;
+  float mu = dot(uv, axis);
+  float stepM = dot(stepUV, axis);
+
+  // Everything slideFx wrote sits in the slab the train covers, and the sharp
+  // path reads the hero's slab out of the source, so outside their union both are
+  // exactly vec4(0). Pad by the extent the train reaches beyond that one hero
+  // slab, by this kernel's reach, and by a few texels of bilinear reach, so only
+  // a fragment whose entire footprint misses the union is rejected.
+  float slab = mu - dot(pos, axis);
+  float reach = trainExtent + 4.0 * abs(stepM);
+  float pad = reach + 4.0 * dot(1.0 / max(inputSize, vec2(1.0)), axis);
+  if (min(slab, 1.0 - slab) < -pad) {
+    gl_FragColor = toOutputFormat(vec4(0.0));
+    return;
+  }
+
+  // smoothstep(0,e,v) * smoothstep(0,e,1-v) is exactly smoothstep(0,e,min(v,1-v))
+  // while e < 0.5, because whichever side is inside the ramp leaves the other at
+  // exactly 1. The taps move along one axis, and position is axis-aligned, so the
+  // cross-axis coordinate is the same in both spaces and one hoisted cross-axis
+  // feather serves the sharp path's `uv - pos` and the blur taps' `uv`.
+  float e = 0.005;
+  vec2 duv = min(uv, 1.0 - uv);
+  float caCross = smoothstep(0.0, e, dot(duv, 1.0 - axis));
+
+  // At both ends of the sweep the hero is the only copy on screen, so this one
+  // full-res clipped tap is the correct reconstruction of the whole train there.
+  float caSharp = caCross * smoothstep(0.0, e, min(slab, 1.0 - slab));
+  vec4 sharp = sampleInput(uv - pos) * caSharp / max(caSharp, 0.001);
+
+  // Sub-texel spread: the sharp path alone, so the settled frame stays pixel-sharp
+  // despite slideFx rendering at half res. preRender pins blurMix to exactly 0
+  // there. Uniform branch: every fragment takes the same side.
+  if (blurMix <= 0.0) {
+    gl_FragColor = toOutputFormat(sharp);
+    return;
+  }
+
+  vec4 color = vec4(0.0);
+  float totalWeight = 0.0;
+
+  // Final-pass directional blur over the clone train, reading the half-res
+  // intermediate. Weighting each tap by the frame-edge feather drops taps that
+  // fall outside the frame instead of letting the sampler clamp the opposite edge
+  // in, and renormalizing by totalWeight keeps the border from darkening.
+  for (int i = -4; i <= 4; i++) {
+    float fi = float(i);
+    float gm = mu + stepM * fi;
+    float ca = caCross * smoothstep(0.0, e, min(gm, 1.0 - gm));
+    float weight = (1.0 / (1.0 + 2.0 * abs(fi))) * ca;
+    color += texture2D(auxSampler1, uv + stepUV * fi) * weight;
+    totalWeight += weight;
+  }
+
+  color /= max(totalWeight, 0.001);
+  gl_FragColor = toOutputFormat(mix(sharp, color, blurMix));
+}
+";
+
+string glsl = "varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform vec2 position;
+uniform vec2 ghostDir;
+uniform float cloneCount;
+uniform float gap;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  // Same screen-direction correction as in dirBlur.
+  vec2 pos = vec2(position.x, UP * position.y);
+  vec2 dir = vec2(ghostDir.x, UP * ghostDir.y);
+  vec2 shifted = uv - pos;
+
+  // preRender snaps ghostDir to its dominant axis, so the clones are offset along
+  // one coordinate only. Fall back to y when the direction is zero: the offset is
+  // zero there anyway, so either choice picks the same clone.
+  vec2 axis = vec2(0.0, 1.0);
+  if (abs(ghostDir.x) > 0.0) { axis = vec2(1.0, 0.0); }
+
+  float m = dot(shifted, axis);
+  float s = dot(dir, axis);
+
+  // Clone k leads the hero by gap*k and covers one frame extent, and gap is never
+  // below 1.0, so the clones tile the axis without overlapping and AT MOST ONE of
+  // them covers this fragment. Rather than compositing the whole train, divide by
+  // the gap to find the one slot this fragment falls in and take a single tap.
+  //
+  // The slot index is signed and the clone index is not: for a train leading in
+  // -axis the slots run negative, so fold the direction back out with s = +-1.
+  float slot = floor(m / gap);
+  float k = s * slot;
+
+  // Subtracting the slot's offset lands inside the hero's own footprint when this
+  // fragment is covered, and outside [0,1] when it fell in the blank between two
+  // clones, so the standard frame-edge feather doubles as the coverage test.
+  vec2 sampleUV = shifted - axis * (gap * slot);
+  float e = 0.005;
+
+  // Along the axis the ramp sits just OUTSIDE the footprint, unlike the
+  // cross-axis one. At gap 1.0 the clones are flush, and a ramp reaching inward
+  // from each footprint edge would have both sides of every shared seam fading to
+  // zero, opening a transparent hairline along it. Ramping outward instead leaves
+  // abutting clones meeting at full opacity. Width is also capped to half the
+  // blank so the ramp can never reach into the neighbouring clone.
+  float eAxis = max(min(e, 0.5 * (gap - 1.0)), 1e-5);
+  float along = dot(sampleUV, axis);
+  float perp = dot(sampleUV, 1.0 - axis);
+  float gate = smoothstep(-eAxis, 0.0, min(along, 1.0 - along))
+             * smoothstep(0.0, e, min(perp, 1.0 - perp));
+
+  // Hard cut, deliberately: this only ever admits or rejects a whole slot, and a
+  // slot outside the train has no clone to feather against. Partial coverage at
+  // the frame edges is the feather's job above.
+  gate *= step(-0.5, k) * step(k, cloneCount - 0.5);
+
+  // Normalize the gate the way the rest of this family does, which collapses the
+  // ramps above into a crisp edge carrying just a hair of anti-aliasing.
+  gate = gate / max(gate, 0.001);
+
+  // sampleInput is premultiplied here, so scaling by coverage needs no second
+  // multiply by alpha. No clone is ever drawn at reduced opacity: the train
+  // enters and leaves by sliding past the frame edge.
+  gl_FragColor = toOutputFormat(sampleInput(sampleUV) * gate);
+}
+";

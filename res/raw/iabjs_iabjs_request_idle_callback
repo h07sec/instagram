@@ -1,0 +1,1 @@
+!function(){try{if(window.self!==window.top)return}catch{return}const notifyNative=function(){"function"==typeof window.__call_iabjs_unified_bridge&&window.__call_iabjs_unified_bridge("iabjs_idle_callback",window.__iabjs_unified_bridge_nonce,{})};"function"==typeof window.requestIdleCallback?window.requestIdleCallback(notifyNative,{timeout:2e3}):setTimeout(notifyNative,0)}()

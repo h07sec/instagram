@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "E518E185-5F39-45B3-A8D1-FF6C1A2A085F",
+  "displayName": "밝은 Lavender",
+  "description": "[IG Edits] Color filter name. With \"밝은 Lavender\", the creator gets a violet lavender color grade with soft horizontal light streaks and skin smoothing.",
+  "iglu": {
+    "legacyId": 3303
+  },
+  "assets": [
+    {
+      "name": "bright_lavender_lut.png",
+      "assetHash": "556c661c425b6d3738411abb2486591b6e6fa2987a7cf4aae08c6334d0a7841b",
+      "hubAssetId": "977228798183002"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGCOxyBOwh"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3a4ea66c",
+      "handle": "AQAD-HcV0Wiq",
+      "md5": "40fc9b6ace5fa97292f980ad7959dc07"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GEeciTOYncBxoTwQAH4InlBWp9RibhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1667876533673899",
+  "displayName": "CPM 35",
+  "description": "[IG Edits] Color filter name. Softened LUT color grade with a 35mm-style film grain overlay.",
+  "android": {
+    "previewAsset": {
+      "key": "bfb17464",
+      "handle": "AQAHwNjL3SqH",
+      "md5": "4987fbb3074e2cd805fd7fe6225c17e9"
+    }
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADhZVfZmGu"
+    }
+  },
+  "iglu": {
+    "legacyId": 3188
+  },
+  "assets": [
+    {
+      "name": "cpm_35_lut.png",
+      "assetHash": "ed98a6ee7ba8e7c6fcf77e39214243d0f410d199e141ee01156a464b6dbdce96",
+      "hubAssetId": "1436370638431203"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJZYRTKCmJgcncAJAKXFdE5m3UwmbhQoAAAD"
+    }
+  }
+}

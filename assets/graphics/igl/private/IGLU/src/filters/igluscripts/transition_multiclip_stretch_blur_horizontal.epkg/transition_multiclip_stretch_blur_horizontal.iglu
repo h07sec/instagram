@@ -1,0 +1,252 @@
+[Filter TransitionMulticlipStretchBlurHorizontal]
+# Source AE collect02 stretch_blur_H horizontal pair (layers 3-4), checked 2026-11-10.
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.parameters={
+    {duration=1.266666666667,min=0.1,max=5.0,description="Duration"},
+    {blurAmount=1.0,min=0.0,max=1.0,description="Blur Amount"},
+    {stretchAmount=1.0,min=0.0,max=1.0,description="Stretch Amount"},
+  };
+  filter.passes={
+    {name='a0,inputs={'default},uniforms={radius=0.0,columnBand=1.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=stretchBlurGlsl},
+    {name='a1,inputs={'a0},uniforms={radius=0.0,columnBand=1.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=stretchBlurGlsl},
+    {name='a2,inputs={'a1},uniforms={radius=0.0,columnBand=1.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=stretchBlurGlsl},
+    {name='b0,inputs={'transition},uniforms={radius=0.0,columnBand=1.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=stretchBlurGlsl},
+    {name='b1,inputs={'b0},uniforms={radius=0.0,columnBand=1.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=stretchBlurGlsl},
+    {name='b2,inputs={'b1},uniforms={radius=0.0,columnBand=1.0,tapCount=0.0,kernelSize={0.0,0.0},taps[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},glslShader=stretchBlurGlsl},
+    {name='compose,inputs={'default,'transition,'a2,'b2},shaderInputNames={'default,'s_texture1,'s_a,'s_b},uniforms={scaleA=1.0,scaleB=1.0,mixB=0.0,p=0.0},glslShader=stretchComposeGlsl},
+  };
+}
+fun cubic(f32 a, f32 b, f32 u) f32 {
+  f32 v = 1.0 - u;
+  return 3.0*v*v*u*a + 3.0*v*u*u*b + u*u*u;
+}
+fun segment(f32 t, f32 t0, f32 v0, f32 t1, f32 v1, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 u = clamp((t-t0)/(t1-t0), 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = u;
+  f32 i = 0.0;
+  while (i < 20.0) {
+    s = (lo+hi)*0.5;
+    if (cubic(x1,x2,s) < u) { lo=s; } else { hi=s; }
+    i=i+1.0;
+  }
+  f32 r = v0+(v1-v0)*cubic(y1,y2,s);
+  if (t <= t0) { r=v0; }
+  if (t >= t1) { r=v1; }
+  return r;
+}
+fun radiusA(f32 t) f32 {
+  f32 r = 0.0;
+  if (t >= 0.933333333333) { r=segment(t,0.933333333333,0.0,1.833333333333,90.0,0.16666666667,0.0,0.83333333333,1.0); }
+  if (t >= 1.833333333333) { r=90.0; }
+  return r;
+}
+fun scaleA(f32 t) f32 {
+  f32 r = 100.0;
+  if (t >= 0.866666666667) { r=segment(t,0.866666666667,100.0,1.583333333333,249.0,0.630948561063,0.0,0.66666667,1.0); }
+  if (t >= 1.583333333333) { r=249.0; }
+  return r;
+}
+fun radiusB(f32 t) f32 {
+  f32 r = 90.0;
+  if (t >= 0.65) { r=segment(t,0.65,90.0,2.133333333333,0.0,0.33333333,0.0,0.473080077228,1.0); }
+  if (t >= 2.133333333333) { r=0.0; }
+  return r;
+}
+fun scaleB(f32 t) f32 {
+  f32 r = 249.0;
+  if (t >= 1.066666666667) { r=segment(t,1.066666666667,249.0,2.016666666667,100.0,0.33333333,0.0,0.191548258785,1.0); }
+  if (t >= 2.016666666667) { r=100.0; }
+  return r;
+}
+fun opacityB(f32 t) f32 {
+  f32 r = 0.0;
+  if (t >= 1.066666666667) { r=segment(t,1.066666666667,0.0,1.583333333333,100.0,0.33333333,0.0,0.66666667,1.0); }
+  if (t >= 1.583333333333) { r=100.0; }
+  return r;
+}
+# Merged bilinear taps for a pass of 25 equal bilinear samples at k*spacing texels, k=-12..12.
+# Valid when output pixels sit on input texel centers. boxWeights[j + reach] is the weight of
+# texel j; texel pairs (j, j+1) become one fetch at j + w1/(w0+w1) weighted w0+w1, packed as
+# (offset, weight) twice per vec4 in boxTaps.
+f32[32.0] boxWeights = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+vec4[8.0] boxTaps = {{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0},{0.0,0.0,0.0,0.0}};
+fun buildBoxTaps(f32 spacing, f32 reach) f32 {
+  for (f32 z = 0.0; z < 32.0; z = z + 1.0) { boxWeights[z] = 0.0; }
+  for (f32 k = 0.0 - 12.0; k <= 12.0; k = k + 1.0) {
+    f32 x = k * spacing + reach;
+    f32 i0 = floor(x);
+    f32 fr = x - i0;
+    f32 i1 = i0 + 1.0;
+    boxWeights[i0] = boxWeights[i0] + (1.0 - fr) / 25.0;
+    boxWeights[i1] = boxWeights[i1] + fr / 25.0;
+  }
+  for (f32 m = 0.0; m < 8.0; m = m + 1.0) {
+    f32 j0 = 4.0 * m;
+    f32 a = boxWeights[j0] + boxWeights[j0 + 1.0];
+    f32 b = boxWeights[j0 + 2.0] + boxWeights[j0 + 3.0];
+    f32 offsetA = j0 - reach;
+    if (a > 0.0) { offsetA = offsetA + boxWeights[j0 + 1.0] / a; }
+    f32 offsetB = j0 + 2.0 - reach;
+    if (b > 0.0) { offsetB = offsetB + boxWeights[j0 + 3.0] / b; }
+    boxTaps[m] = {offsetA, a, offsetB, b};
+  }
+  return reach + 1.0;
+}
+# Last values sent to each chain's blur passes; uniforms keep their value between frames.
+f32 sentSpacingA = 0.0 - 1.0;
+f32 sentSpacingB = 0.0 - 1.0;
+f32 sentCountA = 0.0 - 1.0;
+f32 sentCountB = 0.0 - 1.0;
+vec2 sentSize = {0.0, 0.0};
+[PreRender]
+fun preRender(Filter filter) {
+ f32 p=clamp(max(getParameterFloat('progress),getParameterFloat('transition_progress)),0.0,1.0);f32 t=0.866666666667+p*1.266666666667;
+ f32 amount=getParameterFloat('blurAmount);
+ f32 stretch=getParameterFloat('stretchAmount);
+ vec2 size=getTextureSize('default);
+ f32 toX=size.y/max(size.x,1.0);
+ f32 rA=radiusA(t)/1280.0*amount*toX;
+ f32 rB=radiusB(t)/1280.0*amount*toX;
+ f32 sA=1.0+(scaleA(t)*0.01-1.0)*stretch;
+ f32 sB=1.0+(scaleB(t)*0.01-1.0)*stretch;
+ f32 mixB=opacityB(t)*0.01;
+ # Columns each blur pass must produce: compose reads |x-0.5| <= 0.5/scale of the last pass,
+ # and every pass reads radius further than the one after it (two texels of margin).
+ # A chain the compose mix does not read renders no columns.
+ f32 margin=2.0/max(size.x,1.0);
+ f32 bandA=0.0-1.0;
+ if (p > 0.0 and p < 1.0 and mixB < 1.0) { bandA=0.5/max(sA,0.00001)+margin; }
+ f32 bandB=0.0-1.0;
+ if (p > 0.0 and p < 1.0 and mixB > 0.0) { bandB=0.5/max(sB,0.00001)+margin; }
+ setShaderUniform('a2,'columnBand,bandA);
+ if (bandA > 0.0) { bandA=bandA+rA+margin; }
+ setShaderUniform('a1,'columnBand,bandA);
+ if (bandA > 0.0) { bandA=bandA+rA+margin; }
+ setShaderUniform('a0,'columnBand,bandA);
+ setShaderUniform('b2,'columnBand,bandB);
+ if (bandB > 0.0) { bandB=bandB+rB+margin; }
+ setShaderUniform('b1,'columnBand,bandB);
+ if (bandB > 0.0) { bandB=bandB+rB+margin; }
+ setShaderUniform('b0,'columnBand,bandB);
+ f32 bandA0=bandA;
+ f32 bandB0=bandB;
+ # Narrow boxes: the 25 taps, 0.08 radii apart, become at most 16 merged bilinear fetches.
+ # Below 1/8 texel the original taps fall within the GPU's subtexel filtering precision,
+ # so the 25-tap loop is kept there (zero radius stays exact). Chains rendering no columns skip it.
+ f32 spacingA=rA*size.x*0.08;
+ f32 reachA=0.0;
+ if (spacingA > 0.0) { reachA=floor(12.0*spacingA)+1.0; }
+ f32 countA=0.0;
+ if (bandA0 > 0.0 and reachA <= 15.0 and (spacingA <= 0.0 or spacingA >= 0.125)) {
+  if (spacingA != sentSpacingA) {
+   countA=buildBoxTaps(spacingA,reachA);
+   setShaderUniform('a0,'taps,boxTaps);
+   setShaderUniform('a1,'taps,boxTaps);
+   setShaderUniform('a2,'taps,boxTaps);
+   sentSpacingA=spacingA;
+  }
+  countA=reachA+1.0;
+ }
+ if (countA != sentCountA) {
+  setShaderUniform('a0,'tapCount,countA);
+  setShaderUniform('a1,'tapCount,countA);
+  setShaderUniform('a2,'tapCount,countA);
+  sentCountA=countA;
+ }
+ setShaderUniform('a0,'radius,rA);
+ setShaderUniform('a1,'radius,rA);
+ setShaderUniform('a2,'radius,rA);
+ f32 spacingB=rB*size.x*0.08;
+ f32 reachB=0.0;
+ if (spacingB > 0.0) { reachB=floor(12.0*spacingB)+1.0; }
+ f32 countB=0.0;
+ if (bandB0 > 0.0 and reachB <= 15.0 and (spacingB <= 0.0 or spacingB >= 0.125)) {
+  if (spacingB != sentSpacingB) {
+   countB=buildBoxTaps(spacingB,reachB);
+   setShaderUniform('b0,'taps,boxTaps);
+   setShaderUniform('b1,'taps,boxTaps);
+   setShaderUniform('b2,'taps,boxTaps);
+   sentSpacingB=spacingB;
+  }
+  countB=reachB+1.0;
+ }
+ if (countB != sentCountB) {
+  setShaderUniform('b0,'tapCount,countB);
+  setShaderUniform('b1,'tapCount,countB);
+  setShaderUniform('b2,'tapCount,countB);
+  sentCountB=countB;
+ }
+ setShaderUniform('b0,'radius,rB);
+ setShaderUniform('b1,'radius,rB);
+ setShaderUniform('b2,'radius,rB);
+ if (size.x != sentSize.x or size.y != sentSize.y) {
+  setShaderUniform('a0,'kernelSize,size);
+  setShaderUniform('a1,'kernelSize,size);
+  setShaderUniform('a2,'kernelSize,size);
+  setShaderUniform('b0,'kernelSize,size);
+  setShaderUniform('b1,'kernelSize,size);
+  setShaderUniform('b2,'kernelSize,size);
+  sentSize=size;
+ }
+ setShaderUniform('compose,'scaleA,sA);
+ setShaderUniform('compose,'scaleB,sB);
+ setShaderUniform('compose,'mixB,mixB);setShaderUniform('compose,'p,p);
+}
+string stretchBlurGlsl="
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform float radius;
+// Columns farther than columnBand from the centre are never read downstream.
+uniform float columnBand;
+// Merged (texel offset, weight) taps, two per vec4; 0 taps selects the 25-tap loop.
+uniform float tapCount;
+uniform vec2 kernelSize;
+uniform vec4 taps[8];
+uniform vec2 inputSize;
+void main(){
+ vec2 uv=sourceTextureCoordinate;
+ if(abs(uv.x-0.5)>columnBand){gl_FragColor=vec4(0.0);return;}
+ vec4 c=vec4(0.0);
+ if(tapCount>0.5&&inputSize.x==kernelSize.x&&inputSize.y==kernelSize.y){
+  vec2 texel=vec2(1.0/inputSize.x,0.0);
+  for(int i=0;i<8;i++){
+   if(float(2*i)>=tapCount)break;
+   vec4 t=taps[i];
+   c+=sampleInput(uv+texel*t.x)*t.y;
+   if(float(2*i+1)>=tapCount)break;
+   c+=sampleInput(uv+texel*t.z)*t.w;
+  }
+ }else{
+  const int N=25;for(int i=0;i<N;i++){float d=((float(i)+0.5)/float(N)*2.0-1.0)*radius;c+=sampleInput(clamp(uv+vec2(d,0.0),vec2(0.0),vec2(1.0)));}
+  c/=float(N);
+ }
+ gl_FragColor=toOutputFormat(c);
+}";
+string stretchComposeGlsl="
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform sampler2D s_texture1;
+uniform sampler2D s_a;
+uniform sampler2D s_b;
+uniform float scaleA;
+uniform float scaleB;
+uniform float mixB;
+uniform float p;
+void main(){
+ vec2 uv=sourceTextureCoordinate;
+ vec4 c;
+ if(p<=0.0){c=sampleInput(uv);}
+ else if(p>=1.0){c=texture2D(s_texture1,uv);}
+ else if(mixB<=0.0){c=texture2D(s_a,vec2((uv.x-0.5)/scaleA+0.5,uv.y));}
+ else if(mixB>=1.0){c=texture2D(s_b,vec2((uv.x-0.5)/scaleB+0.5,uv.y));}
+ else{vec2 a=vec2((uv.x-0.5)/scaleA+0.5,uv.y);vec2 b=vec2((uv.x-0.5)/scaleB+0.5,uv.y);c=mix(texture2D(s_a,a),texture2D(s_b,b),mixB);}
+ gl_FragColor=toOutputFormat(c);
+}";

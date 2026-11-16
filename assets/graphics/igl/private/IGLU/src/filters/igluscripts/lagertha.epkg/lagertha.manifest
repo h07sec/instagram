@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "642F717F-4D31-493A-9DAD-E4E603A1541A",
+  "displayName": "Lagertha",
+  "description": "[IG Edits] Color filter name. With \"Lagertha\", the creator gets a desaturated brown LUT color grade with a rounded-corner picture-in-picture of the camera image.",
+  "iglu": {
+    "legacyId": 3250
+  },
+  "assets": [
+    {
+      "name": "lagertha_lut.png",
+      "assetHash": "7518ae2c95f1c7ce330ecd3c082acdeb5b2055c9777ec0342006b964b64fa03b",
+      "hubAssetId": "996351430178141"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEEjPImpVX"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "9cd68c46",
+      "handle": "AQAFy77h_XSS",
+      "md5": "71fcb37c6ae1dbecbf99eb74c6c4fc30"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GDNpJjMWIY68rcIHAGW0aTlh8vgybhQoAAAD"
+    }
+  }
+}

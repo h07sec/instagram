@@ -1,0 +1,1204 @@
+[Filter TapAndFlowMetalPortFlowOnly]
+[MaskBehavior composite]
+[TimeBehavior monotonic]
+
+# V19 "Focus + Light Leak" Metal port (v19-handoff), optimised to 12 passes. See
+# v19-spec.md for the timeline; relief also shades the flow's lit patches.
+# tapPosition is top-left normalized output/screen space, not mask-local space.
+# sourceSize keeps radii in full-image pixels; outputSize is the native pass target.
+
+fun bezierAxis(f32 a, f32 b, f32 t) f32 {
+  f32 it = 1.0 - t;
+  return 3.0 * it * it * t * a + 3.0 * it * t * t * b + t * t * t;
+}
+
+fun cubicBezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x) f32 {
+  f32 xc = clamp(x, 0.0, 1.0);
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 i = 0.0;
+  while (i < 20.0) {
+    f32 mid = 0.5 * (lo + hi);
+    if (bezierAxis(x1, x2, mid) < xc) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+    i = i + 1.0;
+  }
+  return bezierAxis(y1, y2, 0.5 * (lo + hi));
+}
+
+[Init]
+fun init(Filter filter) {
+
+makeTexture('mask);
+
+
+filter.parameters = {
+    {tapPosition = {0.4, 0.25}, description = "tapPosition"},
+    {waveDuration = 0.3, min = 0.3, max = 6.0, description = "waveDuration"},
+    {waveStrength = 0.0, min = 0.0, max = 1.0, description = "waveStrength"},
+    {leak = 1.0, min = 0.0, max = 1.0, description = "leak"},
+    {relief = 0.847, min = 0.0, max = 3.0, description = "relief"},
+    {focusBlur = 2.6, min = 0.0, max = 4.0, description = "focusBlur"},
+    {dim = 0.1, min = 0.0, max = 1.0, description = "dim"},
+    {restStartAt = 0.0, min = 0.0, max = 2.0, description = "restStartAt"},
+    {restFadeIn = 2.0, min = 0.0, max = 6.0, description = "restFadeIn"},
+    {gain = 1.608, min = 1.0, max = 3.0, description = "gain"},
+    {burn = 0.9, min = 0.5, max = 1.0, description = "burn"},
+    {noiseScale = 6.50815, min = 0.25, max = 12.0, description = "noiseScale"},
+    {flowSpeed = 0.65, min = 0.0, max = 4.0, description = "flowSpeed"},
+    {warmth = 0.315, min = 0.0, max = 1.0, description = "warmth"},
+};
+
+  filter.passes = {
+    {
+      name = 'maskH,
+      inputs = {'mask},
+      scale = {0.25, 0.25},
+      bufferType = 'float16,
+      uniforms = { sourceSize = {1080.0, 1920.0}, sigmas = {8.3, 23.5, 45.7, 0.0}, axis = {1.0, 0.0}, fromMask = 1.0 },
+      glslShader = multiBlurGlsl,
+    },
+    {
+      name = 'maskV,
+      inputs = {'maskH},
+      scale = {0.25, 0.25},
+      bufferType = 'float16,
+      uniforms = { sourceSize = {1080.0, 1920.0}, sigmas = {8.3, 23.5, 45.7, 0.0}, axis = {0.0, 1.0}, fromMask = 0.0 },
+      glslShader = multiBlurGlsl,
+    },
+    {
+      name = 'reduceA,
+      inputs = {'default, 'mask, 'maskV},
+      bufferType = 'float32,
+      uniforms = { outputSize = {16.0, 64.0} },
+      glslShader = reduceAGlsl,
+    },
+    {
+      name = 'reduceB,
+      inputs = {'default, 'reduceA},
+      bufferType = 'float32,
+      uniforms = { outputSize = {3.0, 1.0} },
+      glslShader = reduceBGlsl,
+    },
+    {
+      name = 'lvl0,
+      inputs = {'default},
+      uniforms = { destSize = {591.0, 1051.0} },
+      glslShader = downsampleGlsl,
+    },
+    {
+      name = 'atlas,
+      inputs = {'lvl0},
+      uniforms = { outputSize = {888.0, 1051.0}, atlasSize = {888.0, 1051.0}, lvlRect0 = {0.0, 0.0, 591.0, 1051.0}, lvlRect1 = {592.0, 0.0, 295.0, 525.0}, lvlRect2 = {592.0, 526.0, 147.0, 262.0}, lvlRect3 = {592.0, 789.0, 73.0, 131.0}, lvlRect4 = {592.0, 921.0, 36.0, 65.0} },
+      glslShader = atlasGlsl,
+    },
+    {
+      name = 'focus,
+      inputs = {'maskV, 'reduceB, 'atlas},
+      scale = {0.25, 0.25},
+      uniforms = { frameSize = {390.0, 693.0}, waveTime = 0.0, focusBlur = 2.6, atlasSize = {888.0, 1051.0}, lvlRect0 = {0.0, 0.0, 591.0, 1051.0}, lvlRect1 = {592.0, 0.0, 295.0, 525.0}, lvlRect2 = {592.0, 526.0, 147.0, 262.0}, lvlRect3 = {592.0, 789.0, 73.0, 131.0}, lvlRect4 = {592.0, 921.0, 36.0, 65.0} },
+      glslShader = focusGlsl,
+    },
+    {
+      name = 'relief,
+      inputs = {'default, 'reduceB, 'atlas},
+      scale = {0.5, 0.5},
+      bufferType = 'float16,
+      uniforms = { frameSize = {390.0, 693.0}, env = 0.0, atlasSize = {888.0, 1051.0}, lvlRect0 = {0.0, 0.0, 591.0, 1051.0}, lvlRect1 = {592.0, 0.0, 295.0, 525.0}, lvlRect2 = {592.0, 526.0, 147.0, 262.0}, lvlRect3 = {592.0, 789.0, 73.0, 131.0}, lvlRect4 = {592.0, 921.0, 36.0, 65.0} },
+      glslShader = reliefGlsl,
+    },
+    {
+      name = 'tables,
+      inputs = {'default},
+      bufferType = 'float32,
+      uniforms = { outputSize = {257.0, 3.0}, gens = {0.0, 0.0, 0.0} },
+      glslShader = tablesGlsl,
+    },
+    {
+      name = 'noise,
+      inputs = {'default, 'tables},
+      scale = {0.2, 0.2},
+      uniforms = { outputSize = {1080.0, 1920.0}, refScale = 2.77, weights = {1.0, 0.0, 0.0}, along = {0.0, 0.0, 0.0}, frequency = 0.008, enabled = 0.0 },
+      glslShader = noiseGlsl,
+    },
+    {
+      name = 'patch,
+      inputs = {'noise},
+      scale = {0.2, 0.2},
+      uniforms = { outputSize = {1080.0, 1920.0}, sigma = 16.6 },
+      glslShader = blur2DGlsl,
+    },
+    {
+      name = 'compose,
+      inputs = {'default, 'maskV, 'reduceB, 'patch, 'atlas, 'focus, 'relief},
+      uniforms = {
+        sourceSize = {1080.0, 1920.0},
+        refScale = 2.77,
+        frameSize = {390.0, 693.0},
+        tapFrame = {195.0, 346.0},
+        waveTime = 0.0,
+        waveDuration = 1.8,
+        env = 0.0,
+        waveStrength = 1.0,
+        leak = 1.0,
+        relief = 1.0,
+        dimAmount = 0.0,
+        restOpacity = 0.0,
+        gain = 1.64,
+        burn = 0.9,
+        warmth = 0.25,
+        reliefLight = {-0.45, -0.89},
+        atlasSize = {888.0, 1051.0},
+        lvlRect0 = {0.0, 0.0, 591.0, 1051.0},
+      },
+      glslShader = composeGlsl,
+    }
+  };
+  vec2 reduceASize = {16.0, 64.0};
+  setTextureSize('reduceA, reduceASize);
+  vec2 reduceBSize = {3.0, 1.0};
+  setTextureSize('reduceB, reduceBSize);
+  vec2 tablesSize = {257.0, 3.0};
+  setTextureSize('tables, tablesSize);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  vec2 size = getTextureSize('default);
+  f32 refScale = min(size.x, size.y) / 390.0;
+  f32 frameW = size.x / refScale;
+  f32 frameH = size.y / refScale;
+  vec2 frameSize = {frameW, frameH};
+
+  # Mask blurs (3 box passes ~ Gaussian sigma sqrt(r(r+1))): r = rest matte (sigma 3),
+  f32 sigMatte = 3.0 * refScale;
+  f32 sigHalo = 8.485 * refScale;
+  f32 sigWide = 16.492 * refScale;
+  vec4 maskSigmas = {sigMatte, sigHalo, sigWide, 0.0};
+  setShaderUniform('maskH, 'sourceSize, size);
+  setShaderUniform('maskH, 'sigmas, maskSigmas);
+  setShaderUniform('maskV, 'sourceSize, size);
+  setShaderUniform('maskV, 'sigmas, maskSigmas);
+
+  # Reductions: 32 x 32 blocks x 4 groups, then 3 result texels.
+  vec2 reduceASize = {16.0, 64.0};
+  setTextureSize('reduceA, reduceASize);
+  vec2 reduceBSize = {3.0, 1.0};
+  setTextureSize('reduceB, reduceBSize);
+
+  # Photo levels at the web's video density (720 texels per 474.75 frame units).
+  f32 density = 720.0 / 474.75;
+  f32 l0w = max(floor(frameW * density), 1.0);
+  f32 l0h = max(floor(frameH * density), 1.0);
+  f32 l1w = max(floor(l0w / 2.0), 1.0);
+  f32 l1h = max(floor(l0h / 2.0), 1.0);
+  f32 l2w = max(floor(l0w / 4.0), 1.0);
+  f32 l2h = max(floor(l0h / 4.0), 1.0);
+  f32 l3w = max(floor(l0w / 8.0), 1.0);
+  f32 l3h = max(floor(l0h / 8.0), 1.0);
+  f32 l4w = max(floor(l0w / 16.0), 1.0);
+  f32 l4h = max(floor(l0h / 16.0), 1.0);
+  # One atlas: lvl0 on the left, lvl1-4 stacked to its right.
+  f32 colX = l0w + 1.0;
+  f32 y2 = l1h + 1.0;
+  f32 y3 = y2 + l2h + 1.0;
+  f32 y4 = y3 + l3h + 1.0;
+  f32 atlasW = colX + l1w;
+  vec2 atlasSize = {atlasW, l0h};
+  vec4 r0 = {0.0, 0.0, l0w, l0h};
+  vec4 r1 = {colX, 0.0, l1w, l1h};
+  vec4 r2 = {colX, y2, l2w, l2h};
+  vec4 r3 = {colX, y3, l3w, l3h};
+  vec4 r4 = {colX, y4, l4w, l4h};
+  vec2 lvl0Size = {l0w, l0h};
+  setTextureSize('lvl0, lvl0Size);
+  setShaderUniform('lvl0, 'destSize, lvl0Size);
+  setTextureSize('atlas, atlasSize);
+  setShaderUniform('atlas, 'atlasSize, atlasSize);
+  setShaderUniform('atlas, 'lvlRect0, r0);
+  setShaderUniform('atlas, 'lvlRect1, r1);
+  setShaderUniform('atlas, 'lvlRect2, r2);
+  setShaderUniform('atlas, 'lvlRect3, r3);
+  setShaderUniform('atlas, 'lvlRect4, r4);
+  setShaderUniform('focus, 'atlasSize, atlasSize);
+  setShaderUniform('focus, 'lvlRect0, r0);
+  setShaderUniform('focus, 'lvlRect1, r1);
+  setShaderUniform('focus, 'lvlRect2, r2);
+  setShaderUniform('focus, 'lvlRect3, r3);
+  setShaderUniform('focus, 'lvlRect4, r4);
+  setShaderUniform('relief, 'atlasSize, atlasSize);
+  setShaderUniform('relief, 'lvlRect0, r0);
+  setShaderUniform('relief, 'lvlRect1, r1);
+  setShaderUniform('relief, 'lvlRect2, r2);
+  setShaderUniform('relief, 'lvlRect3, r3);
+  setShaderUniform('relief, 'lvlRect4, r4);
+  setShaderUniform('compose, 'atlasSize, atlasSize);
+  setShaderUniform('compose, 'lvlRect0, r0);
+
+  f32 t = max(getParameterFloat('time_sec), 0.0);
+  f32 T = max(getParameterFloat('waveDuration), 0.3);
+  # v19Light envelope: smoothstep(0, 0.05T, t) x (1 - smoothstep(0.4T, 0.95T, t)).
+  f32 eIn = clamp(t / (0.05 * T), 0.0, 1.0);
+  f32 eOut = clamp((t - 0.4 * T) / (0.55 * T), 0.0, 1.0);
+  f32 env = eIn * eIn * (3.0 - 2.0 * eIn) * (1.0 - eOut * eOut * (3.0 - 2.0 * eOut));
+
+  setShaderUniform('focus, 'frameSize, frameSize);
+  setShaderUniform('focus, 'waveTime, t);
+  setShaderUniform('focus, 'focusBlur, getParameterFloat('focusBlur));
+  setShaderUniform('relief, 'frameSize, frameSize);
+
+  # V16Field.gpuSlots on the effect clock (leg 2200 ms, drift 152.3).
+  vec2 tablesSize = {257.0, 3.0};
+  setTextureSize('tables, tablesSize);
+  f32 p = t * 1000.0 * max(getParameterFloat('flowSpeed), 0.0) / 2200.0;
+  f32 i = 0.0;
+  f32 g0 = 0.0;
+  f32 g1 = 0.0;
+  f32 g2 = 0.0;
+  f32 w0 = 0.0;
+  f32 w1 = 0.0;
+  f32 w2 = 0.0;
+  f32 a0 = 0.0;
+  f32 a1 = 0.0;
+  f32 a2 = 0.0;
+  while (i < 3.0) {
+    f32 raw = p - i;
+    f32 u = raw - 3.0 * floor(raw / 3.0);
+    f32 gen = floor((p - i + 1.0) / 3.0);
+    f32 s = 0.0;
+    if (u < 1.0) {
+      s = u;
+    } else if (u < 2.0) {
+      s = 2.0 - u;
+    }
+    f32 w = s * s * (3.0 - 2.0 * s);
+    f32 along = (min(u, 2.0) / 2.0 - 0.5) * 152.3;
+    if (i < 0.5) {
+      g0 = gen;
+      w0 = w;
+      a0 = along;
+    } else if (i < 1.5) {
+      g1 = gen;
+      w1 = w;
+      a1 = along;
+    } else {
+      g2 = gen;
+      w2 = w;
+      a2 = along;
+    }
+    i = i + 1.0;
+  }
+  vec3 gens = {g0, g1, g2};
+  vec3 weights = {w0, w1, w2};
+  vec3 alongs = {a0, a1, a2};
+  setShaderUniform('tables, 'gens, gens);
+
+  # Timeline (v19-spec.md): dim on in-out over 450 ms; rest from restStartAt x T,
+  f32 dimAmount = getParameterFloat('dim) * cubicBezier(0.32, 0.72, 0.0, 1.0, t / 0.5);
+  f32 restStart = T * getParameterFloat('restStartAt);
+  f32 restLength = max(getParameterFloat('restFadeIn), 0.001);
+  f32 restOpacity = cubicBezier(0.32, 0.72, 0.0, 1.0, (t - restStart) / restLength);
+  if (t < restStart) {
+    restOpacity = 0.0;
+  }
+  f32 restOn = 0.0;
+  if (restOpacity > 0.0) {
+    restOn = 1.0;
+  }
+  setShaderUniform('relief, 'env, max(env, restOn));
+
+  # Noise and patch coordinates use their authored 0.2-resolution pass output, not the full frame.
+  setShaderUniform('noise, 'refScale, refScale);
+  setShaderUniform('noise, 'weights, weights);
+  setShaderUniform('noise, 'along, alongs);
+  setShaderUniform('noise, 'frequency, 0.008 * max(getParameterFloat('noiseScale), 0.01));
+  setShaderUniform('noise, 'enabled, restOn);
+
+  setShaderUniform('patch, 'sigma, 6.0 * refScale);
+
+  vec2 tap = getParameterVec2('tapPosition);
+  f32 tapX = clamp(tap.x, 0.0, 1.0) * frameW;
+  f32 tapY = clamp(tap.y, 0.0, 1.0) * frameH;
+  vec2 tapFrame = {tapX, tapY};
+
+  setShaderUniform('compose, 'sourceSize, size);
+  setShaderUniform('compose, 'refScale, refScale);
+  setShaderUniform('compose, 'frameSize, frameSize);
+  setShaderUniform('compose, 'tapFrame, tapFrame);
+  setShaderUniform('compose, 'waveTime, t);
+  setShaderUniform('compose, 'waveDuration, T);
+  setShaderUniform('compose, 'env, env);
+  setShaderUniform('compose, 'waveStrength, getParameterFloat('waveStrength));
+  setShaderUniform('compose, 'leak, getParameterFloat('leak));
+  setShaderUniform('compose, 'relief, getParameterFloat('relief));
+  setShaderUniform('compose, 'dimAmount, dimAmount);
+  setShaderUniform('compose, 'restOpacity, restOpacity);
+  setShaderUniform('compose, 'gain, getParameterFloat('gain));
+  setShaderUniform('compose, 'burn, getParameterFloat('burn));
+  setShaderUniform('compose, 'warmth, getParameterFloat('warmth));
+  # Busy-pattern relief light: (-0.45, -0.89) turning once per 6 s.
+  f32 turn = 6.2831853 * t / 6.0;
+  f32 lx = 0.0 - 0.45 * cos(turn) + 0.89 * sin(turn);
+  f32 ly = 0.0 - 0.45 * sin(turn) - 0.89 * cos(turn);
+  vec2 reliefLight = {lx, ly};
+  setShaderUniform('compose, 'reliefLight, reliefLight);
+}
+
+string reduceAGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform sampler2D auxSampler2;
+uniform vec2 outputSize;
+
+float erfApprox(float x) {
+  float x2 = x * x;
+  float t = sqrt(1.0 - exp(-x2 * (1.2732395 + 0.147 * x2) / (1.0 + 0.147 * x2)));
+  return x < 0.0 ? -t : t;
+}
+
+float erfInvApprox(float x) {
+  float ln = log(1.0 - x * x);
+  float t = 4.3307467 + 0.5 * ln;
+  float r = sqrt(sqrt(t * t - ln / 0.147) - t);
+  return x < 0.0 ? -r : r;
+}
+
+float edgeDist(float m, float sigma) {
+  return sigma * 1.41421356 * erfInvApprox(clamp(2.0 * m - 1.0, -0.9995, 0.9995));
+}
+
+float edgeAt(float d, float sigma) {
+  return 0.5 * (1.0 + erfApprox(d / (sigma * 1.41421356)));
+}
+
+float ghostFrom(float halo, float wide) {
+  float d = edgeDist(halo, 8.485);
+  if (halo > 0.98) d = max(d, edgeDist(wide, 16.492));
+  return edgeAt(d - 9.8, 8.6);
+}
+
+float coverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+void main() {
+  ivec2 c = ivec2(sourceTextureCoordinate * outputSize);
+  if (c.x > 15 || c.y > 63) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+  int group = c.y / 16;
+  ivec2 blk = ivec2(c.x, c.y - group * 16);
+  vec4 acc = group == 3 ? vec4(1.0, 1.0, 0.0, 0.0) : vec4(0.0);
+  for (int j = 0; j < 16; j++) {
+    for (int i = 0; i < 16; i++) {
+      vec2 uv = (vec2(blk * 16 + ivec2(i, j)) + 0.5) / 256.0;
+      float m = coverage(texture2D(auxSampler1, uv));
+      if (group == 3) {
+        if (m > 0.5) {
+          acc.xy = min(acc.xy, uv);
+          acc.zw = max(acc.zw, uv);
+        }
+        continue;
+      }
+      vec4 mk = texture2D(auxSampler2, uv);
+      float w = ghostFrom(mk.g, mk.b);
+      if (group == 2) {
+        if (w >= 0.5) acc.x += w;
+        continue;
+      }
+      vec3 p = clamp(sampleInput(uv).rgb, 0.0, 1.0);
+      if (group == 0) {
+        if (m >= 0.5) acc += vec4(p, 1.0);
+      } else {
+        float l = dot(p, vec3(0.2126, 0.7152, 0.0722));
+        if (m >= 0.5) acc.xy += vec2(l, l * l);
+        if (w >= 0.5) acc.zw += vec2(l, max(max(p.r, p.g), p.b)) * w;
+      }
+    }
+  }
+  gl_FragColor = acc;
+}
+";
+
+string reduceBGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform vec2 outputSize;
+
+vec4 groupAt(int x, int y, int group) {
+  return texture2D(auxSampler1, (vec2(float(x), float(y + 16 * group)) + 0.5) / vec2(16.0, 64.0));
+}
+
+void main() {
+  ivec2 c = ivec2(sourceTextureCoordinate * outputSize);
+  if (c.x > 2 || c.y > 0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+  vec4 a = vec4(0.0);
+  vec4 b = vec4(0.0);
+  float sw = 0.0;
+  vec4 box = vec4(1.0, 1.0, 0.0, 0.0);
+  for (int y = 0; y < 16; y++) {
+    for (int x = 0; x < 16; x++) {
+      if (c.x == 2) {
+        vec4 g = groupAt(x, y, 3);
+        box = vec4(min(box.xy, g.xy), max(box.zw, g.zw));
+      } else {
+        a += groupAt(x, y, 0);
+        b += groupAt(x, y, 1);
+        if (c.x == 1) sw += groupAt(x, y, 2).x;
+      }
+    }
+  }
+  if (c.x == 2) {
+    if (box.z <= box.x || box.w <= box.y) box = vec4(0.25, 0.25, 0.75, 0.75);
+    gl_FragColor = vec4((box.xy + box.zw) * 0.5, (box.zw - box.xy) * 0.5);
+    return;
+  }
+  float n = max(a.w, 1.0);
+  float luma = a.w > 0.5 ? b.x / n : 0.3;
+  if (c.x == 0) {
+    gl_FragColor = a.w > 0.5 ? vec4(a.rgb / n, luma) : vec4(0.3);
+    return;
+  }
+  float spread = a.w > 0.5 ? sqrt(max(b.y / n - luma * luma, 0.0)) : 0.0;
+  float prodY = sw > 0.0 ? b.z / sw : 0.3;
+  float prodHi = sw > 0.0 ? clamp((b.w / sw - 0.5) / 0.3, 0.0, 1.0) : 0.0;
+  gl_FragColor = vec4(spread, prodY, prodHi, 1.0);
+}
+";
+
+string focusGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform sampler2D auxSampler2;
+uniform vec2 frameSize;
+uniform float waveTime;
+uniform float focusBlur;
+uniform vec2 atlasSize;
+uniform vec4 lvlRect0;
+uniform vec4 lvlRect1;
+uniform vec4 lvlRect2;
+uniform vec4 lvlRect3;
+uniform vec4 lvlRect4;
+
+vec3 sampleAtlasLevel(int k, vec2 uv) {
+  vec4 R = k <= 0 ? lvlRect0 : (k == 1 ? lvlRect1 : (k == 2 ? lvlRect2 : (k == 3 ? lvlRect3 : lvlRect4)));
+  vec2 px = clamp(uv * R.zw, vec2(0.5), R.zw - 0.5) + R.xy;
+  return texture2D(auxSampler2, px / atlasSize).rgb;
+}
+
+vec3 video(vec2 uv, float lod) {
+  float l = clamp(lod, 0.0, 4.0);
+  int k0 = int(floor(l));
+  return mix(sampleAtlasLevel(k0, uv), sampleAtlasLevel(min(k0 + 1, 4), uv), l - float(k0));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 pos = vec2(uv.x, 0.5 - (uv.y - 0.5) * UP) * frameSize;
+  vec4 bbox = texture2D(auxSampler1, vec2(2.5, 0.5) / vec2(3.0, 1.0));
+  vec2 c = vec2(bbox.x, 0.5 - (bbox.y - 0.5) * UP) * frameSize;
+  vec2 halfBox = bbox.zw * frameSize;
+  vec2 muv = (pos - c + halfBox + 40.0) / (2.0 * halfBox + 80.0);
+  bool inGeo = muv.x >= 0.0 && muv.y >= 0.0 && muv.x <= 1.0 && muv.y <= 1.0;
+  float halo = inGeo ? sampleInput(uv).g : 0.0;
+  vec2 dd = abs(pos - c) - halfBox;
+  float sd = length(max(dd, 0.0)) + min(max(dd.x, dd.y), 0.0);
+  float lod = focusBlur * smoothstep(-30.0, 250.0, sd);
+  float x = clamp(waveTime / 0.55, 0.0, 1.0);
+  float a = (1.0 - clamp(halo * 1.15, 0.0, 1.0)) * x * x * x * (x * (x * 6.0 - 15.0) + 10.0) * smoothstep(0.05, 0.7, lod);
+  if (a <= 0.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+  float l = max(lod - 1.0, 0.0);
+  vec2 r = exp2(l) / lvlRect0.zw * 1.6;
+  vec3 s = video(uv, l) * 0.2;
+  for (int i = 0; i < 8; i++) {
+    float an = float(i) * 0.785398 + 0.39;
+    s += video(uv + vec2(cos(an), sin(an)) * r, l) * 0.1;
+  }
+  gl_FragColor = vec4(s * a, a);
+}
+";
+
+string reliefGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform sampler2D auxSampler2;
+uniform vec2 frameSize;
+uniform float env;
+uniform vec2 atlasSize;
+uniform vec4 lvlRect0;
+uniform vec4 lvlRect1;
+uniform vec4 lvlRect2;
+uniform vec4 lvlRect3;
+uniform vec4 lvlRect4;
+
+vec3 sampleAtlasLevel(int k, vec2 uv) {
+  vec4 R = k <= 0 ? lvlRect0 : (k == 1 ? lvlRect1 : (k == 2 ? lvlRect2 : (k == 3 ? lvlRect3 : lvlRect4)));
+  vec2 px = clamp(uv * R.zw, vec2(0.5), R.zw - 0.5) + R.xy;
+  return texture2D(auxSampler2, px / atlasSize).rgb;
+}
+
+float lumL(vec2 uv, float lod) {
+  float l = clamp(lod, 0.0, 4.0);
+  int k0 = int(floor(l));
+  vec3 v = mix(sampleAtlasLevel(k0, uv), sampleAtlasLevel(min(k0 + 1, 4), uv), l - float(k0));
+  return dot(v, vec3(0.2126, 0.7152, 0.0722));
+}
+
+vec2 grd(vec2 uv, float l) {
+  vec2 px = exp2(l) / lvlRect0.zw;
+  float gy = lumL(uv + vec2(0.0, px.y), l) - lumL(uv - vec2(0.0, px.y), l);
+  return vec2(lumL(uv + vec2(px.x, 0.0), l) - lumL(uv - vec2(px.x, 0.0), l), -gy * UP);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 bbox = texture2D(auxSampler1, vec2(2.5, 0.5) / vec2(3.0, 1.0));
+  vec2 pos = vec2(uv.x, 0.5 - (uv.y - 0.5) * UP) * frameSize;
+  vec2 c = vec2(bbox.x, 0.5 - (bbox.y - 0.5) * UP) * frameSize;
+  vec2 d = abs(pos - c) - bbox.zw * frameSize;
+  if (env <= 0.0 || max(d.x, d.y) > 40.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+  vec2 g = grd(uv, 2.4) * 6.0 + grd(uv, 1.0) * 1.6;
+  g *= min(1.0, 1.1 / max(length(g), 1e-4));
+  gl_FragColor = vec4(g, 0.0, 1.0);
+}
+";
+
+string multiBlurGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 sourceSize;
+uniform vec2 axis;
+uniform vec4 sigmas;
+uniform float fromMask;
+
+float coverage(vec4 c) {
+  return max(c.r, max(c.g, c.b));
+}
+
+float blurChannel(vec2 uv, float sigma, int channel) {
+  vec2 offset = axis * sigma * 0.5 / sourceSize;
+  float total = 0.0;
+  float weights = 0.0;
+  for (int i = -6; i <= 6; i++) {
+    float x = float(i) * 0.5;
+    float w = exp(-0.5 * x * x);
+    vec4 s = sampleInput(uv + offset * float(i));
+    float v = fromMask > 0.5 ? coverage(s) : (channel == 0 ? s.r : (channel == 1 ? s.g : (channel == 2 ? s.b : s.a)));
+    total += v * w;
+    weights += w;
+  }
+  return total / weights;
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  gl_FragColor = toOutputFormat(vec4(
+      blurChannel(uv, sigmas.x, 0),
+      blurChannel(uv, sigmas.y, 1),
+      blurChannel(uv, sigmas.z, 2),
+      blurChannel(uv, sigmas.w, 3)));
+}
+";
+
+
+
+string downsampleGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 destSize;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 q = 0.25 / destSize;
+  vec4 c = sampleInput(uv + vec2(-q.x, -q.y)) + sampleInput(uv + vec2(q.x, -q.y))
+         + sampleInput(uv + vec2(-q.x, q.y)) + sampleInput(uv + vec2(q.x, q.y));
+  gl_FragColor = toOutputFormat(c * 0.25);
+}
+";
+
+string atlasGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform vec2 atlasSize;
+uniform vec4 lvlRect0;
+uniform vec4 lvlRect1;
+uniform vec4 lvlRect2;
+uniform vec4 lvlRect3;
+uniform vec4 lvlRect4;
+
+void main() {
+  vec2 px = sourceTextureCoordinate * outputSize;
+  int k = -1;
+  vec4 R = vec4(0.0);
+  for (int i = 0; i < 5; i++) {
+    vec4 r = i == 0 ? lvlRect0 : (i == 1 ? lvlRect1 : (i == 2 ? lvlRect2 : (i == 3 ? lvlRect3 : lvlRect4)));
+    if (k < 0 && px.x >= r.x && px.y >= r.y && px.x < r.x + r.z && px.y < r.y + r.w) {
+      k = i;
+      R = r;
+    }
+  }
+  if (k < 0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+  vec2 luv = (px - R.xy) / R.zw;
+  int n = k <= 1 ? 1 : (1 << (k - 1));
+  vec2 texel = 1.0 / R.zw;
+  vec2 corner = luv - 0.5 * texel;
+  vec3 acc = vec3(0.0);
+  for (int j = 0; j < 8; j++) {
+    if (j >= n) break;
+    for (int i = 0; i < 8; i++) {
+      if (i >= n) break;
+      acc += sampleInput(corner + (vec2(float(i), float(j)) + 0.5) / float(n) * texel).rgb;
+    }
+  }
+  gl_FragColor = toOutputFormat(vec4(acc / float(n * n), 1.0));
+}
+";
+
+string blur2DGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform float sigma;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 stepUV = vec2(sigma * 0.6) / outputSize;
+  float total = 0.0;
+  float weights = 0.0;
+  for (int j = -4; j <= 4; j++) {
+    for (int i = -4; i <= 4; i++) {
+      vec2 o = vec2(float(i), float(j)) * 0.6;
+      float w = exp(-0.5 * dot(o, o));
+      total += sampleInput(uv + vec2(float(i), float(j)) * stepUV).r * w;
+      weights += w;
+    }
+  }
+  gl_FragColor = toOutputFormat(vec4(vec3(total / weights), 1.0));
+}
+";
+
+string tablesGlsl = "
+precision highp float;
+precision highp int;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform vec3 gens;
+
+uvec2 mul32(uint a, uint b) {
+  uint a0 = a & uint(0xFFFF);
+  uint a1 = a >> uint(16);
+  uint b0 = b & uint(0xFFFF);
+  uint b1 = b >> uint(16);
+  uint p00 = a0 * b0;
+  uint p01 = a0 * b1;
+  uint p10 = a1 * b0;
+  uint p11 = a1 * b1;
+  uint mid = (p00 >> uint(16)) + (p01 & uint(0xFFFF)) + (p10 & uint(0xFFFF));
+  return uvec2(p11 + (p01 >> uint(16)) + (p10 >> uint(16)) + (mid >> uint(16)), (p00 & uint(0xFFFF)) | (mid << uint(16)));
+}
+
+uvec2 mul64(uvec2 x, uvec2 y) {
+  uvec2 r = mul32(x.y, y.y);
+  r.x += x.x * y.y + x.y * y.x;
+  return r;
+}
+
+uvec2 signedProduct(int a, uint k) {
+  uvec2 r = mul32(uint(abs(a)), k);
+  if (a < 0) {
+    r = uvec2(~r.x, ~r.y);
+    r.y += uint(1);
+    if (r.y == uint(0)) r.x += uint(1);
+  }
+  return r;
+}
+
+uvec2 fold33(uvec2 h) {
+  return uvec2(h.x, h.y ^ (h.x >> uint(1)));
+}
+
+uvec2 unitHash(int a, int b, int c) {
+  uvec2 h = signedProduct(a, uint(73856093)) ^ signedProduct(b, uint(19349663)) ^ signedProduct(c, uint(83492791));
+  h = fold33(h);
+  h = mul64(h, uvec2(uint(0xFF51AFD7), uint(0xED558CCD)));
+  h = fold33(h);
+  h = mul64(h, uvec2(uint(0xC4CEB9FE), uint(0x1A85EC53)));
+  return fold33(h);
+}
+
+int hashFloor(uvec2 h, uint n) {
+  uvec2 hi = mul32(h.x, n);
+  uvec2 lo = mul32(h.y, n);
+  uint sum = hi.y + lo.x;
+  return int(hi.x + (sum < hi.y ? uint(1) : uint(0)));
+}
+
+float hashUnit(uvec2 h) {
+  return float(h.x) / 4294967296.0 + float(h.y) / 18446744073709551616.0;
+}
+
+int nextRandom(inout int s) {
+  int r = 16807 * (s - (s / 127773) * 127773) - 2836 * (s / 127773);
+  if (r <= 0) r += 2147483647;
+  s = r;
+  return r;
+}
+
+void main() {
+  ivec2 c = ivec2(sourceTextureCoordinate * outputSize);
+  if (c.x > 256 || c.y > 2) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+  int slot = c.y;
+  float genF = floor(gens[slot] + 0.5);
+  int gen = int(genF);
+
+  if (c.x == 256) {
+    gl_FragColor = vec4(hashUnit(unitHash(slot, gen, 7)), genF, 1.0, 1.0);
+    return;
+  }
+
+  int seed = 1 + hashFloor(unitHash(slot, gen, 1), uint(9998));
+  int s = seed;
+  int x = c.x;
+
+  vec2 g = vec2(0.0);
+  for (int n = 0; n < 1024; n++) {
+    int r0 = nextRandom(s);
+    int r1 = nextRandom(s);
+    if (n == x) {
+      float g0 = float((r0 - (r0 / 512) * 512) - 256) / 256.0;
+      float g1 = float((r1 - (r1 / 512) * 512) - 256) / 256.0;
+      float len = sqrt(g0 * g0 + g1 * g1);
+      g = len > 0.0 ? vec2(g0, g1) / len : vec2(0.0);
+    }
+  }
+
+  int lattice[256];
+  for (int k = 0; k < 256; k++) {
+    lattice[k] = k;
+  }
+  for (int k = 255; k > 0; k--) {
+    int r = nextRandom(s);
+    int j = r - (r / 256) * 256;
+    int t = lattice[k];
+    lattice[k] = lattice[j];
+    lattice[j] = t;
+  }
+
+  gl_FragColor = vec4(float(lattice[x]), g, 1.0);
+}
+";
+
+
+string noiseGlsl = "
+precision highp float;
+precision highp int;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+
+uniform vec2 outputSize;
+uniform float refScale;
+uniform vec3 weights;
+uniform vec3 along;
+uniform float frequency;
+uniform float enabled;
+
+vec4 tableAt(int x, int slot) {
+  return texture2D(auxSampler1, (vec2(float(x), float(slot)) + 0.5) / vec2(257.0, 3.0));
+}
+
+float turbulence(int slot, vec2 p) {
+  float sum = 0.0;
+  float ratio = 1.0;
+  vec2 v = p * frequency;
+  for (int o = 0; o < 2; o++) {
+    vec2 q = v + 4096.0;
+    int ix = int(q.x);
+    int iy = int(q.y);
+    int bx0 = ix & 255;
+    int bx1 = (bx0 + 1) & 255;
+    int by0 = iy & 255;
+    int by1 = (by0 + 1) & 255;
+    float rx0 = q.x - float(ix);
+    float rx1 = rx0 - 1.0;
+    float ry0 = q.y - float(iy);
+    float ry1 = ry0 - 1.0;
+    int i = int(tableAt(bx0, slot).r + 0.5);
+    int j = int(tableAt(bx1, slot).r + 0.5);
+    int b00 = int(tableAt((i + by0) & 255, slot).r + 0.5);
+    int b10 = int(tableAt((j + by0) & 255, slot).r + 0.5);
+    int b01 = int(tableAt((i + by1) & 255, slot).r + 0.5);
+    int b11 = int(tableAt((j + by1) & 255, slot).r + 0.5);
+    vec2 g00 = tableAt(b00, slot).gb;
+    vec2 g10 = tableAt(b10, slot).gb;
+    vec2 g01 = tableAt(b01, slot).gb;
+    vec2 g11 = tableAt(b11, slot).gb;
+    float sx = rx0 * rx0 * (3.0 - 2.0 * rx0);
+    float sy = ry0 * ry0 * (3.0 - 2.0 * ry0);
+    float u0 = rx0 * g00.x + ry0 * g00.y;
+    float v0 = rx1 * g10.x + ry0 * g10.y;
+    float a = u0 + sx * (v0 - u0);
+    float u1 = rx0 * g01.x + ry1 * g01.y;
+    float v1 = rx1 * g11.x + ry1 * g11.y;
+    float b = u1 + sx * (v1 - u1);
+    sum += (a + sy * (b - a)) / ratio;
+    v *= 2.0;
+    ratio *= 2.0;
+  }
+  return clamp((sum + 1.0) * 0.5, 0.0, 1.0);
+}
+
+void main() {
+  if (enabled < 0.5) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+  vec2 uv = sourceTextureCoordinate;
+  vec2 p = vec2(uv.x, 0.5 - (uv.y - 0.5) * UP) * outputSize / refScale;
+
+  float sum = 0.0;
+  for (int k = 0; k < 3; k++) {
+    float w = weights[k];
+    if (w <= 0.0005) continue;
+    float angle = tableAt(256, k).r * 6.2831853;
+    vec2 q = p - vec2(cos(angle), sin(angle)) * along[k];
+    sum += w * turbulence(k, q);
+  }
+  float m = clamp(sum * 5.0 + (0.5 - 5.0 * 0.55), 0.0, 1.0);
+
+  gl_FragColor = toOutputFormat(vec4(vec3(m), 1.0));
+}
+";
+
+
+string composeGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform sampler2D auxSampler2;
+uniform sampler2D auxSampler3;
+uniform sampler2D auxSampler4;
+uniform sampler2D auxSampler5;
+uniform sampler2D auxSampler6;
+
+uniform vec2 sourceSize;
+uniform float refScale;
+uniform vec2 frameSize;
+uniform vec2 tapFrame;
+uniform float waveTime;
+uniform float waveDuration;
+uniform float env;
+uniform float waveStrength;
+uniform float leak;
+uniform float relief;
+uniform float dimAmount;
+uniform float restOpacity;
+uniform float gain;
+uniform float burn;
+uniform float warmth;
+uniform vec2 reliefLight;
+#define WARM vec3(1.0, 0.84, 0.66)
+uniform vec2 atlasSize;
+uniform vec4 lvlRect0;
+
+#define PI 3.14159265
+
+float erfApprox(float x) {
+  float x2 = x * x;
+  float t = sqrt(1.0 - exp(-x2 * (1.2732395 + 0.147 * x2) / (1.0 + 0.147 * x2)));
+  return x < 0.0 ? -t : t;
+}
+
+float erfInvApprox(float x) {
+  float ln = log(1.0 - x * x);
+  float t = 4.3307467 + 0.5 * ln;
+  float r = sqrt(sqrt(t * t - ln / 0.147) - t);
+  return x < 0.0 ? -r : r;
+}
+
+float edgeDist(float m, float sigma) {
+  return sigma * 1.41421356 * erfInvApprox(clamp(2.0 * m - 1.0, -0.9995, 0.9995));
+}
+
+float edgeAt(float d, float sigma) {
+  return 0.5 * (1.0 + erfApprox(d / (sigma * 1.41421356)));
+}
+
+float ghostFrom(float halo, float wide) {
+  float d = edgeDist(halo, 8.485);
+  if (halo > 0.98) d = max(d, edgeDist(wide, 16.492));
+  return edgeAt(d - 9.8, 8.6);
+}
+
+
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x) { return mod289(((x * 34.0) + 10.0) * x); }
+vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+float snoise(vec3 v) {
+  const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
+  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+  vec3 i = floor(v + dot(v, C.yyy));
+  vec3 x0 = v - i + dot(i, C.xxx);
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min(g.xyz, l.zxy);
+  vec3 i2 = max(g.xyz, l.zxy);
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+  i = mod289(i);
+  vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                   + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+  float n_ = 0.142857142857;
+  vec3 ns = n_ * D.wyz - D.xzx;
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_);
+  vec4 x = x_ * ns.x + ns.yyyy;
+  vec4 y = y_ * ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+  vec4 b0 = vec4(x.xy, y.xy);
+  vec4 b1 = vec4(x.zw, y.zw);
+  vec4 s0 = floor(b0) * 2.0 + 1.0;
+  vec4 s1 = floor(b1) * 2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+  vec3 p0 = vec3(a0.xy, h.x);
+  vec3 p1 = vec3(a0.zw, h.y);
+  vec3 p2 = vec3(a1.xy, h.z);
+  vec3 p3 = vec3(a1.zw, h.w);
+  vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+  vec4 m = max(0.5 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+  m = m * m;
+  return 105.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+}
+
+float fbm2(vec3 p) { return 0.62 * snoise(p) + 0.31 * snoise(p * 2.03 + vec3(17.1, 9.3, 3.7)); }
+float easeOutCubic(float x) { x = clamp(x, 0.0, 1.0); return 1.0 - pow(1.0 - x, 3.0); }
+
+float ramp(float v, float a, float b) {
+  return clamp((v - a) / (b - a), 0.0, 1.0);
+}
+
+vec3 restGrade(vec3 x, float slope, float intercept, float material, float shoulderGain, vec3 tint) {
+  float mx = max(max(x.r, x.g), x.b);
+  float cap = 0.995 / max(mx, 0.004);
+  vec3 tw = x * min(slope, cap);
+  vec3 flatGrade = tw + (1.0 - tw) * clamp(max(slope - cap, 0.0) * mx * 0.3, 0.0, 1.0) * WARM + intercept;
+  vec3 shoulder = x * shoulderGain / (1.0 + (shoulderGain - 1.0) * x);
+  vec3 y = flatGrade + (shoulder - flatGrade) * material + tint * (1.0 - x);
+  return clamp(y * mix(vec3(1.0), WARM / 0.861, warmth), 0.0, 1.0);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  float t = waveTime;
+  vec4 still = sampleInput(uv);
+  vec3 color = still.rgb;
+
+  vec4 mk = texture2D(auxSampler1, uv);
+  float matte = mk.r;
+  float dMatte = edgeDist(matte, 3.0);
+
+  vec4 focus = texture2D(auxSampler5, uv);
+  color = color * (1.0 - focus.a) + focus.rgb;
+
+  if (env > 0.0) {
+    vec4 bbox = texture2D(auxSampler2, vec2(2.5, 0.5) / vec2(3.0, 1.0));
+    vec2 pos = vec2(uv.x, 0.5 - (uv.y - 0.5) * UP) * frameSize;
+    vec2 c = vec2(bbox.x, 0.5 - (bbox.y - 0.5) * UP) * frameSize;
+    vec2 halfBox = bbox.zw * frameSize;
+    vec2 muv = (pos - c + halfBox + 40.0) / (2.0 * halfBox + 80.0);
+    if (muv.x >= 0.0 && muv.y >= 0.0 && muv.x <= 1.0 && muv.y <= 1.0) {
+      float T = waveDuration;
+      float sz = max(2.0 * halfBox.x, 2.0 * halfBox.y);
+      vec2 origin = clamp(tapFrame, c - halfBox, c + halfBox);
+      float rmax = max(30.0, length(abs(origin - c) + halfBox) + 40.0);
+      vec2 dv = pos - origin;
+      float d = length(dv);
+      vec2 dr = dv / max(d, 1.0);
+      float wob = 0.05 * snoise(vec3(dr * 1.6, t * 0.8)) + 0.025 * snoise(vec3(dr * 3.9, t * 1.6 + 3.0));
+      float R = mix(10.0, rmax, easeOutCubic(t / T)) * (1.0 + wob);
+
+      float soft = edgeAt(dMatte, 1.414);
+      float wide = min(1.0, mk.b * 1.6) * smoothstep(0.0, 0.06, min(min(muv.x, 1.0 - muv.x), min(muv.y, 1.0 - muv.y)));
+      float ghost = ghostFrom(mk.g, mk.b);
+      vec4 tone = texture2D(auxSampler2, vec2(1.5, 0.5) / vec2(3.0, 1.0));
+      float prodY = tone.g;
+      float prodHi = tone.b;
+
+      vec2 apx = clamp(uv * lvlRect0.zw, vec2(0.5), lvlRect0.zw - 0.5) + lvlRect0.xy;
+      vec3 base = texture2D(auxSampler4, apx / atlasSize).rgb;
+      float mx = max(max(base.r, base.g), base.b);
+      vec3 n = normalize(vec3(-texture2D(auxSampler6, uv).rg * relief, 1.0));
+      float inside = 1.0 - smoothstep(R - 26.0, R + 12.0, d);
+      vec3 Lr = normalize(vec3(-dr * 0.9, 0.42));
+      float fr = dot(n, Lr) - Lr.z;
+      float b3 = exp(-pow((d - R) / 34.0, 2.0));
+      float rv = env * (b3 * (0.3 + 1.5 * max(fr, 0.0)) + 0.05 * inside) * ghost;
+      float rs = env * b3 * max(-fr, 0.0) * ghost;
+      float ang = atan(dr.y, dr.x);
+      float st = 0.72 + 0.28 * fbm2(vec3(cos(ang) * 3.2, sin(ang) * 3.2, d / (0.9 * sz) + t * 0.25));
+      float lk = exp(-pow((d - R + 0.12 * sz) / (0.28 * sz), 2.0)) * st * env * mix(wide * 0.35, 1.0, soft) * leak;
+
+      float boost = mix(1.0, 2.6, smoothstep(0.3, 0.06, prodY));
+      float gdes = 1.0 + 0.7 * rv * mix(1.0, 0.6, prodHi) * boost;
+      float cap = 0.995 / max(mx, 0.004);
+      vec3 tc = base * min(gdes, cap);
+      tc += (1.0 - tc) * clamp(max(gdes - cap, 0.0) * mx * 0.3, 0.0, 1.0);
+      vec3 wc = vec3(1.0, 0.84, 0.66);
+      vec3 t2 = tc * (1.0 + lk * 0.4 * wc);
+      vec3 ov = max(t2 - 1.0, 0.0);
+      tc = min(t2, vec3(1.0));
+      tc += (1.0 - tc) * clamp(dot(ov, vec3(0.333)) * 0.6 + lk * 0.07, 0.0, 1.0) * wc;
+      tc *= 1.0 - clamp(rs * (0.12 + 0.3 * prodHi), 0.0, 0.55);
+      float fade = waveStrength * (1.0 + (0.45 - 1.0) * clamp((prodY - 0.5) / 0.25, 0.0, 1.0));
+      tc = mix(base, tc, fade);
+      vec3 gc = mix(vec3(1.0), tc / max(base, vec3(0.004)), step(vec3(0.004), base));
+      color = clamp(color * gc, 0.0, 1.0);
+    }
+  }
+
+  vec4 meanColor = texture2D(auxSampler2, vec2(0.5, 0.5) / vec2(3.0, 1.0));
+  float luma = meanColor.a;
+  float spread = texture2D(auxSampler2, vec2(1.5, 0.5) / vec2(3.0, 1.0)).r;
+  float darkness = ramp(luma, 0.25, 0.12);
+  float busy = ramp(spread, 0.13, 0.17);
+  float brightness = ramp(luma, 0.5, 0.75);
+  float matteDark = darkness * ramp(spread, 0.09, 0.05);
+
+  color *= 1.0 - dimAmount * (1.0 - 0.5 * brightness) * (1.0 - edgeAt(dMatte, 4.0));
+
+  if (matte > 0.001 && restOpacity > 0.0) {
+    float busySlope = gain + (1.3 - gain) * busy;
+    float slope = busySlope > 1.08 ? busySlope + (1.08 - busySlope) * brightness : busySlope;
+    float intercept = (0.05 * (1.0 - busy) + 0.2 * darkness) * (1.0 - brightness);
+    float burnSlope = burn + (0.8 - burn) * brightness;
+    float material = darkness;
+    float shoulderGain = 3.0 + matteDark;
+    float peak = max(max(meanColor.r, meanColor.g), max(meanColor.b, 0.001));
+    vec3 tint = meanColor.rgb / peak * 0.05 * matteDark;
+    float clarity = 1.5 * matteDark + 0.8 * busy * (1.0 - brightness);
+    float patRelief = 1.6 * busy * (1.0 - brightness);
+
+    vec3 x = clamp(still.rgb, 0.0, 1.0);
+    vec3 lit = restGrade(x, slope, intercept, material, shoulderGain, tint);
+    if (clarity > 0.001) {
+      vec2 stepUV = vec2(2.0 * refScale) / sourceSize;
+      vec3 sum = vec3(0.0);
+      float ws = 0.0;
+      for (int j = -2; j <= 2; j++) {
+        for (int i = -2; i <= 2; i++) {
+          float w = (1.0 - abs(float(i)) / 3.0) * (1.0 - abs(float(j)) / 3.0);
+          vec3 s = clamp(sampleInput(uv + vec2(float(i), float(j)) * stepUV).rgb, 0.0, 1.0);
+          sum += restGrade(s, slope, intercept, material, shoulderGain, tint) * w;
+          ws += w;
+        }
+      }
+      vec3 dd = lit - sum / ws;
+      vec3 e = dd / 0.0588;
+      lit = clamp(lit + dd * clarity * exp(-e * e), 0.0, 1.0);
+    }
+    if (patRelief > 0.001) {
+      vec2 l = reliefLight * 3.5;
+      vec2 across = vec2(-l.y, l.x);
+      float hd = 0.0;
+      for (int k = -1; k <= 1; k++) {
+        vec2 o = across * (0.5 * float(k));
+        vec2 a = (o - l) * refScale / sourceSize;
+        vec2 b = (o + l) * refScale / sourceSize;
+        vec3 ha = clamp(sampleInput(uv + vec2(a.x, -a.y * UP)).rgb, 0.0, 1.0);
+        vec3 hb = clamp(sampleInput(uv + vec2(b.x, -b.y * UP)).rgb, 0.0, 1.0);
+        hd += dot(ha - hb, vec3(0.2126, 0.7152, 0.0722));
+      }
+      hd /= 3.0;
+      float e = hd / 0.3;
+      lit = clamp(lit + patRelief * hd * exp(-e * e) * (0.4 + 0.6 * lit), 0.0, 1.0);
+    }
+    vec3 burned = clamp(x * burnSlope, 0.0, 1.0);
+    float patchMask = texture2D(auxSampler3, uv).r;
+    vec3 rest = mix(burned, lit, patchMask);
+    if (relief > 0.0 && patchMask > 0.0) {
+      vec4 bbox = texture2D(auxSampler2, vec2(2.5, 0.5) / vec2(3.0, 1.0));
+      vec2 pos = vec2(uv.x, 0.5 - (uv.y - 0.5) * UP) * frameSize;
+      vec2 c = vec2(bbox.x, 0.5 - (bbox.y - 0.5) * UP) * frameSize;
+      vec2 dv = pos - clamp(tapFrame, c - bbox.zw * frameSize, c + bbox.zw * frameSize);
+      vec2 dr = dv / max(length(dv), 1.0);
+      vec4 tone = texture2D(auxSampler2, vec2(1.5, 0.5) / vec2(3.0, 1.0));
+      vec3 n = normalize(vec3(-texture2D(auxSampler6, uv).rg * relief, 1.0));
+      vec3 Lr = normalize(vec3(-dr * 0.9, 0.42));
+      float fr = dot(n, Lr) - Lr.z;
+      float gdes = 1.0 + 0.7 * patchMask * 1.5 * max(fr, 0.0) * mix(1.0, 0.6, tone.b) * mix(1.0, 2.6, smoothstep(0.3, 0.06, tone.g));
+      float mx = max(max(rest.r, rest.g), rest.b);
+      float cap = 0.995 / max(mx, 0.004);
+      vec3 tc = rest * min(gdes, cap);
+      tc += (1.0 - tc) * clamp(max(gdes - cap, 0.0) * mx * 0.3, 0.0, 1.0) * WARM;
+      tc *= 1.0 - clamp(patchMask * max(-fr, 0.0) * (0.12 + 0.3 * tone.b), 0.0, 0.55);
+      rest = mix(rest, tc, 1.0 + (0.45 - 1.0) * clamp((tone.g - 0.5) / 0.25, 0.0, 1.0));
+    }
+    color = mix(color, rest, matte * restOpacity);
+  }
+
+  gl_FragColor = toOutputFormat(vec4(color, still.a));
+}
+";

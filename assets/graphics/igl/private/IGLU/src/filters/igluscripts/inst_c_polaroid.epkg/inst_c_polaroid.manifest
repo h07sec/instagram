@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "824133093179587",
+  "displayName": "Inst C Polaroid",
+  "description": "[IG Edits] Video effect name. With \"Inst C Polaroid\", the creator can apply a Spark-ported bright, cool instant-film look with soft focus and white dust inside an instant-photo frame.",
+  "iglu": {
+    "legacyId": 3351
+  },
+  "assets": [
+    {
+      "name": "inst_c_polaroid_lut.png",
+      "assetHash": "dcd309151d34b7770e813c2b808c78ba4555d5d0321a079220846c26e3acf470",
+      "hubAssetId": "1824168718901533"
+    },
+    {
+      "name": "inst_c_polaroid_dust.png",
+      "assetHash": "1abd04aaddd47f5ac70a21cef290b30d12fe94bd3c460c2adc49d42f69688bcb",
+      "hubAssetId": "1814274392969367"
+    },
+    {
+      "name": "inst_c_polaroid_frame.png",
+      "assetHash": "93a49547d014799c879a102ba577783dc8be580fa73a62a0db189bfbb8d105a6",
+      "hubAssetId": "1594904848629787"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFD697VlXo"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "1a66f209",
+      "handle": "AQAHwVK71VnU",
+      "md5": "7e9e8de84cb6febe31831af72bbe4798"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GCqDKTOs2yuxfKYHALxNL2WBdj5jbhQoAAAD"
+    }
+  }
+}

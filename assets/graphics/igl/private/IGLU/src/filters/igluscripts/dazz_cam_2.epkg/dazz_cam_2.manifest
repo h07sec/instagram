@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "917290659183848",
+  "displayName": "Dazz cam 2",
+  "description": "[IG Edits] Color filter name. With \"Dazz cam 2\", the creator can apply a Spark-ported instant-photo frame with a faded film grade and a soft vignette.",
+  "iglu": {
+    "legacyId": 3397
+  },
+  "assets": [
+    {
+      "name": "dazz_cam_2_lut.png",
+      "assetHash": "195400b1b4ced42eb0e30da9ee6358a07d2b320d7398ac858ce6b5d5328be9ff",
+      "hubAssetId": "1622030666071685"
+    },
+    {
+      "name": "dazz_cam_2_frame.png",
+      "assetHash": "3d85d5c8cc43e955be608773dfe4aa695044d11d4e746f58e968d69c6d66009c",
+      "hubAssetId": "1511632110790364"
+    },
+    {
+      "name": "dazz_cam_2_dust.png",
+      "assetHash": "99ebe10f5ffbe1628e542e2bc77e4a3bbd4e137f53a2ee9589234d35ed067541",
+      "hubAssetId": "1122394767209304"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF1s9a1B10"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "a021b2a2",
+      "handle": "AQAEyMN2qgBm",
+      "md5": "88999f1780f792aeb9bcd1b0eb93a2ec"
+    }
+  }
+}

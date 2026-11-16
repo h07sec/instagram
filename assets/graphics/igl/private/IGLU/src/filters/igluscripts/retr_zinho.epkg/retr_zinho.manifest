@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "344872754171117",
+  "displayName": "RETRÔZINHO 🎞",
+  "description": "[IG Edits] Video effect name. With \"RETRÔZINHO 🎞\", the creator gets a Spark-ported bright, faded retro film look: two-LUT grade, slight RGB split, fine grain and flickering film dust.",
+  "iglu": {
+    "legacyId": 3418
+  },
+  "assets": [
+    {
+      "name": "retr_zinho_lut_a.png",
+      "assetHash": "8071a8d80e9c8de227d5cdab511979e2fed91e2979eaa9f96e4e410cca2e847f",
+      "hubAssetId": "1833282557685771"
+    },
+    {
+      "name": "retr_zinho_lut_b.png",
+      "assetHash": "de7eacda37140bb0634c716c662bee2862782c42232347150982a2009c70bf7e",
+      "hubAssetId": "1157336633910675"
+    },
+    {
+      "name": "retr_zinho_grain.png",
+      "assetHash": "37c1356e1331839ba43e5a115ad4abdd3b0ac3d0fdbbd30ecabd661432a61837",
+      "hubAssetId": "1305327818381941"
+    },
+    {
+      "name": "retr_zinho_dust.png",
+      "assetHash": "f6620d30e4ce1f1db7ed9cf3ee22a24f7d95fa1e9400a0842d45c8f3ab89cbb9",
+      "hubAssetId": "28986796947667674"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAG-ITNJ1Ou"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ea6dc7b5",
+      "handle": "AQAFHiK-6O8m",
+      "md5": "e4bc0723d2d0193e23bd8a5b4b0bfb08"
+    }
+  }
+}

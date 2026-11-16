@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130002">Նահանգ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Հասցե</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130006">Բն/փող (կամընտիր)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Փակել դիտարկիչը</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">%1$s տիրույթն ուզում է օգտագործել Ձեր սարքի տեսախցիկը:</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s ուզում է օգտագործել Ձեր սարքի տեղադրությունը:</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130032">Թույլ տվեք բոլոր մեդիաներին օգտագործել ֆայլի ընտրիչ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Թույլատրել</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Արգելափակել</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130038">Այս կայքի անվտանգության հավաստագրի հետ կապված խնդիրներ կան</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Շարունակեք վեբկայքում</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Վերադառնալ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">%1$s կողմից օգտագործվող անվտանգության վկայագրի հետ կապված խնդիր կա: Ձեր անձնական տվյալները, ինչպիսիք են գաղտնաբառերը կամ կրեդիտ քարտի համարները, կարող են ապահով չլինել այս վեբկայքի հետ կիսվելիս:</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Վեբկայքը չի օգտագործում ապահով կապ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Անվտանգության սխալ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003e">Ինչ-որ բան այն չէ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Բաց թողնել</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009e">էլփոստ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Վեբկայքը, որը դիտում եք, փորձում է բացել արտաքին հավելված: Կցանկանա՞ք շարունակել։</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Հետ գնալ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Շարունակել</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Դուք լքում եք մեր հավելվածը</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Սա կարող է լինել տեխնիկական սխալի պատճառով, որը շտկելու ուղղությամբ մենք աշխատում ենք: Փորձեք վերաբեռնել այս էջը:</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Թարմացնել</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Էջն այս պահին հասանելի չէ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Ազգանուն</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Էջը հնարավոր չէ բեռնել</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Բացել՝ օգտագործելով․․․</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">Բացել %1$s հավելվածում</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Այլ ընտրանքներ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Անուն</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Դուք այժմ դիտում եք լիաէկրան ռեժիմում: Դուրս գալու համար սահեցրեք ձախ կամ հպեք «Հետ» կոճակին:</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Մենք հենց հիմա խնդիրներ ունենք %2$s հավելվածը %1$s լեզվով կարգավորելու հետ կապված։ Դուք կարող եք կրկին փորձել կամ այս պահին %2$s-ն օգտագործել անգլերենով (ԱՄՆ)։</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Մի պահ սպասեք, մինչ մենք կարգավորում ենք %1$s լեզուն…</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Կրկին փորձել</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">Շարունակել անգլերենով (Ամերիկյան)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">Փոստային դասիչ</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13013b">Ընտրեք ժամանակը</string>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1138895629932705",
+  "displayName": "mcdonald's v2",
+  "description": "[IG Edits] Color filter name. With \"mcdonald's v2\", the creator can apply a Spark-ported cool, violet-blue colour grade.",
+  "iglu": {
+    "legacyId": 3409
+  },
+  "assets": [
+    {
+      "name": "mcdonald_s_v2_lut.png",
+      "assetHash": "94c2e3290a33cce248a1ad361607ad2992e2b1d721374ab2853ddfbeb5725d63",
+      "hubAssetId": "1655202382746200"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAENPUrEFnA"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "59abd635",
+      "handle": "AQAKwQZWBh6d",
+      "md5": "e9c33745d3f1a4677f13cafd505da03d"
+    }
+  }
+}

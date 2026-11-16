@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "708576074181539",
+  "displayName": "Old Camera",
+  "description": "[IG Edits] Video effect name. With \"Old Camera\", the creator can apply a Spark-ported vintage camera look with warm grain and flickering film scratches.",
+  "iglu": {
+    "legacyId": 3416
+  },
+  "assets": [
+    {
+      "name": "old_camera_lut.png",
+      "assetHash": "ec3e089a8f3f36b3105a354990d2666bed20e088bbe0f8f6f0b2ffee4e598066",
+      "hubAssetId": "1865600101294613"
+    },
+    {
+      "name": "old_camera_grain.png",
+      "assetHash": "9dad0603d7a64e584059e5cef4848fb0bd4c7e3c21018591ecca7fe4c6ace0cb",
+      "hubAssetId": "29012369758457505"
+    },
+    {
+      "name": "old_camera_dust_a.png",
+      "assetHash": "67282c15065f84154c49858e54607859d35ca065dd658af3e6323efb81a17105",
+      "hubAssetId": "1065959506502012"
+    },
+    {
+      "name": "old_camera_dust_b.png",
+      "assetHash": "51739f355292bc7b65a1d7e7a0632c9c698aae664477da14542bb8986b4938bb",
+      "hubAssetId": "1319295980268177"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGeaRiLKZd"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "72b1cf5b",
+      "handle": "AQAEBcL9J9V5",
+      "md5": "cc240cb982ef8537b4785e2eb650af63"
+    }
+  }
+}

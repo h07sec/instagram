@@ -1,0 +1,187 @@
+# IGLUSCRIPTCOLLISION_BYPASS: Intentional replacement of C++ native effect - IGLUScript takes precedence on Android/iOS; C++ filter retained as fallback for direct C++ callers (sample app, server tools).
+
+[Filter VideoInfiniteZoom]
+# Endless zoom: copies of the frame scaled by their age, each newer, smaller copy drawn inside the
+# ones before it.
+#
+# Without beats ages come from the clock, a new copy every 0.5 of `time_sec * zoom_speed`, as in
+# VideoInfiniteZoomFilter.cpp. With `useBeats` true a copy spawns on each beat: `layerAge0`..
+# `layerAge19` (0 is the newest) are seconds since each copy's beat, written by
+# BeatReactiveController, and a negative value hides the copy. Copies age at a fixed rate, and the
+# plain frame shows where no copy covers the pixel.
+#
+# BeatReactiveController writes `useBeats` when a manifest declares beatReactive; otherwise nothing
+# writes it and the false default selects the clock.
+
+f32[20.0] layerSeconds = {
+    -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+    -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0
+};
+
+# Per beat-mode copy: 1 / scale, or negative when hidden.
+f32[20.0] layerInvScale = {
+    -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+    -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0
+};
+
+[Init]
+fun init(Filter filter) {
+    filter.parameters = {
+        {speed = 0.15, min = 0.0, max = 1.0, description = "Zoom speed"},
+        {useBeats = false, description = "True while the beat system is driving this effect"},
+        {layerAge0 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since the newest copy's beat"},
+        {layerAge1 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 1's beat"},
+        {layerAge2 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 2's beat"},
+        {layerAge3 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 3's beat"},
+        {layerAge4 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 4's beat"},
+        {layerAge5 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 5's beat"},
+        {layerAge6 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 6's beat"},
+        {layerAge7 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 7's beat"},
+        {layerAge8 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 8's beat"},
+        {layerAge9 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 9's beat"},
+        {layerAge10 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 10's beat"},
+        {layerAge11 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 11's beat"},
+        {layerAge12 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 12's beat"},
+        {layerAge13 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 13's beat"},
+        {layerAge14 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 14's beat"},
+        {layerAge15 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 15's beat"},
+        {layerAge16 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 16's beat"},
+        {layerAge17 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 17's beat"},
+        {layerAge18 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since copy 18's beat"},
+        {layerAge19 = -1.0, min = -1.0, max = 3600.0, description = "Seconds since the oldest copy's beat"},
+    };
+
+    filter.passes = {
+        {
+            name = 'infinite_zoom,
+            inputs = {'default},
+            uniforms = {
+                time_sec = 0.0,
+                zoom_speed = 0.2995,
+                beatMode = 0.0,
+                layerInvScale[] = {
+                    -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                    -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0
+                },
+            },
+            glslShader = glslInfiniteZoom,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    # VideoInfiniteZoomFilter.cpp: zoom_speed = lerp(0.1, 1.43, speed).
+    f32 zoomSpeed = mix(0.1, 1.43, getParameterFloat('speed));
+    setShaderUniform('infinite_zoom, 'zoom_speed, zoomSpeed);
+
+    # The host parameter, unrelated to the uniform of that name in VideoShaderUniformsOpenGL.
+    setShaderUniform('infinite_zoom, 'time_sec, getParameterFloat('time_sec));
+
+    f32 beatMode = 0.0;
+    if (getParameterBoolean('useBeats)) {
+        beatMode = 1.0;
+    }
+    setShaderUniform('infinite_zoom, 'beatMode, beatMode);
+    if (beatMode > 0.5) {
+        layerSeconds[0.0] = getParameterFloat('layerAge0);
+        layerSeconds[1.0] = getParameterFloat('layerAge1);
+        layerSeconds[2.0] = getParameterFloat('layerAge2);
+        layerSeconds[3.0] = getParameterFloat('layerAge3);
+        layerSeconds[4.0] = getParameterFloat('layerAge4);
+        layerSeconds[5.0] = getParameterFloat('layerAge5);
+        layerSeconds[6.0] = getParameterFloat('layerAge6);
+        layerSeconds[7.0] = getParameterFloat('layerAge7);
+        layerSeconds[8.0] = getParameterFloat('layerAge8);
+        layerSeconds[9.0] = getParameterFloat('layerAge9);
+        layerSeconds[10.0] = getParameterFloat('layerAge10);
+        layerSeconds[11.0] = getParameterFloat('layerAge11);
+        layerSeconds[12.0] = getParameterFloat('layerAge12);
+        layerSeconds[13.0] = getParameterFloat('layerAge13);
+        layerSeconds[14.0] = getParameterFloat('layerAge14);
+        layerSeconds[15.0] = getParameterFloat('layerAge15);
+        layerSeconds[16.0] = getParameterFloat('layerAge16);
+        layerSeconds[17.0] = getParameterFloat('layerAge17);
+        layerSeconds[18.0] = getParameterFloat('layerAge18);
+        layerSeconds[19.0] = getParameterFloat('layerAge19);
+        # Zoom per second, fixed so copies move at the same speed however the beats are spaced.
+        f32 beatZoomSpeed = 0.499;
+        for (f32 i = 0.0; i < 20.0; i = i + 1.0) {
+            f32 seconds = layerSeconds[i];
+            f32 invScale = -1.0;
+            if (seconds >= 0.0) {
+                invScale = 1.0 / (seconds * beatZoomSpeed + 0.001);
+            }
+            layerInvScale[i] = invScale;
+        }
+        setShaderUniform('infinite_zoom, 'layerInvScale, layerInvScale);
+    }
+}
+
+string glslInfiniteZoom = "
+
+varying vec2 textureCoordinate;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform float time_sec;
+uniform float zoom_speed;
+uniform float beatMode;
+uniform float layerInvScale[20];
+
+void main() {
+  vec2 maskUV = textureCoordinate;
+  vec2 center = vec2(0.5);
+  vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
+
+  if (beatMode > 0.5) {
+    // Copies are opaque and newer ones draw on top, so the pixel shows the newest copy covering
+    // it, with the clock path's mask and sample coordinates. Search newest first and sample once;
+    // the plain frame shows where none covers it. A hidden copy means every older one is hidden
+    // too, so it ends the search.
+    vec2 dUV = maskUV - center;
+    vec2 dUV2 = sourceTextureCoordinate - center;
+    vec2 sampleUV = sourceTextureCoordinate;
+    for (int i = 0; i < 20; i++) {
+      float invScale = layerInvScale[i];
+      if (invScale < 0.0) {
+        break;
+      }
+      vec2 zUV = dUV * invScale + center;
+      if (zUV.x >= 0.0 && zUV.x <= 1.0 && zUV.y >= 0.0 && zUV.y <= 1.0) {
+        sampleUV = dUV2 * invScale + center;
+        break;
+      }
+    }
+    gl_FragColor = toOutputFormat(sampleInput(sampleUV));
+    return;
+  }
+
+  float t = time_sec * zoom_speed;
+  float cycle = floor(t / 0.5);
+
+  for (int i = 2; i >= 0; --i) {
+    float spawnIndex = cycle - float(i);
+    float age = t - spawnIndex * 0.5;
+    float alive = step(0.0, age) * step(age, 2.0);
+
+    float scale = age + 1e-3;
+    float invScale = 1.0 / scale;
+
+    vec2 dUV = maskUV - center;
+    vec2 zUV = dUV * invScale + center;
+
+    float inX = step(0.0, zUV.x) * step(zUV.x, 1.0);
+    float inY = step(0.0, zUV.y) * step(zUV.y, 1.0);
+    float mask = alive * inX * inY;
+
+    vec2 dUV2 = sourceTextureCoordinate - center;
+    vec2 zUV2 = dUV2 * invScale + center;
+
+    vec4 sampleCol = sampleInput(zUV2);
+    color = color * (1.0 - mask) + sampleCol * mask;
+  }
+  gl_FragColor = toOutputFormat(color);
+}
+";

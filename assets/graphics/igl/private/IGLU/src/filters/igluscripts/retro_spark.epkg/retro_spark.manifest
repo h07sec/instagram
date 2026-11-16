@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "C3F0BFEE-5552-4F2F-8476-3248E935AA4F",
+  "displayName": "𝐑𝐄𝐓𝐑𝐎",
+  "description": "[IG Edits] Color filter name. With \"RETRO\", the creator gets a retro LUT color grade with a light film grain.",
+  "iglu": {
+    "legacyId": 3244
+  },
+  "assets": [
+    {
+      "name": "retro_spark_lut.png",
+      "assetHash": "87b4a9da9c7a72d415eedf2da8c11fecbdc5808e2439b407adf97b3b774a869e",
+      "hubAssetId": "29252248167694193"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEEztGj9LV"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "d85988bf",
+      "handle": "AQADj1sZ6Es_",
+      "md5": "7bcb9e4cb8ff393ae2bf2eaabc22bae4"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNPxHjPrZ08HSSUEAOoVBL-o7SwcbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "C35AB166-3ACC-4A6F-8C7A-9995C730759A",
+  "displayName": "ᴄᴀᴍᴄᴏʀᴅᴇʀ ᴠ.1",
+  "description": "[IG Edits] Color filter name. With \"Camcorder v.1\", the creator gets a faded green camcorder color grade with soft focus and a camcorder viewfinder overlay.",
+  "iglu": {
+    "legacyId": 3249
+  },
+  "assets": [
+    {
+      "name": "camcorder_v1_lut.png",
+      "assetHash": "e248c6fe90dd6648309d16883bd756c71866dbe3577ff64bf499085ced39f82c",
+      "hubAssetId": "1409552941353153"
+    },
+    {
+      "name": "camcorder_v1_hud.png",
+      "assetHash": "39676efe39e35c40b761aed4997165cbb0dbcdff20a55dda4c3fa2e44a33fba4",
+      "hubAssetId": "4249915265301291"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGQ5DTAmLj"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "7601f96",
+      "handle": "AQAFkmJZPxgh",
+      "md5": "2fa350af81e6ab360b78a2b12945f0d9"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GAuvITO2nBtRJgQEAFkUMqg5tFR1bhQoAAAD"
+    }
+  }
+}

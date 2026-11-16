@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "text_soft_mask_in",
+  "displayName": "Soft Mask In",
+  "description": "Label for the Soft Mask In text effect style. This is a text effect that users can add to their content. It animates with a soft mask transition-in animation.",
+  "iglu": {
+    "behavior": {
+      "type": "fixedIntro",
+      "durationMs": 1000,
+      "curve": "linear"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "457629568574286",
+  "displayName": "Color Highlighter",
+  "description": "[IG Edits] Video effect name. With \"Color Highlighter\", the creator can apply a Spark-ported colour splash that keeps one picked colour and turns everything else black and white.",
+  "iglu": {
+    "legacyId": 3447
+  },
+  "assets": []
+}

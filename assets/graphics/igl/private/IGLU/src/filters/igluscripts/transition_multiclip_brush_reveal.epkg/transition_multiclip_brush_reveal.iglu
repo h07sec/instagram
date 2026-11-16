@@ -1,0 +1,112 @@
+[Filter TransitionMulticlipBrushReveal]
+
+# Clip B is painted in by a brush-stroke mask over an untouched clip A.
+#
+# Ported from the Easel web tool's multiclip_brush_reveal.iglu, with Easel's
+# transition_brush_reveal inlined: that effect is not in this repo.
+#
+# The brush mask is the named input 'brushout, which the host binds (the texture
+# symbol is the asset's file stem, brushout.png). Nothing delivers it in
+# production yet; unbound, it samples as transparent black and clip B cuts in
+# almost at once. brush_path points the loader at a local file for the sample app.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  makeTexture('brushout);
+
+  filter.parameters = {
+    {smoothParam = 0.05, min = 0.0, max = 0.5, description = "Smoothstep edge softness"},
+    {angle = 330.0, min = 0.0, max = 360.0, description = "Brush UV rotation (degrees)"},
+    {framerate = 0.05, min = 0.0, max = 1.0, description = "1 = full framerate, 0 = 1 fps (over 4s)"},
+    {maskScale = 1.55, min = 0.2, max = 3.0, description = "Mask size relative to the image (1 = mask exactly covers the image)"},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition, 'brushout},
+      shaderInputNames = {'default, 's_texture1, 'brushout},
+      uniforms = {
+        threshold = 0.0,
+        smoothParam = 0.05,
+        brushMatrix = {1.0, 0.0, 0.0, 1.0},
+        maskDiv = 1.55,
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+string brush_path = "brush_path";
+string brush_filename = "";
+
+[PreRender]
+fun preRender(Filter filter) {
+  string brush_path_parameter = getParameterString(brush_path);
+  if (brush_path_parameter != "") {
+    string new_brush_filename = stringAppend("textureFilePath://", brush_path_parameter);
+    if (new_brush_filename != brush_filename) {
+      brush_filename = new_brush_filename;
+      loadTexture('brushout, brush_filename);
+    }
+  }
+
+  f32 progress = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+
+  # Quantize progress to simulate a lower framerate, treating 0-1 as 4 seconds:
+  # framerate 1 is 60 fps (effectively smooth), 0 is 1 fps (4 steps).
+  f32 fps = 1.0 + getParameterFloat('framerate) * 59.0;
+  f32 totalFrames = fps * 4.0;
+  f32 threshold = floor(progress * totalFrames) / totalFrames * 1.2;
+
+  # Brush UV rotation, column-major 2x2 (m00, m10, m01, m11).
+  f32 rad = getParameterFloat('angle) * 3.14159265 / 180.0;
+  f32 c = cos(rad);
+  f32 s = sin(rad);
+  vec4 brushMatrix = {c, s, 0.0 - s, c};
+
+  setShaderUniform('composite, 'threshold, threshold);
+  setShaderUniform('composite, 'smoothParam, getParameterFloat('smoothParam));
+  setShaderUniform('composite, 'brushMatrix, brushMatrix);
+  setShaderUniform('composite, 'maskDiv, max(getParameterFloat('maskScale), 0.001));
+}
+
+string glsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform sampler2D brushout;
+uniform float threshold;
+uniform float smoothParam;
+uniform vec4 brushMatrix;
+uniform float maskDiv;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 b = texture2D(s_texture1, uv);
+
+  // The brush math is Easel's, which runs in OpenGL orientation: screen top at
+  // y = 1, and PNG row 0 at v = 0. On Metal both axes run the other way, so
+  // flipping y there reproduces the same mask. Identity on OpenGL.
+  vec2 easelUV = vec2(uv.x, max(DOWN, 0.0) + UP * uv.y);
+
+  vec2 centered = easelUV - 0.5;
+  vec2 rotated = brushMatrix.xy * centered.x + brushMatrix.zw * centered.y;
+  // Dividing the centred UV shrinks the sampled window, which scales the brush
+  // up relative to the image; maskScale = 1 makes the mask exactly cover it.
+  vec2 brushUV = rotated / maskDiv + 0.5;
+
+  float brushVal = texture2D(brushout, brushUV).r;
+  b.a *= smoothstep(brushVal, brushVal + smoothParam, threshold);
+
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb * b.a + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

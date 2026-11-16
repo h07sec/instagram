@@ -1,0 +1,67 @@
+{
+  "android": {
+    "previewAsset": {
+      "handle": "AQAEr23iuWX_",
+      "key": "a950a61",
+      "md5": "0e649c2a5eed3b49b426a95dd70f0589"
+    }
+  },
+  "dependencies": [
+    "video_spray"
+  ],
+  "description": "[IG Edits] Video effect name. With \"Spray In\", the creator can reveal the subject as a grainy pixel spray sharpens into view.",
+  "displayName": "Spray In",
+  "identifier": "810dfa9f-1d8b-4abd-9f95-c06e45f51e25",
+  "iglu": {
+    "behavior": {
+      "curve": "quadraticOut",
+      "durationMs": 1500,
+      "type": "fixedIntro"
+    },
+    "customization": [
+      {
+        "available": [
+          "up",
+          "down"
+        ],
+        "defaultSelection": "down",
+        "displayName": "Direction",
+        "displayNameDescription": "[IG Edits] Picker label choosing which way a video effect's wipe travels across the frame (up or down).",
+        "name": "direction"
+      },
+      {
+        "default": 1.5,
+        "displayMethod": "time",
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "max": 5.0,
+        "min": 0.5,
+        "name": "duration"
+      },
+      {
+        "default": 0.25,
+        "displayName": "Size",
+        "displayNameDescription": "[IG Edits] Slider label controlling the size or scale of an element produced by a video effect; exact units and range vary per effect.",
+        "max": 1.0,
+        "min": 0.1,
+        "name": "size"
+      },
+      {
+        "default": 1.0,
+        "displayName": "Amount",
+        "displayNameDescription": "[IG Edits] Slider label controlling the strength of a video effect. Generic across many effects (glow, blur, color, distortion, etc.); exact range varies per effect.",
+        "max": 1.0,
+        "min": 0.0,
+        "name": "amount"
+      }
+    ],
+    "legacyId": 4011
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHWD9KJxOM"
+    }
+  },
+  "schemaVersion": 1,
+  "sdkVersion": 1
+}

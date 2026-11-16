@@ -1,0 +1,212 @@
+[Filter TransitionSpray]
+
+[Init]
+fun init(Filter filter) {
+    filter.parameters = {
+        {blurSize = 6.0, min = 0.0, max = 20.0, description = "blurSize"},
+        {revealSmoothness = 0.25, min = 0.001, max = 1.0, description = "revealSmoothness"},
+        {blendWindow = 0.1, min = 0.001, max = 1.0, description = "blendWindow"},
+        {outro = 0.0, min = 0.0, max = 1.0, description = "outro"},
+        {direction = 3.0, min = 2.0, max = 3.0, description = "Wipe travel direction; 2 = up, 3 = down"},
+    };
+
+    filter.passes = {
+        {
+            name = 'blurH,
+            inputs = {'default},
+            scale = {0.25, 0.25},
+            uniforms = {
+                blurSize = 6.0,
+                texelSize = {0.00208, 0.0037},
+            },
+            glslShader = blurHGlsl,
+        },
+        {
+            name = 'blurV,
+            inputs = {'blurH},
+            scale = {0.25, 0.25},
+            uniforms = {
+                blurSize = 6.0,
+                texelSize = {0.00208, 0.0037},
+            },
+            glslShader = blurVGlsl,
+        },
+        {
+            name = 'compose,
+            inputs = {'default, 'blurV},
+            uniforms = {
+                progress = 0.0,
+                revealSmoothness = 0.25,
+                blendWindow = 0.1,
+                outro = 0.0,
+                direction = 3.0,
+                outputSize = {1080.0, 1920.0},
+            },
+            glslShader = composeGlsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    vec2 size = getTextureSize('default);
+
+    # The blur passes render at quarter resolution, so their texel is four
+    # times the full-frame one. Matching it keeps the blur radius consistent
+    # in screen space rather than scaling with the output size.
+    f32 blurScale = 0.25;
+    vec2 blurTexel = {1.0 / (size.x * blurScale), 1.0 / (size.y * blurScale)};
+    setShaderUniform('blurH, 'texelSize, blurTexel);
+    setShaderUniform('blurV, 'texelSize, blurTexel);
+
+    f32 p = getParameterFloat('progress);
+    f32 outro = getParameterFloat('outro);
+    f32 t = p * (1.0 - outro) + (1.0 - p) * outro;
+
+    # Blur radius shrinks to nothing as the effect completes, so the last
+    # frame samples a single texel and the crossfade lands on a clean image.
+    f32 startBlur = getParameterFloat('blurSize);
+    f32 currentBlur = startBlur * (1.0 - t);
+    setShaderUniform('blurH, 'blurSize, currentBlur);
+    setShaderUniform('blurV, 'blurSize, currentBlur);
+
+    setShaderUniform('compose, 'revealSmoothness, getParameterFloat('revealSmoothness));
+    setShaderUniform('compose, 'blendWindow, getParameterFloat('blendWindow));
+    setShaderUniform('compose, 'outro, outro);
+    setShaderUniform('compose, 'direction, getParameterFloat('direction));
+    setShaderUniform('compose, 'outputSize, size);
+}
+
+# =========================================================================
+# Horizontal 9-tap gaussian blur (from inout_v2_video_particles_proc_pop)
+# =========================================================================
+string blurHGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+uniform float blurSize;
+uniform vec2 texelSize;
+
+void main() {
+    vec4 sum = vec4(0.0);
+    sum += sampleInput(sourceTextureCoordinate + vec2(-4.0 * texelSize.x * blurSize, 0.0)) * 0.051;
+    sum += sampleInput(sourceTextureCoordinate + vec2(-3.0 * texelSize.x * blurSize, 0.0)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(-2.0 * texelSize.x * blurSize, 0.0)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(-1.0 * texelSize.x * blurSize, 0.0)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate) * 0.1633;
+    sum += sampleInput(sourceTextureCoordinate + vec2(1.0 * texelSize.x * blurSize, 0.0)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate + vec2(2.0 * texelSize.x * blurSize, 0.0)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(3.0 * texelSize.x * blurSize, 0.0)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(4.0 * texelSize.x * blurSize, 0.0)) * 0.051;
+    gl_FragColor = toOutputFormat(sum);
+}
+";
+
+# =========================================================================
+# Vertical 9-tap gaussian blur (from inout_v2_video_particles_proc_pop)
+# =========================================================================
+string blurVGlsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+uniform float blurSize;
+uniform vec2 texelSize;
+
+void main() {
+    vec4 sum = vec4(0.0);
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -4.0 * texelSize.y * blurSize)) * 0.051;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -3.0 * texelSize.y * blurSize)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -2.0 * texelSize.y * blurSize)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, -1.0 * texelSize.y * blurSize)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate) * 0.1633;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 1.0 * texelSize.y * blurSize)) * 0.1531;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 2.0 * texelSize.y * blurSize)) * 0.12245;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 3.0 * texelSize.y * blurSize)) * 0.0918;
+    sum += sampleInput(sourceTextureCoordinate + vec2(0.0, 4.0 * texelSize.y * blurSize)) * 0.051;
+    gl_FragColor = toOutputFormat(sum);
+}
+";
+
+# =========================================================================
+# Crossfade the shrinking blur back into the sharp frame while wiping the
+# whole thing in from the top or bottom.
+# =========================================================================
+string composeGlsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D auxSampler1;
+    uniform float progress;
+    uniform float revealSmoothness;
+    uniform float blendWindow;
+    uniform float outro;
+    uniform float direction;
+    uniform vec2 outputSize;
+
+    // Same per-pixel white noise as transition_print.
+    float hash12(vec2 p) {
+        vec3 p3 = fract(vec3(p.x, p.y, p.x) * 0.1031);
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.x + p3.y) * p3.z);
+    }
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        // hash12 needs pixel-scale input; on 0-1 UVs it degenerates into visible bands.
+        vec2 guv = vec2(uv.x, max(DOWN, 0.0) + UP * uv.y);
+        vec2 pixel = floor(guv * outputSize);
+
+        float t = mix(progress, 1.0 - progress, outro);
+
+        vec4 sharp = sampleInput(uv);
+        vec4 blurred = texture2D(auxSampler1, uv);
+
+        // The radius has been winding down to 0 across the whole duration, so
+        // by now the blur chain is only carrying its quarter-res softness. The
+        // swap to the full-res frame is held back to the last blendWindow of
+        // the duration, then done as a per-pixel dither so pixels flip to
+        // sharp in scattered grain rather than fading through a ghost.
+        // Squeezing the noise into an open range keeps every threshold inside
+        // (0, 1), which is what makes blend = 0 pick the blur everywhere and
+        // blend = 1 pick the sharp frame everywhere.
+        float w = max(blendWindow, 0.0001);
+        float blend = clamp((t - (1.0 - w)) / w, 0.0, 1.0);
+
+        float d = hash12(pixel) * 0.998 + 0.001;
+        vec4 img = mix(blurred, sharp, step(d, blend));
+
+        // Distance from the top edge on every backend. Growing the head from
+        // the top moves the edge down on the intro but up on the outro (t runs
+        // backwards), so measure from whichever edge makes it travel the
+        // requested way. Padding the ramp by the smoothing width keeps t = 0
+        // fully hidden and t = 1 fully shown at any smoothness.
+        float topDepth = max(UP, 0.0) + DOWN * uv.y;
+        float travelDown = step(2.5, direction);
+        float depth = mix(1.0 - topDepth, topDepth, abs(travelDown - outro));
+        float s = max(revealSmoothness, 0.001);
+        float head = t * (1.0 + s);
+        float revealed = smoothstep(depth, depth + s, head);
+
+        // The blur chain runs at quarter resolution, so its soft alpha edge
+        // arrives here already upscaled and smooth. Dithering it against noise
+        // generated per full-res pixel turns that soft
+        // ramp into crisp single-pixel spray instead of the 4px clusters you
+        // get from jittering inside the blur passes themselves.
+        // Fold the reveal ramp in before dithering rather than multiplying it
+        // on afterwards. Both are soft alpha sources, so combining them first
+        // means the wipe edge sprays into the same grain as the blurred
+        // silhouette instead of cutting a smooth gradient across it.
+        float softA = img.a * revealed;
+
+        float da = hash12(pixel + 53.0) * 0.998 + 0.001;
+        float sprayed = step(da, softA);
+
+        // Ease back to the true alpha over the same final window, so the last
+        // frame keeps the source's own edges rather than a stippled version.
+        float outputAlpha = mix(sprayed, softA, blend);
+        if (img.a > 0.0) {
+            img.rgb *= outputAlpha / img.a;
+        } else {
+            img.rgb = vec3(0.0);
+        }
+        img.a = outputAlpha;
+        gl_FragColor = toOutputFormat(img);
+    }
+";

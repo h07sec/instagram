@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1069802477670885",
+  "displayName": "Film burn blue",
+  "description": "[IG Edits] Color filter name. With \"Film burn blue\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3381
+  },
+  "assets": [
+    {
+      "name": "film_burn_blue_lut.png",
+      "assetHash": "c7edf2c6bcd37dd2c52c0c3258b3b6b95bd7d00def2297c5a1e1a399a39b135a",
+      "hubAssetId": "1184746064116993"
+    },
+    {
+      "name": "film_burn_blue_box.png",
+      "assetHash": "89115ef68ff69e0774fd41601e9c273d85326170f32e95a40922d88223927969",
+      "hubAssetId": "1823532965733580"
+    },
+    {
+      "name": "film_burn_blue_burn.png",
+      "assetHash": "9db3766ca8735133a60f66de8e0c0829190ead135afabc1b7157b2c496419008",
+      "hubAssetId": "1111571241417471"
+    },
+    {
+      "name": "film_burn_blue_detail.png",
+      "assetHash": "ba5d21fc5c9d1ec97e3ee0a4b1b16f63823047f74a4608b908bcb0ab3dbf62b3",
+      "hubAssetId": "1689680712754994"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD0LUeqysa"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "d977255",
+      "handle": "AQAD7fC0Pien",
+      "md5": "bb5087a82100e3941038222870b49f4c"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOzO4TS8AgLD9OMDAHmVi9LB8ZFSbhQoAAAD"
+    }
+  }
+}

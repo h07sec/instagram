@@ -1,0 +1,165 @@
+[Filter TransitionMulticlipFlickerFast]
+
+# Multiclip Flicker Fast (AE: Edits_Transition_collect_01 / PRE_TRANSITION_FLICKER_FAST).
+# Light-leak flashes across the cut from clip A to clip B: screened white
+# bands at different heights with the odd blank frame, a full white frame on
+# the cut, then bands over clip B. In AE each flash is one hand-timed 30fps
+# precomp frame (Gradient Ramp + Fractal Noise + CC Vignette, rotated into a
+# horizontal band) composited onto the clips in Add mode, in an 8 bpc project.
+# Here each flash is a vertical Gaussian band of light added to the clip and
+# clipped at white, so its core blows out like an exposure ramp while its
+# edges brighten the image underneath. The hand-timed bands' centre, width
+# and peak were fit to the AE render's added light (rms error 0.01-0.06).
+#
+# Flashes run at a fixed rate in real seconds (flashRate, AE's one per 30fps
+# frame), so their number follows the transition's length: 8 at the 0.267s
+# default, 3 at 0.1s, 90 at 3s.
+# The cut sits three quarters of the way through. The flashes nearest the cut
+# keep the AE comp's hand-timed sequence (all 8 at the default length); further
+# ones are generated from a per-flash hash. `duration` is the transition length
+# in seconds (the manifest's `duration` customization).
+#
+# Ported from the Easel web tool's multiclip_flicker_fast.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {duration = 0.267, min = 0.1, max = 5.0, description = "Transition length (seconds)"},
+    {flashRate = 30.0, min = 2.0, max = 60.0, description = "Flashes per second"},
+    {flashColor = {1.0, 1.0, 1.0, 1.0}, description = "Flash Color"},
+    {flashGain = 1.0, min = 0.0, max = 4.0, description = "Light added at the band's core (1 = white)"},
+    {flashSoftness = 1.0, min = 0.25, max = 4.0, description = "Band width multiplier (1 = fitted to AE)"},
+  };
+
+  filter.passes = {{
+    name = 'flash,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      showB = false,
+      bandCenter = 0.5,
+      invBandWidth = 10.0,
+      flashPeak = 0.0,
+      hasFlash = false,
+      flashColor = {1.0, 1.0, 1.0, 1.0},
+    },
+    glslShader = glsl,
+  }};
+}
+
+# Fraction of the flashes that come before the cut (6 of 8 in AE).
+f32 CUT_FRACTION = 0.75;
+
+fun hash(f32 n) f32 {
+  f32 x = sin(n * 12.9898 + 4.1414) * 43758.5453;
+  return x - floor(x);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 duration = max(getParameterFloat('duration), 0.01);
+
+  f32 flashes = max(2.0, floor(duration * getParameterFloat('flashRate) + 0.5));
+  f32 cut = clamp(floor(flashes * CUT_FRACTION + 0.5), 1.0, flashes - 1.0);
+  f32 k = min(floor(p * flashes), flashes - 1.0);
+  # Flash index relative to the cut: 0 is the white frame on the cut.
+  f32 j = k - cut;
+
+  # Gaussian band per flash: centre and width as fractions of the frame
+  # height from the top, peak as light added at the centre (above 1 clips).
+  f32 bandC = 0.5;
+  f32 bandW = 0.1;
+  f32 amount = 0.0;
+  if (j == 0.0) {
+    bandC = 0.56;
+    bandW = 0.38;
+    amount = 4.0;
+  } else if (j == 1.0) {
+    bandC = 0.7;
+    bandW = 0.24;
+    amount = 4.0;
+  } else if (j == 0.0 - 2.0) {
+    bandC = 0.4;
+    bandW = 0.24;
+    amount = 1.2;
+  } else if (j == 0.0 - 3.0) {
+    bandC = 0.3;
+    bandW = 0.18;
+    amount = 1.0;
+  } else if (j == 0.0 - 4.0) {
+    bandC = 0.48;
+    bandW = 0.1;
+    amount = 2.2;
+  } else if (j == 0.0 - 6.0) {
+    bandC = 0.0 - 0.06;
+    bandW = 0.1;
+    amount = 2.4;
+  } else if (j == 0.0 - 1.0 or j == 0.0 - 5.0) {
+    amount = 0.0;
+  } else {
+    # Generated flash: about one in four is blank, the rest a band anywhere.
+    if (hash(k) >= 0.25) {
+      bandC = hash(k + 31.0) * 1.1 - 0.05;
+      bandW = 0.1 + hash(k + 57.0) * 0.2;
+      amount = 1.0 + hash(k + 83.0) * 1.5;
+    }
+  }
+  if (p <= 0.0 or p >= 1.0) {
+    amount = 0.0;
+  }
+
+  boolean showB = false;
+  if (j >= 0.0) {
+    showB = true;
+  }
+  if (p >= 1.0) {
+    showB = true;
+  }
+
+  vec4 flashColor = getParameterVec4('flashColor);
+  f32 flashPeak = amount * flashColor.a * getParameterFloat('flashGain);
+  f32 bandWidth = max(bandW * getParameterFloat('flashSoftness), 0.001);
+  setShaderUniform('flash, 'showB, showB);
+  setShaderUniform('flash, 'bandCenter, bandC);
+  setShaderUniform('flash, 'invBandWidth, 1.0 / bandWidth);
+  setShaderUniform('flash, 'flashPeak, flashPeak);
+  setShaderUniform('flash, 'hasFlash, flashPeak != 0.0);
+  setShaderUniform('flash, 'flashColor, flashColor);
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform bool showB;
+uniform float bandCenter;
+uniform float invBandWidth;
+uniform float flashPeak;
+uniform bool hasFlash;
+uniform vec4 flashColor;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 col;
+  if (showB) {
+    col = texture2D(s_texture1, uv);
+  } else {
+    col = sampleInput(uv);
+  }
+  float m = 0.0;
+  if (hasFlash) {
+    // Distance from the top edge on every backend.
+    float y = max(UP, 0.0) + DOWN * uv.y;
+    float d = (y - bandCenter) * invBandWidth;
+    m = flashPeak * exp(-d * d);
+  }
+  // Add, clipped at white (AE's Add mode in an 8 bpc comp).
+  vec3 rgb = min(col.rgb + flashColor.rgb * m, vec3(1.0));
+  gl_FragColor = toOutputFormat(vec4(rgb, 1.0));
+}
+";

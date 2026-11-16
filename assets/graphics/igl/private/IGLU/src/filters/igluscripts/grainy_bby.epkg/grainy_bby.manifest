@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1264137480819960",
+  "displayName": "𝑔𝑟𝑎𝑖𝑛𝑦 𝑏𝑏𝑦.",
+  "description": "[IG Edits] Video effect name. With \"𝑔𝑟𝑎𝑖𝑛𝑦 𝑏𝑏𝑦.\", the creator gets a soft pink lift with visible film grain, soft skin, light blush and a hint of lip color.",
+  "iglu": {
+    "legacyId": 3346
+  },
+  "assets": [
+    {
+      "name": "grainy_bby_lut.png",
+      "assetHash": "79b3b1561bc8398e7a4d7562bc5ee2a7dd0d365b4b4dbf2f6f01e5fb5662054b",
+      "hubAssetId": "1948626839925034"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGf3L511_0"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "8856e4c3",
+      "handle": "AQALksqyY_5l",
+      "md5": "68ca5f272d4c94e6aa49d54eddf67f52"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GKx6wjOGp9DP7ygEAPzkfZH9kUgTbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "183B014B-70C5-43A7-9312-208F717F736C",
+  "displayName": "ѕυηѕєт..",
+  "description": "[IG Edits] Color filter name. With \"ѕυηѕєт..\", the creator gets a warm, golden sunset LUT color grade with skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3298
+  },
+  "assets": [
+    {
+      "name": "sunset_spark_lut.png",
+      "assetHash": "36394f7ae51c8b0431028c72ef8898d26569345aefc816a13e86902e915f9296",
+      "hubAssetId": "1643089087358360"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADz7d_JUve"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ed16e4ae",
+      "handle": "AQADkR2qLRJk",
+      "md5": "a96875d619afd30d8f3ed5f383df7292"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GKEPrjP-VM5CbxMIAO-713E36PxObhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2664901703522376",
+  "displayName": "Bloom Light",
+  "description": "[IG Edits] Color filter name. With \"Bloom Light\", the creator can apply a Spark-ported soft, matte grade with a warm bloom glow around bright areas and darker corners.",
+  "iglu": {
+    "legacyId": 3343
+  },
+  "assets": [
+    {
+      "name": "bloom_light_lut.png",
+      "assetHash": "ed8ce5ec05e1d8ae775de6e5db5de3a25868093a20d7e8c6926fb6fdba588fed",
+      "hubAssetId": "1646132993858663"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD3yiar410"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "8afff01c",
+      "handle": "AQAIE3wTCPlV",
+      "md5": "85bbb5e007fedf10287022cbbf73d947"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMW4jjPkMIUKxfoEANYz87zed99YbhQoAAAD"
+    }
+  }
+}

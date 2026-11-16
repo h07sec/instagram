@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "637417721181307",
+  "displayName": "Langsat",
+  "description": "[IG Edits] Color filter name. With \"Langsat\", the creator gets a pure 8x8 LUT color grade applied to the camera image at full strength.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADt8FxvHuo"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "40a7f2e8",
+      "handle": "AQALaON4tmJq",
+      "md5": "f36970daf9bc5a13cc1cf5bd8087474d"
+    }
+  },
+  "iglu": {
+    "legacyId": 3206
+  },
+  "assets": [
+    {
+      "name": "langsat_lut.png",
+      "assetHash": "6ac2fe270f155c760706239e24960fea2657788e4f6899af57e1c01d2dd09ad8",
+      "hubAssetId": "1546676823668796"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GBnOMzLlEXQ_CN8DAPID38ND6CEpbhQoAAAD"
+    }
+  }
+}

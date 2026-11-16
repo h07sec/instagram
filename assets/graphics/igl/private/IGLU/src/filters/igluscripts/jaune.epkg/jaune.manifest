@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "331022369127780",
+  "displayName": "𝕁 𝔸 𝕌 ℕ 𝔼",
+  "description": "[IG Edits] Color filter name. With \"𝕁 𝔸 𝕌 ℕ 𝔼\", the creator can apply a Spark-ported violet-tinted grade with olive greens and lavender highlights.",
+  "iglu": {
+    "legacyId": 3345
+  },
+  "assets": [
+    {
+      "name": "jaune_lut.png",
+      "assetHash": "931aae1aaa1598e8e980658d6065e0c2453773c91656d2a57594943d097dfdde",
+      "hubAssetId": "1145609057841350"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFbmz0_UDs"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "98c73316",
+      "handle": "AQAHHxbTBnd5",
+      "md5": "7075edb1935e0aebab5d2216326946b1"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GCWCjzOC6p6js34HAGKxcId7XHw8bhQoAAAD"
+    }
+  }
+}

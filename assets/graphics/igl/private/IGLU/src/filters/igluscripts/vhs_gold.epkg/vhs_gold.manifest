@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "764799798732699",
+  "displayName": "𝐕𝐇𝐒 𝐆𝐎𝐋𝐃 🎞️",
+  "description": "[IG Edits] Color filter name. With \"𝐕𝐇𝐒 𝐆𝐎𝐋𝐃 🎞️\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3379
+  },
+  "assets": [
+    {
+      "name": "vhs_gold_lut.png",
+      "assetHash": "772bb2572ba54dc6a727ecc97ef5c552b381bf1b10ac6804263c30ec25227a9b",
+      "hubAssetId": "1108550572171357"
+    },
+    {
+      "name": "vhs_gold_leak.png",
+      "assetHash": "a764e75afa5defd9b69d5c58d7c7b6c1b953c6ec0ee84f1c053201092bf50b5a",
+      "hubAssetId": "1438147031283328"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAJUabzqb0x"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "c4710634",
+      "handle": "AQADxwXUqWU8",
+      "md5": "1386675c4495c6ed4c06ef390d51fb92"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJmM8DRBMqrUgtADAInhHqpINgAQbhQoAAAD"
+    }
+  }
+}

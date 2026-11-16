@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "668482108778811",
+  "displayName": "Natural3🌈MrX",
+  "description": "[IG Edits] A natural color grade.",
+  "iglu": {
+    "legacyId": 3405
+  },
+  "assets": [
+    {
+      "name": "natural3_mrx_lut.png",
+      "assetHash": "fc3dd1507efa188930509c4e2ead1346c3d58de88e7faaa001f6a92f2ca48d39",
+      "hubAssetId": "1891616335550174"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAQiUH9N7Qi"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "2a58d6ce",
+      "handle": "AQAJ3O41kfxA",
+      "md5": "5e18fb04fea17cc69128dafeb303a3cd"
+    }
+  }
+}

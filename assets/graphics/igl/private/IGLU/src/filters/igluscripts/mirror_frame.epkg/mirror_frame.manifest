@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "706890342997873",
+  "displayName": "Mirror Frame",
+  "description": "[IG Edits] Frame effect name. With \"Mirror Frame\", the creator can apply a Spark-ported mirrored kaleidoscope border with an iridescent metal frame.",
+  "iglu": {
+    "legacyId": 3445
+  },
+  "assets": [
+    {
+      "name": "mirror_frame_frame.png",
+      "assetHash": "a5c5abac8629d5442f4701492270f22bfd20133cc019a005b67f2dd8bf044431",
+      "hubAssetId": "1461243425973576"
+    },
+    {
+      "name": "mirror_frame_data.png",
+      "assetHash": "d8938d37ce8c1c0232f47900c1062a302cbe53576eab2a4fdd8fa3cbc28beddf",
+      "hubAssetId": "2107463226561410"
+    },
+    {
+      "name": "mirror_frame_spectrum.png",
+      "assetHash": "6819d703b83c0df059af635ab6ef9fa60ced7dddf362e0edcc54c2012488e30f",
+      "hubAssetId": "1893995835293475"
+    }
+  ]
+}

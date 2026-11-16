@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Vala ibhrawuza</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002d">I-Meta AI</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002e">I-%1$s ifuna ukusebenzisa ikhamera yedivayisi yakho nemakrofoni.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002f">I-%1$s ifuna ukusebenzisa ikhamera yedivayisi yakho.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">I-%1$s ifuna ukusebenzisa indawo yedivayisi yakho.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130031">I-%1$s ifuna ukusebenzisa imakhrofoni yedivayisi yakho.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130032">Sicela uvumele yonke imidiya ukusebenzisa isikhethi sefayela</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Vumela</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Vimbela</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130035">Nciphisa ibhrawuza</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130036">Emuva</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130037">Dlulisa</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130038">Kunezinkinga ngesitifiketi sokuvikeleka kwale sayithi</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Qhubekela kuwebhusayithi</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Buyela emuva</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">Kunenkinga ngesitifiketi sokuvikeleka esisetshenziswa yi-%1$s. Imininingwane yakho yomuntu siqu, njengamaphasiwedi noma izinombolo zamakhadi ekhredithi, kungenzeka zingavikeleki lapho kwabelwana ngazo nale webhusayithi.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Le webhusayithi ayisebenzisi ukuxhuma okuvikelekile.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Iphutha lokuvikeleka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003e">Unhlokweni</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003f">Susa</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009e">Iwebhusayithi oyibukayo izama ukuvula i-app yangaphandle. Ungathanda ukuqhubeka?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Qhubeka</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Ushiya i-app yethu</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Lokhu kungaba ngenxa yephutha lezobuchwepheshe esizama ukulilungisa. Zama ukulayisha kabusha leli khasi.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Vuselela</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Ikhasi alitholakali njengamanje</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Ikhasi alikwazi ukulayishwa</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Vula ngokuthi …</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Vula ku-%1$s</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300aa">Okunye ongakhetha kukho</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Manje usubuka isikrini esigcwele. Swayipha uye ngakwesokunxele noma thepha inkinobho yokuthi emuva ukuze uphume.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Umlando welinki. Thepha kabili ukuze uthole uhlu lwamalinki amawebhusayithi owavakashele ngokudlule.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Khansela</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f5">Setha isikhathi</string>
+</resources>

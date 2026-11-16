@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "C5FC37D3-0BE8-43DC-8323-197CDB2B3444",
+  "displayName": "Episode.",
+  "description": "[IG Edits] Color filter name. With \"Episode.\", the creator gets a muted, cool cinematic color grade with a darkened bottom of frame and skin smoothing.",
+  "iglu": {
+    "legacyId": 3321
+  },
+  "assets": [
+    {
+      "name": "episode_lut.png",
+      "assetHash": "0810ab22cb3802a24b640af2cc5c5a04d9f86983ea81467ac16b729360f1bd8a",
+      "hubAssetId": "2964071773955347"
+    },
+    {
+      "name": "episode_shadow.png",
+      "assetHash": "3a7a1f7a4ace1ead8d3e3cb3a59ddbb951e0813b584c12337b8642a7f3c1750e",
+      "hubAssetId": "3302498136625639"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAH8_tj_I1M"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "1020018b",
+      "handle": "AQAF0yy7eRDT",
+      "md5": "66e4da0e2b85fdd183c4559e755bf7ab"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPpoYDPsnfJGQd8FADyhvSZsAIJ6bhQoAAAD"
+    }
+  }
+}

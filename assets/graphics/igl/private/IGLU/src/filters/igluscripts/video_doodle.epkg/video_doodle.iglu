@@ -1,0 +1,280 @@
+[Filter VideoDoodle]
+
+[Init]
+fun init(Filter filter) {
+
+    makeTexture('brushTex);
+
+    filter.parameters = {
+        {smoothParam = 0.05, min = 0.0, max = 0.5, description = "Smoothstep edge softness"},
+        {glowColor = {0.9, 0.0, 1.0, 1.0}, description = "Color"},
+        {glowSize = 1.2, min = 0.0, max = 2.0, description = "Glow intensity"},
+        {outro = 0.0, min = 0.0, max = 1.0, description = "0 = In, 1 = Out"},
+        {threshold = 0.1, min = 0.0, max = 1.0, description = "Mask alpha threshold"},
+        {brushUVOffset = 0.2, min = 0.0, max = 1.0, description = "Expand brush UV range outside bbox"},
+        {angle = 0.0, min = 0.0, max = 360.0, description = "Brush UV rotation (degrees)"},
+        {framerate = 0.15, min = 0.0, max = 1.0, description = "1 = full framerate, 0 = 1 fps (over 4s)"},
+        {wipeOffset = 1.0, min = -1.0, max = 1.4, description = "Alpha wipe time offset (progress where the wipe starts)"},
+        {wipeGradient = 0.25, min = 0.0, max = 1.0, description = "Alpha wipe gradient size (screen heights)"},
+        {direction = 3.0, min = 2.0, max = 3.0, description = "Sweep direction on screen: 2 = up, 3 = down"},
+    };
+
+    filter.passes = {
+        # Pass 0a: Per-column bounding boxes from mask alpha (32x1 output)
+        {
+            name = 'bbox_cols,
+            inputs = {'default},
+            uniforms = {
+                threshold = 0.1,
+            },
+            glslShader = glslBBoxCols,
+        },
+        # Pass 0b: Reduce the column boxes to one bounding box (1x1 output)
+        {
+            name = 'bbox_calc,
+            inputs = {'default, 'bbox_cols},
+            uniforms = {
+                gridSize = 32.0,
+            },
+            glslShader = glslBBoxCalc,
+        },
+        # Pass 1: Apply doodle transition with brushTex UVs remapped to bbox
+        {
+            name = 'pass0,
+            inputs = {'default, 'brushTex, 'bbox_calc},
+            uniforms = {
+                progress = 0.0,
+                smoothParam = 0.05,
+                glowColor = {0.8, 0.0, 1.0, 1.0},
+                glowSize = 1.0,
+                outro = 0.0,
+                brushUVOffset = 0.0,
+                angle = 0.0,
+                framerate = 1.0,
+                wipeOffset = 1.0,
+                wipeGradient = 0.25,
+                direction = 3.0,
+            },
+            glslShader = glsl,
+        },
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    # One texel per sample-grid column, then a 1x1 reduction
+    vec2 bboxColsSize = {32.0, 1.0};
+    setTextureSize('bbox_cols, bboxColsSize);
+    vec2 bboxSize = {1.0, 1.0};
+    setTextureSize('bbox_calc, bboxSize);
+
+    f32 threshold = getParameterFloat('threshold);
+    setShaderUniform('bbox_cols, 'threshold, threshold);
+
+    f32 framerate = getParameterFloat('framerate);
+    setShaderUniform('pass0, 'framerate, framerate);
+
+    f32 angle = getParameterFloat('angle);
+    setShaderUniform('pass0, 'angle, angle);
+
+    f32 wipeOffset = getParameterFloat('wipeOffset);
+    setShaderUniform('pass0, 'wipeOffset, wipeOffset);
+
+    f32 wipeGradient = getParameterFloat('wipeGradient);
+    setShaderUniform('pass0, 'wipeGradient, wipeGradient);
+
+    f32 direction = getParameterFloat('direction);
+    setShaderUniform('pass0, 'direction, direction);
+}
+
+# Column pass - each of the 32 texels scans one column of the 32x32 sample grid
+# and stores its (minX, minY, maxX, maxY) as n/64 encoded as n/255, which is
+# exact in 8-bit and float targets alike.
+string glslBBoxCols = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform float threshold;
+
+    void main() {
+        vec4 bbox = vec4(1.0, 1.0, 0.0, 0.0);
+
+        const int GRID_SIZE = 32;
+        float step = 1.0 / float(GRID_SIZE);
+        float x = floor(sourceTextureCoordinate.x * float(GRID_SIZE));
+
+        for (int y = 0; y < GRID_SIZE; y++) {
+            vec2 sampleUV = vec2(
+                (x + 0.5) * step,
+                (float(y) + 0.5) * step
+            );
+            vec4 maskSample = sampleInput(sampleUV);
+            // Record the box in screen space (y = 1 at the top on every
+            // backend); sourceTextureCoordinate is y-flipped on Metal.
+            vec2 screenUV = vec2(sampleUV.x, 0.5 + (sampleUV.y - 0.5) * UP);
+            if (maskSample.a > threshold) {
+                bbox.x = min(bbox.x, screenUV.x);
+                bbox.y = min(bbox.y, screenUV.y);
+                bbox.z = max(bbox.z, screenUV.x);
+                bbox.w = max(bbox.w, screenUV.y);
+            }
+        }
+
+        gl_FragColor = bbox * (64.0 / 255.0);
+    }
+";
+
+# BBox reduction shader - outputs (minX, minY, maxX, maxY) for the masked subject
+string glslBBoxCalc = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D auxSampler1;
+    uniform float gridSize;
+
+    void main() {
+        vec4 bbox = vec4(1.0, 1.0, 0.0, 0.0);
+
+        const int GRID_SIZE = 32;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            vec4 encoded = texture2D(auxSampler1, vec2((float(i) + 0.5) / gridSize, 0.5));
+            vec4 col = floor(encoded * 255.0 + 0.5) / 64.0;
+            bbox.xy = min(bbox.xy, col.xy);
+            bbox.zw = max(bbox.zw, col.zw);
+        }
+
+        gl_FragColor = toOutputFormat(bbox);
+    }
+";
+
+string glsl = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D auxSampler1;
+    uniform sampler2D auxSampler2;
+    uniform float progress;
+    uniform float smoothParam;
+    uniform vec4 glowColor;
+    uniform float glowSize;
+    uniform float outro;
+    uniform float brushUVOffset;
+    uniform float angle;
+    uniform float framerate;
+    uniform float wipeOffset;
+    uniform float wipeGradient;
+    uniform float direction;
+
+    float getActualAlpha(float inalpha, vec2 puv, float p) {
+        vec4 brush = texture2D(auxSampler1, puv);
+        float brushVal = brush.r;
+        float brushAlpha = brush.a;
+
+        brushVal /= max(brushAlpha, 1e-5);
+
+        float mask = smoothstep(brushVal, brushVal + smoothParam, p);
+
+        float edge = 1.0-smoothstep(brushVal, brushVal+(glowSize * 0.1), p);
+        float edgeVal = edge;
+        edgeVal = edgeVal *edgeVal * edgeVal * 3.0;
+        return clamp(max(inalpha, edgeVal) * mask * (brushAlpha * brushAlpha * brushAlpha), 0.0, 1.0);
+    }
+
+    float getSmoothedAlpha(float inalpha, vec2 puv, float p) {
+        float v = getActualAlpha(inalpha, puv, p);
+        float v1 = getActualAlpha(inalpha, puv + vec2(0.0, 0.007), p);
+        float v2 = getActualAlpha(inalpha, puv - vec2(0.0, 0.007), p);
+
+        return v * v1 * v2;
+    }
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        vec4 color = sampleInput(uv);
+        // Screen-space coordinate with y = 1 at the top on every backend.
+        // sampleInput() handles the Metal y-flip itself, but the brush lookup,
+        // the bbox and the wipe do not, so they all use guv.
+        vec2 guv = vec2(uv.x, 0.5 + (uv.y - 0.5) * UP);
+        // direction 3 (down) is the authored top-to-bottom sweep. Up mirrors
+        // guv and the bbox about the horizontal centre line, so the strokes
+        // (laid out across the mirrored bbox) and the wipe run bottom to top.
+        bool mirrorY = direction < 2.5;
+        if (mirrorY) {
+            guv.y = 1.0 - guv.y;
+        }
+
+        // Quantize progress to simulate lower framerate.
+        // Treat 0-1 progress range as 4 seconds:
+        //   framerate = 1 -> 60 fps -> 240 frames (effectively smooth)
+        //   framerate = 0 -> 1 fps  -> 4 frames over 4s (step = 0.25)
+        float fps = 1.0 + framerate * 59.0;
+        float totalFrames = fps * 4.0;
+        float quantizedProgress = floor(progress * totalFrames) / totalFrames;
+
+        float p = mix(quantizedProgress, 1.0 - quantizedProgress, outro);
+        p *= 1.5;
+
+        // Read precomputed bbox (minX, minY, maxX, maxY) from the 1x1 bbox_calc pass
+        vec4 bbox = texture2D(auxSampler2, vec2(0.5));
+        if (mirrorY) {
+            bbox = vec4(bbox.x, 1.0 - bbox.w, bbox.z, 1.0 - bbox.y);
+        }
+        bool bboxValid = bbox.x < bbox.z && bbox.y < bbox.w;
+
+        // Expand the bbox outward from its center by brushUVOffset * bboxSize
+        // on each side, then map the brush texture [0,1] across the expanded region.
+        vec2 origSize = max(bbox.zw - bbox.xy, vec2(0.0001));
+        vec2 expand = origSize * brushUVOffset;
+        vec2 expandedMin = bbox.xy - expand;
+        vec2 expandedMax = bbox.zw + expand;
+        vec2 expandedSize = expandedMax - expandedMin;
+        vec2 t = (guv - expandedMin) / expandedSize;
+        vec2 brushUV = bboxValid ? t : guv;
+
+        // Rotate brush UV around center by angle degrees
+        float rad = angle * 3.14159265 / 180.0;
+        float c = cos(rad);
+        float s = sin(rad);
+        vec2 centered = brushUV - 0.5;
+        vec2 rotated = vec2(c * centered.x - s * centered.y, s * centered.x + c * centered.y);
+        brushUV = rotated + 0.5;
+
+        vec4 brush = texture2D(auxSampler1, brushUV);
+        float brushVal = brush.r;
+        float brushAlpha = brush.a;
+
+        brushVal /= max(brushAlpha, 1e-5);
+
+        float mask = smoothstep(brushVal, brushVal + smoothParam, p);
+
+        float brushBrightness = brush.r - texture2D(auxSampler1, brushUV + vec2(0.0, 2.0/512.0)).r;
+        brushBrightness = 0.8 + (brushBrightness * 10.0);
+
+        float edge = 1.0-smoothstep(brushVal, brushVal+(glowSize * 0.1), p);
+        float edgeVal = edge;
+        edgeVal = edgeVal *edgeVal * edgeVal * 3.0;
+
+        float alpha = getSmoothedAlpha(color.a, brushUV, p);
+
+        float mixVal = clamp(edgeVal * (1.0-(p-brushVal)), 0.0, 1.0);
+        color.rgb = mix(color.rgb, glowColor.xyz * brushBrightness, mixVal);
+        // Final blend back to the untouched subject alpha, done as a gradient
+        // wipe from top to bottom instead of a single global fade so it can be
+        // lined up with the wipe mask driving the rest of the transition.
+        // guv.y = 1 is the top of the screen, so measure
+        // depth downwards. wipeOffset is the p value where the head sits at the
+        // top; the remaining p budget (up to 1.5) sweeps it to the bottom.
+        // Padding the head by the gradient width keeps the last row fully
+        // wiped at any gradient size.
+        // On the outro p runs backwards, so the head retracts instead of
+        // advancing. Flipping the depth axis with outro cancels that out and
+        // keeps the visible edge travelling top to bottom in wall-clock time
+        // for both directions.
+        float depth = mix(1.0 - guv.y, guv.y, outro);
+        float wipeG = max(wipeGradient, 0.001);
+        float wipeT = clamp((p - wipeOffset) / max(1.5 - wipeOffset, 0.001), 0.0, 1.0);
+        float wipeHead = wipeT * (1.0 + wipeG);
+        float wipeReveal = smoothstep(depth, depth + wipeG, wipeHead);
+        color.a = mix(alpha, color.a, wipeReveal);
+        color.rgb *= color.a;
+
+        gl_FragColor = toOutputFormat(color);
+    }
+";

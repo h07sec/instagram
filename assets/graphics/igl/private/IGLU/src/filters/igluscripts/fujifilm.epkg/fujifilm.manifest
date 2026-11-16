@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "316403454375068",
+  "displayName": "Fujifilm ✧",
+  "description": "[IG Edits] Video effect name. With \"Fujifilm ✧\", the creator can apply a Spark-ported bright film grade with grain, dust and a light leak.",
+  "iglu": {
+    "legacyId": 3399
+  },
+  "assets": [
+    {
+      "name": "fujifilm_lut.png",
+      "assetHash": "24acd4c1dc43f21d364f3bdac311db819712246f05a4c8ca5a4f17512d686137",
+      "hubAssetId": "1165875982788236"
+    },
+    {
+      "name": "fujifilm_dust.png",
+      "assetHash": "45a41db69372b29fbdc439bd2e05d75c7a1ca55a3908dcc7b591f64fde95d160",
+      "hubAssetId": "1860699881938917"
+    },
+    {
+      "name": "fujifilm_leak.png",
+      "assetHash": "f818a4178d51c58fdd31467e06d39347374336c900a749f94dd8c276b550cf4e",
+      "hubAssetId": "1162705626090213"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHOKS_nU8v"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ed204285",
+      "handle": "AQADlo3tB7v_",
+      "md5": "9a5568564bec3306b9329e74115e8bd0"
+    }
+  }
+}

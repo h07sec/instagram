@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "86684707-0145-460B-BFA6-C9989BEAC011",
+  "displayName": "mud",
+  "description": "[IG Edits] Color filter name. With \"mud\", the creator gets a muted, earthy mocha LUT color grade with skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3288
+  },
+  "assets": [
+    {
+      "name": "mud_lut.png",
+      "assetHash": "bf9f0bea8e74357fd4fc19ace954ab3fba901964a706894c9601f6442c395ecc",
+      "hubAssetId": "996947485999167"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD3xWU-KXe"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f4193dd5",
+      "handle": "AQBmSN-6Nfv6",
+      "md5": "398ac2e887781f6947f3825a10c79f24"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOWycDM7_EKNiLMHAF83SiLRAgo3bhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "5E8B438C-111B-46A6-A0A8-B7D4EE0EF9C0",
+  "displayName": "Bad Signal-B",
+  "description": "[IG Edits] Video effect name. With \"Bad Signal-B\", the creator gets a cool color grade with flickering blue horizontal glitch bars, like a bad TV signal.",
+  "iglu": {
+    "legacyId": 3268
+  },
+  "assets": [
+    {
+      "name": "bad_signal_b_lut.png",
+      "assetHash": "0fc64c38724003bc7384aa697350b4e9fd5a32e7d061fd9aca2314f8cff3704b",
+      "hubAssetId": "1751177909472763"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFrENl2EKt"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "48e96b29",
+      "handle": "AQAEBk2nspm8",
+      "md5": "62583afba7b857a7855763c82443f4f9"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GHK0kDQ_hYipg4oIAIJchfgG1AtZbhQoAAAD"
+    }
+  }
+}

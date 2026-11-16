@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "iglu": {
+    "behavior": {
+      "type": "static"
+    },
+    "customization": [
+      {
+        "name": "beatStep",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 3.0,
+        "beatReactive": {
+          "mode": "step",
+          "stepValues": [
+            0.0,
+            1.0,
+            2.0,
+            3.0
+          ]
+        }
+      }
+    ]
+  }
+}

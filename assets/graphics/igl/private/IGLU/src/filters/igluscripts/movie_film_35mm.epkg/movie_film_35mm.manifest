@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "6377F322-CD77-4F3D-A398-FDACDA4660BB",
+  "displayName": "❐ 35mm movie film",
+  "description": "[IG Edits] Video effect name. With \"35mm movie film\", the creator gets a desaturated, contrasty cinema look with subtle film gate weave and fine grain.",
+  "iglu": {
+    "legacyId": 3270
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD8lpZPeP2"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "5e575c8f",
+      "handle": "AQBlyVsHAy9W",
+      "md5": "e0aefba0ce20985abe46d0e7ec732647"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMoT9zJu526MCB8EAIAk1545pDEabhQoAAAD"
+    }
+  }
+}

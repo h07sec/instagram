@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "3BD3D7D5-9827-490F-8C16-128E7402983D",
+  "displayName": "ᴅᴀʀᴋ ᴘʀᴇꜱᴇᴛ",
+  "description": "[IG Edits] Color filter name. With \"ᴅᴀʀᴋ ᴘʀᴇꜱᴇᴛ\", the creator gets a dark, moody color grade with cool blue highlights, warm shadows and light skin smoothing.",
+  "iglu": {
+    "legacyId": 3302
+  },
+  "assets": [
+    {
+      "name": "dark_preset_lut.png",
+      "assetHash": "f62a3699a20cc617d6aba6dba51fce1c7334c2ddca9681299349391bd6c02461",
+      "hubAssetId": "1573184047912982"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAE1r8UYRyU"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "504b0fb",
+      "handle": "AQAFUCewvFwY",
+      "md5": "9b0dad4d27bcb677df3a1ab4d6869fbc"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIY7jDPFeMQuQYAHAD0PydgsDwQGbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1459623961192390",
+  "displayName": "فلتر بيرو ✪ 5",
+  "description": "[IG Edits] Color filter name. With \"فلتر بيرو ✪ 5\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3366
+  },
+  "assets": [
+    {
+      "name": "peru_filter_5_lut.png",
+      "assetHash": "13f19051b9c52a08ebe24194849e25506de980cd57ec50c26c6764e677b8df9a",
+      "hubAssetId": "1354044589995036"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAH0fypkKAV"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "1009d28f",
+      "handle": "AQAE2GcY_Dvw",
+      "md5": "aa34c67ecd3796f8e48bed868d177c47"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGlb2jRm1QKaVGUHABVoe-ueNMdHbhQoAAAD"
+    }
+  }
+}

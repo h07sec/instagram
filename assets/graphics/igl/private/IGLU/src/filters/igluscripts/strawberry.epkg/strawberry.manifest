@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "B37EDB32-8B0A-4547-AE35-F1B5D4622A95",
+  "displayName": "strawberry🍓",
+  "description": "[IG Edits] Color filter name. With \"strawberry🍓\", the creator gets a cool, muted LUT color grade with light skin smoothing and fine grain applied to the camera image.",
+  "iglu": {
+    "legacyId": 3281
+  },
+  "assets": [
+    {
+      "name": "strawberry_lut.png",
+      "assetHash": "f35409710b2e22f3f7dafc53edaa3d3e926836b95e13d8383248b89c552c359d",
+      "hubAssetId": "1113097744431797"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGuK_lSpHG"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "88053072",
+      "handle": "AQANeqNzv2KZ",
+      "md5": "1e98fea6bfeef81d948d783dbd49edac"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMAdijMk_EKb6oUKAACFGMLX4bp4bhQoAAAD"
+    }
+  }
+}

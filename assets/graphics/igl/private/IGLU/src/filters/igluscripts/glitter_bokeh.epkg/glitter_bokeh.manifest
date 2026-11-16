@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "50F02D2F-7177-41D5-89AB-8F2DC76308E1",
+  "displayName": "Glitter Bokeh",
+  "description": "[IG Edits] Video effect name. With \"Glitter Bokeh\", the creator's video is sprinkled with soft, twinkling teal glitter sparkles.",
+  "iglu": {
+    "legacyId": 3274
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGdwgo22Z_"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "57d5c60a",
+      "handle": "AQAFt_KVneqt",
+      "md5": "4700799c3fa9fb8c8dc2388f51a8f138"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GBo7YDMjdUffbzQFAB2ltKljga8rbhQoAABZ"
+    }
+  }
+}

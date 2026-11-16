@@ -1,0 +1,109 @@
+[Filter TransitionMulticlipLinearWipeDiagonal]
+
+# Clip B wipes in diagonally from a corner (the Linear Wipe Diagonal In effect)
+# over an untouched clip A.
+#
+# Ported from the Easel web tool's multiclip_linear_wipe_diagonal.iglu.
+# Easel eases progress by its [AnimationCurve quadraticInOut] tag before the
+# script sees it; the transition host passes linear progress, so the curve is
+# applied in [PreRender] instead.
+#
+# The video_linear_wipe_diagonal mask and the over-composite run in one pass
+# that reads both clips.
+
+fun easeInOutQuadratic(f32 t) f32 {
+  if (t < 0.5) {
+    return 2.0 * t * t;
+  }
+  return 4.0 * t - 2.0 * t * t - 1.0;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {direction = 8.0, min = 8.0, max = 11.0, description = "Direction code: 8 = top-left, 9 = top-right, 10 = bottom-right, 11 = bottom-left"},
+    {amount = 0.1, min = 0.0, max = 0.5, description = "Edge smoothness"},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition},
+      shaderInputNames = {'default, 's_texture1},
+      uniforms = {
+        dir = {-0.7071, -0.7071},
+        minD = 0.0,
+        invRange = 1.0,
+        edgeLow = 0.0,
+        edgeHigh = 0.0,
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = easeInOutQuadratic(max(getParameterFloat('progress), getParameterFloat('transition_progress)));
+  f32 direction = getParameterFloat('direction);
+  f32 dirX = 0.0 - 1.0;
+  f32 dirY = 1.0;
+  if (direction == 8.0) {
+    dirY = 0.0 - 1.0;
+  } else if (direction == 9.0) {
+    dirX = 1.0;
+    dirY = 0.0 - 1.0;
+  } else if (direction == 10.0) {
+    dirX = 1.0;
+  }
+  # keep amount off 0 so the smoothstep edge doesn't collapse
+  f32 amount = max(0.001, getParameterFloat('amount));
+
+  f32 invLen = 1.0 / sqrt(dirX * dirX + dirY * dirY);
+  vec2 dir = {0.0, 0.0};
+  dir.x = dirX * invLen;
+  dir.y = dirY * invLen;
+  f32 minD = min(0.0, dir.x) + min(0.0, dir.y);
+  f32 maxD = max(0.0, dir.x) + max(0.0, dir.y);
+  f32 pIn = p * (1.0 + 2.0 * amount) - amount;
+
+  setShaderUniform('composite, 'dir, dir);
+  setShaderUniform('composite, 'minD, minD);
+  setShaderUniform('composite, 'invRange, 1.0 / (maxD - minD));
+  setShaderUniform('composite, 'edgeLow, pIn - amount);
+  setShaderUniform('composite, 'edgeHigh, pIn + amount);
+}
+
+string glsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform vec2 dir;
+uniform float minD;
+uniform float invRange;
+uniform float edgeLow;
+uniform float edgeHigh;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 b = texture2D(s_texture1, uv);
+
+  vec2 guv = vec2(uv.x, max(UP, 0.0) + DOWN * uv.y);
+  float nd = (dot(guv, dir) - minD) * invRange;
+  b.a *= 1.0 - smoothstep(edgeLow, edgeHigh, nd);
+  b.rgb *= b.a;
+
+  // Clip B is premultiplied by its mask, so it goes over clip A without another
+  // multiply by b.a.
+  float outA = b.a + a.a * (1.0 - b.a);
+  vec3 rgb = (b.rgb + a.rgb * a.a * (1.0 - b.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

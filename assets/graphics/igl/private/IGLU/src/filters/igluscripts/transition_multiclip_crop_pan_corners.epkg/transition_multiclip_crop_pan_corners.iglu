@@ -1,0 +1,277 @@
+[Filter TransitionMulticlipCropPanCorners]
+
+fun bez(f32 a, f32 b, f32 s) f32 {
+  f32 r = 1.0 - s;
+  return 3.0 * r * r * s * a + 3.0 * r * s * s * b + s * s * s;
+}
+fun aeEase(f32 u, f32 x1, f32 y1, f32 x2, f32 y2) f32 {
+  f32 lo = 0.0;
+  f32 hi = 1.0;
+  f32 s = 0.0;
+  f32 i = 0.0;
+  while (i < 24.0) {
+    s = (lo + hi) * 0.5;
+    if (bez(x1, x2, s) < u) { lo = s; } else { hi = s; }
+    i = i + 1.0;
+  }
+  return bez(y1, y2, s);
+}
+
+fun c0_l1px(f32 t) f32 {
+  f32 v = (0.0 - 282.0);
+  if (t < 0.266666666667) { v = (0.0 - 282.0); }
+  else if (t < 0.7) {
+    f32 u = clamp((t - 0.266666666667) / 0.433333333333, 0.0, 1.0);
+    v = (0.0 - 282.0) + 642.0 * aeEase(u, 1.0, 0.0, 0.0, 1.0);
+  }
+  else { v = 360.0; }
+  return v;
+}
+fun c1_l5sx(f32 t) f32 {
+  f32 v = 85.0;
+  if (t < 0.7) { v = 85.0; }
+  else if (t < 0.966666666667) {
+    f32 u = clamp((t - 0.7) / 0.266666666667, 0.0, 1.0);
+    v = 85.0 + 15.0 * aeEase(u, 1.0, 0.0, 0.66666667, 1.0);
+  }
+  else { v = 100.0; }
+  return v;
+}
+fun c2_m5w0(f32 t) f32 {
+  f32 v = 640.0;
+  if (t < 0.7) { v = 640.0; }
+  else if (t < 0.966666666667) {
+    f32 u = clamp((t - 0.7) / 0.266666666667, 0.0, 1.0);
+    v = 640.0 + 80.0 * aeEase(u, 1.0, 0.0, 0.66666667, 1.0);
+  }
+  else { v = 720.0; }
+  return v;
+}
+fun c3_l7sx(f32 t) f32 {
+  f32 v = 100.0;
+  if (t < 0.0) { v = 100.0; }
+  else if (t < 0.233333333333) {
+    f32 u = clamp((t - 0.0) / 0.233333333333, 0.0, 1.0);
+    v = 100.0 + (0.0 - 15.0) * aeEase(u, 0.33333333, (0.0 - 0.0), 0.0, 1.0);
+  }
+  else { v = 85.0; }
+  return v;
+}
+fun c4_l7sy(f32 t) f32 {
+  f32 v = 100.0;
+  if (t < 0.0) { v = 100.0; }
+  else if (t < 0.233333333333) {
+    f32 u = clamp((t - 0.0) / 0.233333333333, 0.0, 1.0);
+    v = 100.0 + (0.0 - 15.0) * aeEase(u, 0.33333333, (0.0 - 0.0), 0.0, 1.0);
+  }
+  else { v = 85.0; }
+  return v;
+}
+fun c5_m7w0(f32 t) f32 {
+  f32 v = 720.0;
+  if (t < 0.0) { v = 720.0; }
+  else if (t < 0.233333333333) {
+    f32 u = clamp((t - 0.0) / 0.233333333333, 0.0, 1.0);
+    v = 720.0 + (0.0 - 80.0) * aeEase(u, 0.33333333, (0.0 - 0.0), 0.0, 1.0);
+  }
+  else { v = 640.0; }
+  return v;
+}
+fun c6_l3sx(f32 t) f32 {
+  f32 v = 100.0;
+  if (t < 0.0) { v = 100.0; }
+  else if (t < 0.266666666667) {
+    f32 u = clamp((t - 0.0) / 0.266666666667, 0.0, 1.0);
+    v = 100.0 + (0.0 - 15.0) * aeEase(u, 0.33333333, (0.0 - 0.0), 0.0, 1.0);
+  }
+  else if (t < 0.7) {
+    v = 85.0;
+  }
+  else if (t < 0.966666666667) {
+    f32 u = clamp((t - 0.7) / 0.266666666667, 0.0, 1.0);
+    v = 85.0 + 15.0 * aeEase(u, 1.0, 0.0, 0.66666667, 1.0);
+  }
+  else { v = 100.0; }
+  return v;
+}
+fun c7_l3sy(f32 t) f32 {
+  f32 v = 100.0;
+  if (t < 0.0) { v = 100.0; }
+  else if (t < 0.266666666667) {
+    f32 u = clamp((t - 0.0) / 0.266666666667, 0.0, 1.0);
+    v = 100.0 + (0.0 - 15.0) * aeEase(u, 0.33333333, (0.0 - 0.0), 0.0, 1.0);
+  }
+  else if (t < 0.7) {
+    v = 85.0;
+  }
+  else if (t < 0.966666666667) {
+    f32 u = clamp((t - 0.7) / 0.266666666667, 0.0, 1.0);
+    v = 85.0 + 15.0 * aeEase(u, 1.0, 0.0, 0.66666667, 1.0);
+  }
+  else { v = 100.0; }
+  return v;
+}
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.parameters = {
+    {duration = 1.0, min = 0.1, max = 5.0, description = "Duration"},
+  };
+  filter.passes = {{
+    name = 'layout,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      edgeScale = {720.0, 1280.0},
+      progress = 0.0,
+      m5 = {0.0, 0.0, 1.0, 1.0},
+      matteActive5 = 0.0,
+      m7 = {0.0, 0.0, 1.0, 1.0},
+      matteActive7 = 0.0,
+      xf6 = {0.0, 0.0, 1.0, 1.0},
+      active6 = 0.0,
+      xf8 = {0.0, 0.0, 1.0, 1.0},
+      active8 = 0.0,
+    },
+    glslShader = glsl,
+  }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 t = clamp(p, 0.0, 1.0) * 1.0;
+  f32 c0_l1px_t = c0_l1px(t);
+  f32 c1_l5sx_t = c1_l5sx(t);
+  f32 c2_m5w0_t = c2_m5w0(t);
+  f32 c3_l7sx_t = c3_l7sx(t);
+  f32 c4_l7sy_t = c4_l7sy(t);
+  f32 c5_m7w0_t = c5_m7w0(t);
+  f32 c6_l3sx_t = c6_l3sx(t);
+  f32 c7_l3sy_t = c7_l3sy(t);
+  vec2 size = getTextureSize('default);
+  setShaderUniform('layout, 'edgeScale, size);
+  setShaderUniform('layout, 'progress, p);
+  f32 ax1 = (100.0 * 0.01);
+  f32 bx1 = (c0_l1px_t - 0.0 * (100.0 * 0.01));
+  f32 ay1 = (100.0 * 0.01);
+  f32 by1 = (640.0 - 0.0 * (100.0 * 0.01));
+  f32 ax5 = ax1 * (c1_l5sx_t * 0.01);
+  f32 bx5 = ax1 * ((0.0 - 0.30859375) - 0.0 * (c1_l5sx_t * 0.01)) + bx1;
+  f32 ay5 = ay1 * (c1_l5sx_t * 0.01);
+  f32 by5 = ay1 * (1.12109375 - 0.0 * (c1_l5sx_t * 0.01)) + by1;
+  vec4 m5 = {(ax5 * (0.30859375 - 0.5 * c2_m5w0_t) + bx5) / 720.0, (ay5 * ((0.0 - 1.12109375) - 0.5 * 1280.0) + by5) / 1280.0, (ax5 * (0.30859375 + 0.5 * c2_m5w0_t) + bx5) / 720.0, (ay5 * ((0.0 - 1.12109375) + 0.5 * 1280.0) + by5) / 1280.0};
+  setShaderUniform('layout, 'm5, m5);
+  f32 r5 = min(20.0, 0.5 * min(c2_m5w0_t, 1280.0)) * abs(ax5);
+  f32 matteActive5 = 0.0;
+  if (t >= 0.0 and t < 1.0) { matteActive5 = r5 + 1.0; }
+  setShaderUniform('layout, 'matteActive5, matteActive5);
+  f32 ax7 = ax1 * (c3_l7sx_t * 0.01);
+  f32 bx7 = ax1 * (641.69140625 - 0.0 * (c3_l7sx_t * 0.01)) + bx1;
+  f32 ay7 = ay1 * (c4_l7sy_t * 0.01);
+  f32 by7 = ay1 * (1.12109375 - 0.0 * (c4_l7sy_t * 0.01)) + by1;
+  vec4 m7 = {(ax7 * (0.30859375 - 0.5 * c5_m7w0_t) + bx7) / 720.0, (ay7 * ((0.0 - 1.12109375) - 0.5 * 1280.0) + by7) / 1280.0, (ax7 * (0.30859375 + 0.5 * c5_m7w0_t) + bx7) / 720.0, (ay7 * ((0.0 - 1.12109375) + 0.5 * 1280.0) + by7) / 1280.0};
+  setShaderUniform('layout, 'm7, m7);
+  f32 r7 = min(20.0, 0.5 * min(c5_m7w0_t, 1280.0)) * abs(ax7);
+  f32 matteActive7 = 0.0;
+  if (t >= 0.0 and t < 1.0) { matteActive7 = r7 + 1.0; }
+  setShaderUniform('layout, 'matteActive7, matteActive7);
+  f32 ax3 = ax1 * (c6_l3sx_t * 0.01);
+  f32 bx3 = ax1 * (0.0 - 0.0 * (c6_l3sx_t * 0.01)) + bx1;
+  f32 ay3 = ay1 * (c7_l3sy_t * 0.01);
+  f32 by3 = ay1 * (0.0 - 0.0 * (c7_l3sy_t * 0.01)) + by1;
+  f32 ax6 = ax3 * (33.3333333333 * 0.01);
+  f32 bx6 = ax3 * (0.000000000000057 - 1080.0 * (33.3333333333 * 0.01)) + bx3;
+  f32 ay6 = ay3 * (33.3333333333 * 0.01);
+  f32 by6 = ay3 * (0.0 - 1920.0 * (33.3333333333 * 0.01)) + by3;
+  vec4 xf6 = {bx6 / 720.0, by6 / 1280.0, ax6 * 2160.0 / 720.0, ay6 * 3840.0 / 1280.0};
+  setShaderUniform('layout, 'xf6, xf6);
+  f32 active6 = 0.0;
+  if (t >= 0.266666666667 and t < 5.28333333333) { active6 = 1.0; }
+  setShaderUniform('layout, 'active6, active6);
+  f32 ax4 = ax1 * (c6_l3sx_t * 0.01);
+  f32 bx4 = ax1 * (642.0 - 0.0 * (c6_l3sx_t * 0.01)) + bx1;
+  f32 ay4 = ay1 * (c7_l3sy_t * 0.01);
+  f32 by4 = ay1 * (0.0 - 0.0 * (c7_l3sy_t * 0.01)) + by1;
+  f32 ax8 = ax4 * (100.0 * 0.01);
+  f32 bx8 = ax4 * (0.0 - 360.0 * (100.0 * 0.01)) + bx4;
+  f32 ay8 = ay4 * (100.0 * 0.01);
+  f32 by8 = ay4 * (0.0 - 640.0 * (100.0 * 0.01)) + by4;
+  vec4 xf8 = {bx8 / 720.0, by8 / 1280.0, ax8 * 720.0 / 720.0, ay8 * 1280.0 / 1280.0};
+  setShaderUniform('layout, 'xf8, xf8);
+  f32 active8 = 0.0;
+  if (t >= 0.0 and t < 1.0) { active8 = 1.0; }
+  setShaderUniform('layout, 'active8, active8);
+}
+
+string glsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform sampler2D s_texture1;
+uniform vec2 edgeScale;
+uniform float progress;
+uniform vec4 m5;
+uniform float matteActive5;
+uniform vec4 m7;
+uniform float matteActive7;
+uniform vec4 xf6;
+uniform float active6;
+uniform vec4 xf8;
+uniform float active8;
+
+// Area coverage of the unit source rectangle, at output resolution; z/w is the
+// signed source-to-frame scale, so mirrored layers keep correct edges.
+float imageCoverage(vec2 s, vec2 k) {
+  vec2 d = min(s, 1.0 - s) * abs(k) * edgeScale;
+  vec2 cov = clamp(d + 0.5, 0.0, 1.0);
+  return cov.x * cov.y;
+}
+// Rounded-rectangle matte; r = matteActive - 1 is the corner radius in AE
+// pixels, matteActive = 0 outside the matte layer's in/out.
+float roundedCoverage(vec2 xy, vec4 m, float on) {
+  if (on <= 0.0) return 0.0;
+  vec2 px = edgeScale / vec2(720.0, 1280.0);
+  vec2 lo = min(m.xy, m.zw) * vec2(720.0, 1280.0);
+  vec2 hi = max(m.xy, m.zw) * vec2(720.0, 1280.0);
+  vec2 p = xy * vec2(720.0, 1280.0);
+  float r = on - 1.0;
+  vec2 q = abs(p - 0.5 * (lo + hi)) - (0.5 * (hi - lo) - r);
+  float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+  return clamp(0.5 - d * min(px.x, px.y), 0.0, 1.0);
+}
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  if (progress < 0.0) { gl_FragColor = toOutputFormat(sampleInput(uv)); return; }
+  if (progress >= 1.0) { gl_FragColor = toOutputFormat(texture2D(s_texture1, uv)); return; }
+  // AE uses top-down coordinates; UP keeps this native on OpenGL and Metal.
+  vec2 xy = vec2(uv.x, 0.5 - UP * (uv.y - 0.5));
+  vec3 col = vec3(0.0);
+  float keep = 1.0;
+  // AE layer 6: PRE_B, alpha matte 5.
+  {
+    vec2 s = (xy - xf6.xy) / xf6.zw;
+    float a = active6 * imageCoverage(s, xf6.zw) * roundedCoverage(xy, m5, matteActive5);
+    if (a > 0.0) {
+      vec2 st = vec2(s.x, 0.5 - UP * (s.y - 0.5));
+      vec4 c = texture2D(s_texture1, st);
+      col += c.rgb * a * keep;
+      keep *= 1.0 - a * c.a;
+    }
+  }
+  // AE layer 8: PRE_A, alpha matte 7.
+  if (keep > 0.0) {
+    vec2 s = (xy - xf8.xy) / xf8.zw;
+    float a = active8 * imageCoverage(s, xf8.zw) * roundedCoverage(xy, m7, matteActive7);
+    if (a > 0.0) {
+      vec2 st = vec2(s.x, 0.5 - UP * (s.y - 0.5));
+      vec4 c = sampleInput(st);
+      col += c.rgb * a * keep;
+      keep *= 1.0 - a * c.a;
+    }
+  }
+  gl_FragColor = toOutputFormat(vec4(col, 1.0));
+}
+";

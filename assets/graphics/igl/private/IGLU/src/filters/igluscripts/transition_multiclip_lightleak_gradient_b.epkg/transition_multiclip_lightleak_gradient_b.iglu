@@ -1,0 +1,52 @@
+[Filter TransitionMulticlipLightleakGradientB]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  makeTexture('overlayVideoB);
+  filter.parameters = {{duration = 0.7333333333333333, min = 0.1, max = 5.0, description = "Transition length (seconds)"}};
+  filter.passes = {{
+    name = 'overlayComposite,
+    inputs = {'default, 'transition, 'overlayVideoB},
+    shaderInputNames = {'default, 's_texture1, 'overlayVideoB},
+    uniforms = {showB = 0.0, overlayEnabled = 0.0},
+    glslShader = glsl,
+  }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = clamp(max(getParameterFloat('progress), getParameterFloat('transition_progress)), 0.0, 1.0);
+  f32 showB = 0.0;
+  if (p + 0.000001 >= 0.522727272727) { showB = 1.0; }
+  f32 enabled = 0.0;
+  if (p > 0.0 and p < 1.0) { enabled = 1.0; }
+  setShaderUniform('overlayComposite, 'showB, showB);
+  setShaderUniform('overlayComposite, 'overlayEnabled, enabled);
+}
+
+string glsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+uniform sampler2D s_texture1;
+uniform sampler2D overlayVideoB;
+uniform float showB;
+uniform float overlayEnabled;
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 base;
+  if (showB > 0.5) {
+    base = texture2D(s_texture1, uv);
+  } else {
+    base = sampleInput(uv);
+  }
+  if (overlayEnabled > 0.5) {
+    // Video textures use the same orientation as live input textures.
+    vec3 overlay = texture2D(overlayVideoB, uv).rgb;
+    base = vec4(overlay + base.rgb * (1.0 - overlay), 1.0);
+  }
+  gl_FragColor = toOutputFormat(base);
+}
+";

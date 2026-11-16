@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "3DF4CD41-56DC-4341-BF6E-050C2665A067",
+  "displayName": "Always blurred",
+  "description": "[IG Edits] Video effect name. With \"Always blurred\", the creator gets a heavy, dreamy full-frame blur with a muted moody color grade and light film grain.",
+  "iglu": {
+    "legacyId": 3262
+  },
+  "assets": [
+    {
+      "name": "always_blurred_lut.png",
+      "assetHash": "17980bd2274d56f6eb50c096d443eb1f8697ca32d88bb68a900a565a6e862e39",
+      "hubAssetId": "1576487443769459"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFnOkyxswt"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "854fad9f",
+      "handle": "AQAPwuTDXLUP",
+      "md5": "25ee1a061b706b78fe5dcd5e920f2aa6"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GC-hNTRfXsP03fsFAHEOBYOiUSkAbhQoAAAD"
+    }
+  }
+}

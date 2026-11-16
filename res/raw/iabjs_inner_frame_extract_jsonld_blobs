@@ -1,0 +1,1 @@
+(function(requestId,typesJSON,deferUntilIdle){const extract=()=>window._META.IABInnerFrame.extractJSONLDBlobs(requestId,typesJSON?JSON.parse(typesJSON):void 0);if(!deferUntilIdle)return extract();"function"==typeof window.requestIdleCallback?window.requestIdleCallback(extract,{timeout:2e3}):setTimeout(extract,0)})

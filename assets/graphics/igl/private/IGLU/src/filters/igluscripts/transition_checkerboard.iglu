@@ -1,0 +1,66 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_checkerboard, QE-selectable for A/B vs TransitionCheckerboardFilter.
+[Filter TransitionCheckerboard]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'grid,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      prog = 0.0,
+      cellSize = 270.0,
+      outputSize = {1024.0, 1024.0},
+    },
+    glslShader = glsl,
+  }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progress = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+
+  # toRange(progress, -e, 1.0 + e)
+  f32 e = 0.65;
+  f32 lo = -e;
+  f32 hi = 1.0 + e;
+  setShaderUniform('grid, 'prog, lo + progress * (hi - lo));
+
+  vec2 size = getTextureSize('default);
+  setShaderUniform('grid, 'outputSize, size);
+  setShaderUniform('grid, 'cellSize, 270.0 * (min(size.x, size.y) / 1080.0));
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform float prog;
+  uniform float cellSize;
+  uniform vec2 outputSize;
+  float fromRange(float x, float lo, float hi) { return (x - lo) / (hi - lo); }
+  float parabola(float x, float k) { return pow(4.0 * x * (1.0 - x), k); }
+  float mod289(float x) {
+    float r = x - floor(x * (1.0 / 289.0)) * 289.0;
+    r += 289.0 * (1.0 - step(0.0, r));
+    return r - 289.0 * step(289.0, r);
+  }
+  float permute289(float x) { return mod289((x * 34.0 + 1.0) * x); }
+  float random(vec2 st) { return permute289(permute289(mod289(st.x)) + mod289(st.y)) * (1.0 / 289.0); }
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    vec2 st = uv * outputSize;
+    vec2 cellCoord = floor(st / cellSize);
+    vec4 a = sampleInput(uv);
+    vec4 b = texture2D(s_texture1, uv);
+    float t = random(cellCoord);
+    const float e = 0.65;
+    float tran = clamp(fromRange(prog - t, -e, e), 0.0, 1.0);
+    float white = parabola(tran, 3.0);
+    float blend = smoothstep(-e, e, prog - t);
+    vec4 color = mix(a, b, blend);
+    color = vec4(color.rgb * pow(2.0, white), color.a);
+    gl_FragColor = toOutputFormat(color);
+  }
+";

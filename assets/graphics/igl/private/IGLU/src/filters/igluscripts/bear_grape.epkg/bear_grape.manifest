@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1292211961282032",
+  "displayName": "ʕ•́ᴥ•̀ʔっ♡💜🛐🍇👾",
+  "description": "[IG Edits] Color filter name. With \"ʕ•́ᴥ•̀ʔっ♡💜🛐🍇👾\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3376
+  },
+  "assets": [
+    {
+      "name": "bear_grape_lut.png",
+      "assetHash": "dee05871c910bc29ce8f10312eb10ea0f0174c9171f87e94f5c78fc989618d7a",
+      "hubAssetId": "991053963388530"
+    },
+    {
+      "name": "bear_grape_screen.png",
+      "assetHash": "e8ef9f71fe78374e8f50ebf881606b5f82d9a54cbf71f74519533a6fdb41bd84",
+      "hubAssetId": "1939824817376611"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAIZlOfrr8u"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "8ae7f5d6",
+      "handle": "AQBni84VhKJa",
+      "md5": "012f9054a9ea04480b7ed19463d05637"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GDjgoDTrc2nqN_0FAG5r-LzzPlpjbhQoAAAD"
+    }
+  }
+}

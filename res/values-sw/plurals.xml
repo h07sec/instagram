@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$dm ago</item>
+        <item quantity="one">Dakika %1$d iliyopita</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Expires in %1$d hours</item>
+        <item quantity="one">Muda wake unaisha baada ya saa %1$d</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Inakwisha muda baada ya dakika %1$d</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">Kazi %1$d zinahitaji kukaguliwa</item>
+        <item quantity="one">A task needs review</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d passengers</item>
+        <item quantity="one">Abiria %1$d</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">Kazi %1$d zinahitaji kukaguliwa</item>
+        <item quantity="one">%1$d task needs review</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">Viunganishi %1$d</item>
+        <item quantity="one">Kiunganishi %1$d</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">Mifuko %1$d ya kubeba</item>
+        <item quantity="one">Mfuko %1$d wa kubeba</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d checked bags</item>
+        <item quantity="one">Mfuko %1$d uliokaguliwa</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d stops</item>
+        <item quantity="one">Komesha %1$d</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Tumia picha %1$d</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">Bidhaa %1$d</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Every %1$d hours</item>
+        <item quantity="one">Kila saa %1$d</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">Every %1$d minutes</item>
+        <item quantity="one">Kila baada ya dakika %1$d</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Every %1$d seconds</item>
+        <item quantity="one">Kila sekunde %1$d</item>
+    </plurals>
+</resources>

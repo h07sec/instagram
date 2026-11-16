@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "3E98B472-20D3-45BC-BBC9-3D2702E68CA0",
+  "displayName": "old kino",
+  "description": "[IG Edits] Color filter name. With \"old kino\", the creator gets a warm vintage cinema color grade inside a soft film-gate frame with a fine film grain.",
+  "iglu": {
+    "legacyId": 3325
+  },
+  "assets": [
+    {
+      "name": "old_kino_lut.png",
+      "assetHash": "3ecff15f04b3984ec96cd803ef3b28acfa5d57d7e8947b70c714b3fcfef31c1f",
+      "hubAssetId": "1702270318125873"
+    },
+    {
+      "name": "old_kino_gate.png",
+      "assetHash": "bf41deece77a8a13e8f601365ff5c3ae053c08150ad560f6e75e54eb4e2634d9",
+      "hubAssetId": "1590048312300178"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFusweAfkS"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "fd682333",
+      "handle": "AQAITLpRm85p",
+      "md5": "17f71fd685ec30ce999a9d8bd3a357c1"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOfJnDNbXT-BI8cGAAcaF0ZXnrYUbhQoAAAD"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "658512602926549",
+  "displayName": "Filka Day",
+  "description": "[IG Edits] Video effect name. With \"Filka Day\", the creator can apply a Spark-ported soft pink grade with a handwritten weekday and time stamp.",
+  "iglu": {
+    "legacyId": 3334
+  },
+  "assets": [
+    {
+      "name": "filka_day_lut.png",
+      "assetHash": "d7b58a46bdb53bf1674656f6df7b6f6f172d363fe1b367c3945f63e198d69bb0",
+      "hubAssetId": "1395602782360667"
+    },
+    {
+      "name": "filka_day_atlas.png",
+      "assetHash": "213e8ad3d74806d1d0f12dd57654cb3327f27a561a48d67b858d13213e76fb8e",
+      "hubAssetId": "1152183187463037"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD55YLblwb"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f7f0c385",
+      "handle": "AQAFE1L9YORD",
+      "md5": "6594b8820da25c743d4abaa1cf701315"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIPMnjNBwS68NhUDAJctafolwAhPbhQoAAAD"
+    }
+  }
+}

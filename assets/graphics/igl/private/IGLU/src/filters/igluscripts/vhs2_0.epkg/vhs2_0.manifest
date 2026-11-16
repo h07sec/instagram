@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "376902046847987",
+  "displayName": "ＶＨＳ2.0",
+  "description": "[IG Edits] Video effect name. With \"ＶＨＳ2.0\", the creator can apply a Spark-ported VHS look: a soft grade, tape noise, an RGB split and a PLAY / date stamp.",
+  "iglu": {
+    "legacyId": 3356
+  },
+  "assets": [
+    {
+      "name": "vhs2_0_lut.png",
+      "assetHash": "f2e0ef71687d0c1153d2c8696a153f8e8aa728a1763b5fc1955a46a6b7e60332",
+      "hubAssetId": "994554633695137"
+    },
+    {
+      "name": "vhs2_0_stamp.png",
+      "assetHash": "ff0ab62ce1a538180fc53da29f62074882086e8c29e2ce5c8c808f2078ce9838",
+      "hubAssetId": "2216542369264603"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAJ1uDztNoU"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f6a567bf",
+      "handle": "AQAFUEfnOfTm",
+      "md5": "1c98aa15d85363298ec0d79975bd40ff"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIdZzDPdxRas7dkDAMyF0Ag1DvoxbhQoAAAD"
+    }
+  }
+}

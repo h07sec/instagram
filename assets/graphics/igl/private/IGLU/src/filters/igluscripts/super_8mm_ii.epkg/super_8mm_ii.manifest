@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1148529555804931",
+  "displayName": "Super 8mm II",
+  "description": "[IG Edits] Video effect name. With \"Super 8mm II\", the creator gets a vintage Super-8 look: LUT grade, rouge tint, procedural dust/scratches, grain, and a soft rounded black gate border.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGNjQhYOxB"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "1ec0975f",
+      "handle": "AQAOJGt6RRiv",
+      "md5": "35ee6d798391fc08cb107ba8c263a2fe"
+    }
+  },
+  "iglu": {
+    "legacyId": 3202
+  },
+  "assets": [
+    {
+      "name": "super_8mm_ii_lut.png",
+      "assetHash": "5881fca8998cc4984227830f7ba0cc212c7a2a9e7e7118a5932c9e071e8a5bba",
+      "hubAssetId": "1648942623254241"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GLwONzIuHuNzqVsDAKLo-gzkmjQQbhQoAAAD"
+    }
+  }
+}

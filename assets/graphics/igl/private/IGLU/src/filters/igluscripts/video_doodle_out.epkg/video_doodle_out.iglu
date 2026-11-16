@@ -1,0 +1,53 @@
+[Filter DoodleOut]
+
+[Init]
+fun init(Filter filter) {
+    makeTexture('brushTex);
+
+    filter.parameters = {
+        {smoothParam = 0.05, min = 0.0, max = 0.5, description = "Smoothstep edge softness"},
+        {direction = 3.0, min = 2.0, max = 3.0, description = "Sweep direction on screen: 2 = up, 3 = down"},
+        {color = {0.9, 0.0, 1.0, 1.0}, description = "Stroke color"},
+        {glowSize = 1.2, min = 0.0, max = 2.0, description = "Glow intensity"},
+        {threshold = 0.1, min = 0.0, max = 1.0, description = "Mask alpha threshold"},
+        {brushUVOffset = 0.2, min = 0.0, max = 1.0, description = "Expand brush UV range outside bbox"},
+        {angle = 180.0, min = 0.0, max = 360.0, description = "Brush UV rotation (degrees)"},
+        {framerate = 0.15, min = 0.0, max = 1.0, description = "1 = full framerate, 0 = 1 fps (over 4s)"},
+        {wipeOffset = 0.0, min = -1.0, max = 1.4, description = "Alpha wipe time offset (progress where the wipe starts)"},
+        {wipeGradient = 0.2, min = 0.0, max = 1.0, description = "Alpha wipe gradient size (screen heights)"},
+    };
+
+    filter.passes = {{
+        name = 'base,
+        igid = 'video_doodle,
+        inputs = {'default, 'brushTex},
+        uniforms = {
+            outro = 1.0,
+            direction = 3.0,
+        }
+    }};
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    f32 smoothParam = getParameterFloat('smoothParam);
+    f32 direction = getParameterFloat('direction);
+    vec4 color = getParameterVec4('color);
+    f32 glowSize = getParameterFloat('glowSize);
+    f32 threshold = getParameterFloat('threshold);
+    f32 brushUVOffset = getParameterFloat('brushUVOffset);
+    f32 angle = getParameterFloat('angle);
+    f32 framerate = getParameterFloat('framerate);
+    f32 wipeOffset = getParameterFloat('wipeOffset);
+    f32 wipeGradient = getParameterFloat('wipeGradient);
+    setShaderUniform('base, 'smoothParam, smoothParam);
+    setShaderUniform('base, 'direction, direction);
+    setShaderUniform('base, 'glowColor, color);
+    setShaderUniform('base, 'glowSize, glowSize);
+    setShaderUniform('base, 'threshold, threshold);
+    setShaderUniform('base, 'brushUVOffset, brushUVOffset);
+    setShaderUniform('base, 'angle, angle);
+    setShaderUniform('base, 'framerate, framerate);
+    setShaderUniform('base, 'wipeOffset, wipeOffset);
+    setShaderUniform('base, 'wipeGradient, wipeGradient);
+}

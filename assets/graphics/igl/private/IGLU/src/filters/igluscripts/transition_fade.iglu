@@ -1,0 +1,80 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_fade, QE-selectable for A/B vs TransitionFadeFilter.
+[Filter TransitionFade]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'fade,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      useSecondInput = false,
+      flicker = 0.0,
+      fadeTerm = {0.0, 0.0, 0.0, 1.0},
+    },
+    glslShader = glsl,
+  }};
+
+  filter.parameters = {
+    {flickerFrequency = 2.0, min = 0.0, max = 10.0, description = "Flicker frequency"},
+    {flickerStrength = 0.0, min = 0.0, max = 1.0, description = "Flicker strength"},
+    {flickerSmoothness = 0.8, min = 0.0, max = 1.0, description = "Flicker smoothness"},
+  };
+}
+
+# GLSL smoothstep(edge0, edge1, x) with the interpolant precomputed by the caller.
+# IGLUScript only registers smoothstep for vector types, not f32.
+fun smoothstep01(f32 t) f32 {
+  f32 v = clamp(t, 0.0, 1.0);
+  return v * v * (3.0 - 2.0 * v);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progress = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  # step(0.5, progress): the shader samples only the input on screen
+  boolean useSecondInput = true;
+  if (progress < 0.5) {
+    useSecondInput = false;
+  }
+  setShaderUniform('fade, 'useSecondInput, useSecondInput);
+
+  # flickerMap() was called with uv = vec2(progress, 0.0), so the whole chain is frame-constant.
+  f32 freq = getParameterFloat('flickerFrequency);
+  f32 smoothness = getParameterFloat('flickerSmoothness);
+  f32 strength = getParameterFloat('flickerStrength);
+  f32 flickerBase = freq * 4.0 + 2.0;
+  f32 flickerOffset = 0.5 / flickerBase + progress;
+  f32 flickerSimple = (sin(flickerBase * flickerOffset * 3.1415926536) + 1.0) * 0.5;
+  f32 halfSmoothness = smoothness * 0.5;
+  f32 edge0 = 0.5 - halfSmoothness;
+  f32 edge1 = 0.5 + halfSmoothness;
+  f32 flickerSmooth = smoothstep01((flickerSimple - edge0) / (edge1 - edge0));
+  f32 rampVal = abs(progress - 0.5) * 2.0;
+  f32 flicker = rampVal * (1.0 - strength) + flickerSmooth * strength;
+  setShaderUniform('fade, 'flicker, flicker);
+  # mix(fadeColor, color, flicker) = color * flicker + fadeColor * (1.0 - flicker), with fadeColor
+  # opaque black.
+  vec4 fadeTerm = {0.0, 0.0, 0.0, 1.0 - flicker};
+  setShaderUniform('fade, 'fadeTerm, fadeTerm);
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform bool useSecondInput;
+  uniform float flicker;
+  uniform vec4 fadeTerm;
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    vec4 color;
+    if (useSecondInput) {
+      color = texture2D(s_texture1, uv);
+    } else {
+      color = sampleInput(uv);
+    }
+    gl_FragColor = toOutputFormat(color * flicker + fadeTerm);
+  }
+";

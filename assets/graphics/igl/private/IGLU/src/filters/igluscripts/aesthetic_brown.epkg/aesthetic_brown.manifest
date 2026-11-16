@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "9F1AA042-76B0-4EB7-BAE9-5456B0CCF44B",
+  "displayName": "AESTHETIC BROWN",
+  "description": "[IG Edits] Color filter name. With \"AESTHETIC BROWN\", the creator gets a bright, warm-brown color grade with extra contrast and fine film grain over the camera image.",
+  "iglu": {
+    "legacyId": 3313
+  },
+  "assets": [
+    {
+      "name": "aesthetic_brown_lut.png",
+      "assetHash": "2b099b71037867828ecf53af521c4a19dc062dfd95fc3e1447139e3c23e84278",
+      "hubAssetId": "3037933866539364"
+    },
+    {
+      "name": "aesthetic_brown_grain.png",
+      "assetHash": "f8ba05e53878924e6104d3dc3c41ac2e3803759c78748fd85ee512b37562acdf",
+      "hubAssetId": "1047028121726483"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAQtap8_pr2"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "fd27bd43",
+      "handle": "AQAQ-_XwHVS5",
+      "md5": "39f7f5b87ab5464028867045eb5d9453"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GM8DYTO41UUqGjQGAAMftxOD_DpkbhQoAAAD"
+    }
+  }
+}

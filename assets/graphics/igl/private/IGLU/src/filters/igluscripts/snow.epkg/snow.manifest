@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "F388D1C4-1736-4CDB-9FF1-1FFFBE10E98B",
+  "displayName": "Snow ⋆⁺₊❅⋆",
+  "description": "[IG Edits] Video effect name. With \"Snow\", the creator gets a soft LUT color grade with gently falling snowflakes.",
+  "iglu": {
+    "legacyId": 3252
+  },
+  "assets": [
+    {
+      "name": "snow_lut.png",
+      "assetHash": "81bd7bf8ebcab600450a026abe549b7cd0e6cd3b7ae8693ea924275766e2f8b6",
+      "hubAssetId": "1837017441087062"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAG4jQAqrHl"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "aab74c74",
+      "handle": "AQAFoBYNf88M",
+      "md5": "3c39925d2fdf90ef924c31cf2d1eedff"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GAyh_TIei_9v7tcFAK2kSuRekDpCbhQoAAAD"
+    }
+  }
+}

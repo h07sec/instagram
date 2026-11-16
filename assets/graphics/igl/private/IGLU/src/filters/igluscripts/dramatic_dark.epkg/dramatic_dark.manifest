@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "BC6CF607-9B2E-4F08-A621-76C99B6B59CB",
+  "displayName": "Dramatic Dark",
+  "description": "[IG Edits] Color filter name. With \"Dramatic Dark\", the creator gets a dark, moody LUT color grade with deep shadows, muted colors and warm golden tones applied to the camera image.",
+  "iglu": {
+    "legacyId": 3314
+  },
+  "assets": [
+    {
+      "name": "dramatic_dark_lut.png",
+      "assetHash": "c0948638b6846ccd97480e1593e434c0137dfc54614a61140edf714395f0397b",
+      "hubAssetId": "2483125525542987"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAG0sIBlEft"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "63d31573",
+      "handle": "AQAGb6wxJadk",
+      "md5": "27a7295c7864c9ce54c93c8ba3f44d84"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GF8vXTPlvesK8yoHAPqbjaOr4ygzbhQoAAAD"
+    }
+  }
+}

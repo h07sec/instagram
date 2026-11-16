@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "4900626E-5981-4B6D-A9D5-AB6681E2492A",
+  "displayName": "𝕸𝖆𝖕𝖊𝖑",
+  "description": "[IG Edits] Color filter name. With \"𝕸𝖆𝖕𝖊𝖑\", the creator gets a cool, faded blue LUT color grade with muted warm tones and light skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3322
+  },
+  "assets": [
+    {
+      "name": "mapel_lut.png",
+      "assetHash": "51a7c92eff91eb36faa1fa712c358eeb86e3e347c434397eb3d658aa37e46611",
+      "hubAssetId": "982709210928233"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGaKINrw7_"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "96f9b3ad",
+      "handle": "AQAHTLK6Lzkh",
+      "md5": "5658ba13c577b71e2d0ca7c7c4d90e1d"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GCT4XjP5GzGWVioEAIch62XP9MVybhQoAAAD"
+    }
+  }
+}

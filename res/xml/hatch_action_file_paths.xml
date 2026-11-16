@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="hatch_media" path="hatch_media/" />
+    <cache-path name="hatch_actions" path="hatch_actions/" />
+    <cache-path name="hatch_spaces_shared" path="hatch_spaces_shared/" />
+    <cache-path name="hatch_file_viewer" path="hatch_file_viewer/" />
+</paths>

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1638915299984498",
+  "displayName": "Inst C",
+  "description": "[IG Edits] Video effect name. With \"Inst C\", the creator can apply a Spark-ported bright, cool instant-film look with a dreamy soft focus and fine white dust.",
+  "iglu": {
+    "legacyId": 3344
+  },
+  "assets": [
+    {
+      "name": "inst_c_lut.png",
+      "assetHash": "63a35116247b542610f2d212f4b47b58214068da9fd6a89dbbf93d89fe75e5df",
+      "hubAssetId": "1166326512495470"
+    },
+    {
+      "name": "inst_c_dust.png",
+      "assetHash": "51877c030e491fdf04c17a4e42018f8d938e28ae6ecf34f8c7d297fedc1b98be",
+      "hubAssetId": "1682397469942787"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHv6ZKtNTx"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f977fb7c",
+      "handle": "AQAGieAdqlv7",
+      "md5": "72ab4cfc6761f08d629a3f6ec3a00909"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GB0djjMl40H1xOgDAJQ_VPOrE2sdbhQoAAAD"
+    }
+  }
+}

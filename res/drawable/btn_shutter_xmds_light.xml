@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="?sc_id_capture_shutter_pressed_color" />
+            <stroke android:width="6.0dip" android:color="?sc_id_capture_shutter_border_color" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="?sc_surface_background" />
+            <stroke android:width="6.0dip" android:color="?sc_id_capture_shutter_border_color" />
+        </shape>
+    </item>
+</selector>

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "366022579403397",
+  "displayName": "Film burn black",
+  "description": "[IG Edits] Video effect name. With \"Film burn black\", the creator can apply a Spark-ported dark grade with an animated film-burn overlay.",
+  "iglu": {
+    "legacyId": 3401
+  },
+  "assets": [
+    {
+      "name": "film_burn_black_lut.png",
+      "assetHash": "0c76401e15cf4bfc0521aa7671d8be2d74de5b76d8890c2afb2ca1435e09d55a",
+      "hubAssetId": "1451740309745617"
+    },
+    {
+      "name": "film_burn_black_burn.png",
+      "assetHash": "8dcc7a77b4b346c486dcc96db6c23d83d567755df68661727515a875db3849e0",
+      "hubAssetId": "3276641332521822"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGDGsWQuIA"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "ef176974",
+      "handle": "AQAD5a0t866v",
+      "md5": "3e1224e594f526968e2b57e645f3e3b0"
+    }
+  }
+}

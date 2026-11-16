@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1583474962054097",
+  "displayName": "Flame",
+  "description": "[IG Edits] Video effect name. With \"Flame\", the creator can apply a Spark-ported warm grade with moving fire in the bright parts of the image.",
+  "iglu": {
+    "legacyId": 3349
+  },
+  "assets": [
+    {
+      "name": "flame_lut.png",
+      "assetHash": "11eab5834297f2fb012bdff5b05bb903f17ae390a122fbf264a4aaf550722f92",
+      "hubAssetId": "1771856377362303"
+    },
+    {
+      "name": "flame_fire.png",
+      "assetHash": "7b47ec464906ab747702a792fa59624bc55da911a16eb4238f95f52ecf5bd690",
+      "hubAssetId": "1830746277927770"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADwnexCgdG"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "baad1183",
+      "handle": "AQAF7VDiZDgF",
+      "md5": "5a54b7f6fe7f954428aca98f05f7d09d"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIz98jPXHWp6G3wJAC4gTr0341NobhQoAAAD"
+    }
+  }
+}

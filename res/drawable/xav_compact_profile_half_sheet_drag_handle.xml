@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape android:shape="rectangle"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/xav_compact_profile_half_sheet_drag_handle_color" />
+    <size android:height="2.0dip" android:width="32.0dip" />
+    <corners android:radius="9999.0dip" />
+</shape>

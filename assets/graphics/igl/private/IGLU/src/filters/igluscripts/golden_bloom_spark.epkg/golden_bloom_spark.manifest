@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "DEE9221F-3E65-4BD7-9B27-1C32787B593E",
+  "displayName": "golden bloom",
+  "description": "[IG Edits] Color filter name. With \"golden bloom\", the creator gets a vivid, saturated blue and green landscape LUT color grade applied to the camera image.",
+  "iglu": {
+    "legacyId": 3260
+  },
+  "assets": [
+    {
+      "name": "golden_bloom_spark_lut.png",
+      "assetHash": "c280d899bb243dab6abdf906dcbc26732b03010ee948bfde7fbd75479d7f53e7",
+      "hubAssetId": "1794878714917403"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGj6_EKekb"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "f992238d",
+      "handle": "AQAFcqRwW697",
+      "md5": "dec932455508a6f68a73c6f1261e549f"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGH4fjMayc6NqyJoAPjsnXVEa2RAbhQoAAAD"
+    }
+  }
+}

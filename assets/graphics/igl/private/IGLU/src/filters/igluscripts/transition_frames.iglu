@@ -1,0 +1,103 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_frames, QE-selectable for A/B vs TransitionFramesFilter.
+[Filter TransitionFrames]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'frames,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      outputSize = {1280.0, 720.0},
+      halfSize = {640.0, 360.0},
+      boxHalf = {640.0, 360.0},
+      offset = 0.0,
+      numFrames = 2.0,
+      rad = 0.0,
+      fthA = 0.0,
+      frameColor = {0.0, 0.0, 0.0},
+    },
+    glslShader = glsl,
+  }};
+
+  filter.parameters = {
+    {numFrames = 2.0, min = 1.0, max = 16.0, description = "Number of film frames"},
+    {cornerRadius = 215.0, min = 0.0, max = 500.0, description = "Frame corner radius (px at 1080)"},
+    {feather = 24.0, min = 0.0, max = 200.0, description = "Frame edge feather (px at 1080)"},
+    {padding = {55.0, 440.0}, min = {0.0, 0.0}, max = {1000.0, 1000.0}, description = "Frame padding (px at 1080)"},
+  };
+}
+
+fun ramp(f32 e0, f32 e1, f32 x) f32 {
+  return min(max((x - e0) / (e1 - e0), 0.0), 1.0);
+}
+
+fun easeInOutCubic(f32 t) f32 {
+  if (t < 0.5) {
+    return 4.0 * t * t * t;
+  } else {
+    f32 f = -2.0 * t + 2.0;
+    return 1.0 - pow(f, 3.0) / 2.0;
+  }
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+
+  vec2 size = getTextureSize('default);
+  vec2 halfSize = size * 0.5;
+  setShaderUniform('frames, 'outputSize, size);
+  setShaderUniform('frames, 'halfSize, halfSize);
+
+  f32 numFrames = getParameterFloat('numFrames);
+  setShaderUniform('frames, 'numFrames, numFrames);
+  setShaderUniform('frames, 'offset, easeInOutCubic(ramp(0.1, 0.95, p)) * numFrames);
+
+  # parabola(progress, 0.5)
+  f32 frameAnim = pow(4.0 * p * (1.0 - p), 0.5);
+  f32 sizeScale = min(size.x, size.y) / 1080.0;
+  setShaderUniform('frames, 'rad, getParameterFloat('cornerRadius) * sizeScale * frameAnim);
+  setShaderUniform('frames, 'fthA, getParameterFloat('feather) * sizeScale * frameAnim);
+
+  vec2 pad = getParameterVec2('padding) * sizeScale;
+  setShaderUniform('frames, 'boxHalf, halfSize - pad * frameAnim);
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform vec2 outputSize;
+  uniform vec2 halfSize;
+  uniform vec2 boxHalf;
+  uniform float offset;
+  uniform float numFrames;
+  uniform float rad;
+  uniform float fthA;
+  uniform vec3 frameColor;
+  // Scalar radius: the vec4-per-corner form was called with four identical components,
+  // so both component selects were dead.
+  float sdRoundBox(vec2 p, vec2 b, float r) {
+    vec2 q = abs(p) - b + r;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+  }
+  float random(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    float frameIndex = floor(uv.x + offset) / numFrames;
+    float thresh = random(frameIndex);
+    float blend = 1.0 - step(frameIndex, thresh);
+    vec2 frameUv = vec2(fract(uv.x + offset), uv.y);
+    vec4 a = sampleInput(frameUv);
+    vec4 b = texture2D(s_texture1, frameUv);
+    vec4 color = mix(a, b, blend);
+    vec2 st = frameUv * outputSize;
+    float d = sdRoundBox(st - halfSize, boxHalf, rad);
+    float frame = smoothstep(0.0 - fthA, 1.0 + fthA, d);
+    color.rgb = mix(color.rgb, frameColor.rgb, frame);
+    color = vec4(color.rgb, 1.0);
+    gl_FragColor = toOutputFormat(color);
+  }
+";

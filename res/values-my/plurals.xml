@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">ပြီးခဲ့တဲ့ %1$d ရက်</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">ပြီးခဲ့တဲ့ %1$d နာရီ</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">ပြီးခဲ့တဲ့ %1$d မိနစ်</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">ဘရောက်ဇာ အလုပ် %1$d ခု</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">%1$d နာရီကြာရင် သက်တမ်းကုန်ပါမယ်</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">%1$d မိနစ်ကြာရင် သက်တမ်းကုန်ပါမယ်</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">စိစစ်ပေးဖို့ လိုအပ်တဲ့ အလုပ် %1$d ခု ရှိပါတယ်</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">ခရီးသည် %1$d ဦး</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">စိစစ်ပေးဖို့ လိုအပ်တဲ့ အလုပ် %1$d ခု ရှိပါတယ်</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">ချိတ်ဆက်ကိရိယာ %1$d ခု</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">ခရီးဆောင်အိတ် %1$d လုံး</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">အကြီးစား ခရီးဆောင် အိတ် %1$d လုံး</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">ရပ်နားမှု %1$d ကြိမ်</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">ရပ်တန့်မှု %1$d ခု</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">ရွေးစရာ %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">ရုပ်ပုံ %1$d ပုံ သုံးရန်</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">%1$d ရက်အတွက် အခမဲ့ ပြန်ပို့မှု</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">%1$d ရက်အတွင်း ရောင်းသူထံ ပြန်ပို့နိုင်ခြင်း</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">ယာယီကတ်က %1$d နာရီကြာရင် သက်တမ်းကုန်ပါမယ်</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">အကြောင်းအရာ %1$d ခု</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">ပစ္စည်း %1$d ခု</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">%1$d နာရီတစ်ကြိမ်</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">%1$d မိနစ်တိုင်း</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">%1$d စက္ကန့်တိုင်း</item>
+    </plurals>
+</resources>

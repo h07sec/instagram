@@ -1,0 +1,1 @@
+(function(elementSelectorType,elementSelectorString,highlightElement,viewportLandingOffsetPx,viewportLandingZone){window._META.IabBookmarkHookup(elementSelectorType,elementSelectorString,highlightElement,viewportLandingOffsetPx,viewportLandingZone)})

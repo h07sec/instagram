@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d d. gelede</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d u. gelede</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d min. gelede</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d blaaier take</item>
+        <item quantity="one">%1$d blaaiertaak</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">Verval oor %1$d uur</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">Verval oor %1$d minute</item>
+        <item quantity="one">Verval oor %1$d minuut</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d take moet gekontroleer word</item>
+        <item quantity="one">’n Taak moet gekontroleer word</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d passasiers</item>
+        <item quantity="one">%1$d passasier</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d take moet gekontroleer word</item>
+        <item quantity="one">%1$d taak moet gekontroleer word</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d verbinders</item>
+        <item quantity="one">%1$d verbinder</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d handbagasietasse</item>
+        <item quantity="one">%1$d handbagasietas</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">%1$d ingeweegde tasse</item>
+        <item quantity="one">%1$d ingeweegde tas</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d stoppe</item>
+        <item quantity="one">%1$d stop</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d stoppe</item>
+        <item quantity="one">%1$d stop</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">Opsies %1$s</item>
+        <item quantity="one">Opsie %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">Gebruik %1$d prente</item>
+        <item quantity="one">Gebruik %1$d foto</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">Gratis terugsendings vir %1$d dae</item>
+        <item quantity="one">Gratis terugsendings vir %1$d dag</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">%1$d dae terugsendings</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">Tydelike kaart verval oor %1$d uur</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">Volg almal (%1$d)</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">Volg (%1$d)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">Elke %1$d uur</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">Elke %1$d minute</item>
+        <item quantity="one">Elke %1$d minuut</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">Elke %1$d sekondes</item>
+        <item quantity="one">Elke %1$d sekonde</item>
+    </plurals>
+</resources>

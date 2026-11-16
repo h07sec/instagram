@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130002">Рэгіён</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Адрас</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130006">Кв/пам. (неабавязкова)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Закрыць браўзер</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s хоча выкарыстаць месцазнаходжанне вашай прылады.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Дазволіць</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Заблакіраваць</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Перайсці на вэб-сайт</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Назад</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">У дамена %1$s ёсць праблемы з сертыфікатам бяспекі. Абагульванне асабістай інфармацыі, у тым ліку пароляў і нумароў крэдытных картак, з гэтым вэб-сайтам можа быць небяспечным.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Гэты вэб-сайт не выкарыстоўвае бяспечнае падключэнне</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Нешта пайшло не так</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Электронная пошта</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Вэб-сайт, які вы праглядаеце, спрабуе адкрыць знешнюю праграму. Ці хочаце вы працягнуць?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Працягнуць</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Вы збіраецеся пакінуць нашу праграму</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Магчыма, гэта звязана з тэхнічнай праблемай, якую мы ўжо вырашаем. Паспрабуйце перазагрузіць старонку.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Абнавіць</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Старонка пакуль недаступная</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Прозвішча</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Немагчыма загрузіць Старонку</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Адкрыць у праграме \"%1$s\"</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Іншыя варыянты</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Імя</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Вы выконваеце прагляд у поўнаэкранным рэжыме. Каб выйсці з яго, змахніце налева або націсніце кнопку \"Назад\".</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Узніклі праблемы з устаноўкай мовы (%1$s) для праграмы \"%2$s\". Паўтарыце спробу ці выкарыстоўвайце \"%2$s\" на англійскай мове.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Пачакайце. Устанаўліваем мову (%1$s)…</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Паўтарыць спробу</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">Перайсці на англійскую (ЗША)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f4">паштовы індэкс</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13013b">Указанне часу</string>
+</resources>

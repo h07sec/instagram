@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "16990848-D4D6-4E73-BA57-4D41E562392B",
+  "displayName": "LIGHT LEAK",
+  "description": "[IG Edits] Color filter name. With \"LIGHT LEAK\", the creator gets a warm yellow-green color grade with golden light leaks sweeping across the frame.",
+  "iglu": {
+    "legacyId": 3306
+  },
+  "assets": [
+    {
+      "name": "light_leak_spark_lut.png",
+      "assetHash": "3859e26e43c4792663ed502b43ed56d8fdea549bb57ef285c04dfde687fb841f",
+      "hubAssetId": "1813107076374500"
+    },
+    {
+      "name": "light_leak_spark_leaks.png",
+      "assetHash": "4b39226d2dddc1c052f00455276e61adb3b7e3c02692808ab0861cbaa32bb1a7",
+      "hubAssetId": "1109096158380020"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAIoxnmimgK"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b5b73033",
+      "handle": "AQAEeGUgJRPK",
+      "md5": "584b3835fcf7b528c8d1e3b4034f0f00"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GOhc5TMhFKnbtmkIAK4lzeZ2IwYDbhQoAAAD"
+    }
+  }
+}

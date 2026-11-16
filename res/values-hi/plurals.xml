@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="agent_permission_requested_time_days">
+        <item quantity="other">%1$d दिन पहले</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_hours">
+        <item quantity="other">%1$d घंटे पहले</item>
+    </plurals>
+    <plurals name="agent_permission_requested_time_minutes">
+        <item quantity="other">%1$d मिनट पहले</item>
+    </plurals>
+    <plurals name="desktop_browser_tasks_count">
+        <item quantity="other">%1$d ब्राउज़र टास्क</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_hours">
+        <item quantity="other">%1$d घंटे में समय-सीमा समाप्त हो जाएगी</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_checkout_expires_in_minutes">
+        <item quantity="other">%1$d मिनट में समय-सीमा समाप्त हो जाएगी</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_composer_review">
+        <item quantity="other">%1$d टास्क को रिव्यू करने की ज़रूरत है</item>
+        <item quantity="one">टास्क को रिव्यू करने की ज़रूरत है</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_flight_passenger_count">
+        <item quantity="other">%1$d सवारियाँ</item>
+        <item quantity="one">%1$d यात्री</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_pending_card_text">
+        <item quantity="other">%1$d टास्क को रिव्यू करने की ज़रूरत है</item>
+    </plurals>
+    <plurals name="hatch_agent_permission_shopify_item_count">
+        <item quantity="other">%1$d आइटम</item>
+    </plurals>
+    <plurals name="hatch_connector_catalog_custom_count">
+        <item quantity="other">%1$d कनेक्टर्स</item>
+        <item quantity="one">%1$d कनेक्टर</item>
+    </plurals>
+    <plurals name="hatch_flight_details_carry_on_bags">
+        <item quantity="other">%1$d कैरी-ऑन बैग</item>
+    </plurals>
+    <plurals name="hatch_flight_details_checked_bags">
+        <item quantity="other">चेक किए गए %1$d बैग</item>
+        <item quantity="one">चेक किया गया %1$d बैग</item>
+    </plurals>
+    <plurals name="hatch_flight_stops">
+        <item quantity="other">%1$d स्टॉप</item>
+    </plurals>
+    <plurals name="hatch_generic_list_flight_stops">
+        <item quantity="other">%1$d स्टॉप</item>
+    </plurals>
+    <plurals name="hatch_image_options_multi_selection_message">
+        <item quantity="other">विकल्प %1$s</item>
+    </plurals>
+    <plurals name="hatch_image_options_use_images">
+        <item quantity="other">%1$d फ़ोटो का उपयोग करें</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_free_for_days">
+        <item quantity="other">%1$d दिनों के अंदर फ़्री वापसी की सुविधा</item>
+        <item quantity="one">%1$d दिन के अंदर फ़्री वापसी की सुविधा</item>
+    </plurals>
+    <plurals name="hatch_pdp_returns_window">
+        <item quantity="other">%1$d दिन के अंदर वापसी</item>
+    </plurals>
+    <plurals name="hatch_permission_expiry_hours">
+        <item quantity="other">अस्थायी कार्ड की समय-सीमा %1$d घंटों में समाप्त हो जाएगी</item>
+        <item quantity="one">अस्थायी कार्ड की समय-सीमा %1$d घंटे में समाप्त हो जाएगी</item>
+    </plurals>
+    <plurals name="hatch_product_items_count">
+        <item quantity="other">%1$d आइटम</item>
+    </plurals>
+    <plurals name="hatch_shopping_cart_item_count">
+        <item quantity="other">%1$d आइटम</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_all">
+        <item quantity="other">सभी को फ़ॉलो करें (%1$d)</item>
+    </plurals>
+    <plurals name="madrid_connections_follow_selected">
+        <item quantity="other">फ़ॉलो करें (%1$d)</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_hours">
+        <item quantity="other">हर %1$d घंटे पर</item>
+        <item quantity="one">हर %1$d घंटे</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_minutes">
+        <item quantity="other">हर %1$d मिनट में</item>
+    </plurals>
+    <plurals name="status_task_schedule_interval_seconds">
+        <item quantity="other">हर %1$d सेकंड में</item>
+    </plurals>
+</resources>

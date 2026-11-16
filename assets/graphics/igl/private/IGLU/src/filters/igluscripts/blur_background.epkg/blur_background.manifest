@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "516514899698264",
+  "displayName": "Blur Background ✨",
+  "description": "[IG Edits] Video effect name. With \"Blur Background ✨\", the creator can apply a Spark-ported portrait-mode look: the person stays sharp and the background is softly blurred.",
+  "iglu": {
+    "legacyId": 3392,
+    "subject": {
+      "enabled": true,
+      "fullFrameEnabled": true,
+      "typeSuggestions": [
+        "person"
+      ]
+    }
+  }
+}

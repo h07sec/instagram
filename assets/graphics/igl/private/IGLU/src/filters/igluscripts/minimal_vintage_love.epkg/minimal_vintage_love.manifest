@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "797FC94E-EE9E-4B94-A361-2042AD4D8ED3",
+  "displayName": "Minimal Vintage Love",
+  "description": "[IG Edits] Color filter name. With \"Minimal Vintage Love\", the creator gets a soft vintage color grade with light film dust and a small hand-drawn heart near the bottom.",
+  "iglu": {
+    "legacyId": 3316
+  },
+  "assets": [
+    {
+      "name": "minimal_vintage_love_lut.png",
+      "assetHash": "f9d5fffd830548017e1821378a32d95ec608976eb49881e605888a7d9f49aa3a",
+      "hubAssetId": "1158758903387718"
+    },
+    {
+      "name": "minimal_vintage_love_dust.png",
+      "assetHash": "9f2b53469d34c17ca18a2ed6e5e3c3e7c5de81c69f6d11d77a8ed411f4b324d8",
+      "hubAssetId": "1743773163390829"
+    },
+    {
+      "name": "minimal_vintage_love_heart.png",
+      "assetHash": "ade6815933833b8bdbdad373920dc3a0f53ee7b66caef4bfd64efd4095c2d793",
+      "hubAssetId": "1098164593106868"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQADhNN-BMgY"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "a623bb5a",
+      "handle": "AQAHENlV4f_e",
+      "md5": "8b5e10c999453b12fa63f4c54083d76a"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFiSjzNAUpUJOvkDACiK7qmGShpZbhQoAAAD"
+    }
+  }
+}

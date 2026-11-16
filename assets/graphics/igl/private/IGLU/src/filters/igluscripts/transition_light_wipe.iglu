@@ -1,0 +1,94 @@
+# IGLUSCRIPTCOLLISION_BYPASS: IGLUScript port of transition_light_wipe, QE-selectable for A/B vs TransitionLightWipeFilter.
+[Filter TransitionLightWipe]
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  filter.passes = {{
+    name = 'light_wipe,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      tp = 0.0,
+      normSize = {1.0, 1.0},
+      timeFade = 0.0,
+      lumaMix = 0.0,
+      coreK = -250.0,
+      glowK = -7.5,
+      displacement = 0.2,
+      neonColor = {0.76, 0.26, 0.94, 1.0},
+    },
+    glslShader = glsl,
+  }};
+
+  filter.parameters = {
+    {coreWidth = 0.1, min = 0.001, max = 1.0, description = "Neon core width"},
+    {glowWidth = 0.4, min = 0.001, max = 2.0, description = "Neon glow width"},
+  };
+}
+
+# GLSL smoothstep(edge0, edge1, x) with the interpolant precomputed by the caller.
+# IGLUScript only registers smoothstep for vector types, not f32.
+fun smoothstep01(f32 t) f32 {
+  f32 v = clamp(t, 0.0, 1.0);
+  return v * v * (3.0 - 2.0 * v);
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 progress = getParameterFloat('progress);
+  f32 tp = -(cos(3.14159265358979 * progress) - 1.0) / 2.0;
+  setShaderUniform('light_wipe, 'tp, tp);
+
+  vec2 size = getTextureSize('default);
+  setShaderUniform('light_wipe, 'normSize, size / max(size.x, size.y));
+
+  setShaderUniform('light_wipe, 'lumaMix, smoothstep01((tp - 0.75) / (0.25 - 0.75)));
+  f32 absTp = abs(tp - 0.5);
+  setShaderUniform('light_wipe, 'timeFade, smoothstep01((absTp - 0.5) / (0.45 - 0.5)));
+
+  setShaderUniform('light_wipe, 'coreK, -25.0 / getParameterFloat('coreWidth));
+  setShaderUniform('light_wipe, 'glowK, -3.0 / getParameterFloat('glowWidth));
+}
+
+string glsl = "
+  varying vec2 sourceTextureCoordinate;
+  BaseUniformsOpenGL;
+  uniform sampler2D s_texture1;
+  uniform float tp;
+  uniform vec2 normSize;
+  uniform float timeFade;
+  uniform float lumaMix;
+  uniform float coreK;
+  uniform float glowK;
+  uniform float displacement;
+  uniform vec4 neonColor;
+  void main() {
+    vec2 uv = sourceTextureCoordinate;
+    // slideDirection is the constant {1.0, 1.0}; UP/DOWN are backend-flipped so this
+    // normalize() has to stay in GLSL, where it folds at compile time.
+    vec2 normDir = normalize(vec2(1.0, DOWN));
+    float maxDist = abs(dot(abs(normDir), normSize));
+    float normProg = (1.0 - tp - 0.5) * maxDist + 0.5;
+    vec2 st = (uv - 0.5) * normSize;
+    float dist = dot(normDir, st) - 0.5 + normProg;
+    vec4 texA = sampleInput(uv);
+    vec4 texB = texture2D(s_texture1, uv);
+    float lumaA = dot(texA.rgb, vec3(0.299, 0.587, 0.114));
+    float lumaB = dot(texB.rgb, vec3(0.299, 0.587, 0.114));
+    float offset = mix(lumaA, lumaB, lumaMix) - 0.5;
+    offset = offset * max(0.0, 0.3 - abs(dist));
+    offset = offset * timeFade;
+    dist = dist + offset * displacement;
+    float alpha = step(0.0, dist);
+    vec4 color = mix(texB, texA, alpha);
+    float absDist = abs(dist);
+    float core = exp(coreK * absDist);
+    float glow = exp(glowK * absDist);
+    color.rgb = mix(color.rgb, neonColor.rgb, glow * 0.3 * timeFade);
+    color.rgb += glow * neonColor.rgb * 0.7 * timeFade;
+    color.rgb += core * timeFade;
+    color.rgb = clamp(color.rgb, 0.0, 1.0);
+    gl_FragColor = toOutputFormat(color);
+  }
+";

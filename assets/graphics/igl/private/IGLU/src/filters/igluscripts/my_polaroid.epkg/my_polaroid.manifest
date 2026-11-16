@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1008376826364137",
+  "displayName": "My Polaroid",
+  "description": "[IG Edits] Color filter name. With \"My Polaroid\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3387
+  },
+  "assets": [
+    {
+      "name": "my_polaroid_lut.png",
+      "assetHash": "f295ab4f4f388e63e70553d7fd1377facc7ff97f1ba64c6ebc12d0fd549794c4",
+      "hubAssetId": "1650117516460906"
+    },
+    {
+      "name": "my_polaroid_frame.png",
+      "assetHash": "79a25ab602df161fe824d16f23cd5369291976d460c4a30921b39ef620ec94a3",
+      "hubAssetId": "1123135093596109"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAF_r61iJN_"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "3f93c00c",
+      "handle": "AQAD62Q-xLvL",
+      "md5": "d98146a742c6b36a16c1b5ef3970a331"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GKqBkDNdGUDdcXUHAAl0joNYsMgAbhQoAAAD"
+    }
+  }
+}

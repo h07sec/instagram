@@ -1,0 +1,108 @@
+[Filter TransitionMulticlipClassicFlicker]
+
+# Multiclip Classic Flicker (AE: Edits_Transition_collect_01 / classic_flicker).
+# A hard cut from clip A to clip B inside a black strobe: in AE an adjustment
+# layer runs Strobe Light (black, 0.05s on every 0.1s) and fades in over its
+# first 0.083s; the cut lands at 0.767s, as a black flash ends.
+#
+# The strobe runs at a fixed rate in real seconds (flashRate, AE's 10/s), so
+# the number of flashes follows the transition's length: the AE comp's 4.8
+# strobe cycles at the 0.483s default, 1 at 0.1s, 30 at 3s. `duration` is the
+# transition length in seconds (the manifest's `duration` customization). The
+# cut stays at the same point of progress and always lands as a black flash
+# ends.
+#
+# Ported from the Easel web tool's multiclip_classic_flicker.iglu.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+
+  filter.parameters = {
+    {duration = 0.483, min = 0.1, max = 5.0, description = "Transition length (seconds)"},
+    {flashRate = 10.0, min = 1.0, max = 30.0, description = "Strobe flashes per second"},
+    {strobeColor = {0.0, 0.0, 0.0, 1.0}, description = "Strobe Color"},
+  };
+
+  filter.passes = {{
+    name = 'flicker,
+    inputs = {'default, 'transition},
+    shaderInputNames = {'default, 's_texture1},
+    uniforms = {
+      showB = false,
+      strobeMix = 0.0,
+      opaqueStrobe = false,
+      strobeColor = {0.0, 0.0, 0.0, 1.0},
+    },
+    glslShader = glsl,
+  }};
+}
+
+# Progress of the cut: (0.767s - 0.4s) / 0.483s in the AE comp.
+f32 P_CUT = 0.7598;
+# The AE layer fades in over 0.83 strobe cycles, 17.2% of the comp's window.
+f32 FADE_CYCLES = 0.83;
+f32 FADE_FRACTION = 0.172;
+
+[PreRender]
+fun preRender(Filter filter) {
+  f32 p = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+  f32 duration = max(getParameterFloat('duration), 0.01);
+
+  # Strobe cycles across the whole transition.
+  f32 cycles = duration * getParameterFloat('flashRate);
+
+  boolean showB = false;
+  if (p >= P_CUT) {
+    showB = true;
+  }
+
+  # Cycle position, phased so a black half-cycle ends exactly at the cut.
+  f32 c = (p - P_CUT) * cycles + 0.5;
+  f32 phase = c - floor(c);
+  f32 on = 0.0;
+  if (phase < 0.5) {
+    on = 1.0;
+  }
+
+  # Strobe fade-in: 0.83 cycles, but never more than 17.2% of the transition,
+  # so a short transition still reaches full black on its first flash.
+  f32 fade = max(min(FADE_CYCLES, FADE_FRACTION * cycles), 0.001);
+  f32 opacity = clamp(p * cycles / fade, 0.0, 1.0);
+  if (p >= 1.0) {
+    opacity = 0.0;
+  }
+
+  vec4 strobeColor = getParameterVec4('strobeColor);
+  f32 strobeMix = on * opacity * strobeColor.a;
+  setShaderUniform('flicker, 'showB, showB);
+  setShaderUniform('flicker, 'strobeMix, strobeMix);
+  setShaderUniform('flicker, 'opaqueStrobe, strobeMix == 1.0);
+  setShaderUniform('flicker, 'strobeColor, strobeColor);
+}
+
+string glsl = "
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform bool showB;
+uniform float strobeMix;
+uniform bool opaqueStrobe;
+uniform vec4 strobeColor;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 col = vec4(strobeColor.rgb, 1.0);
+  if (!opaqueStrobe) {
+    if (showB) {
+      col = texture2D(s_texture1, uv);
+    } else {
+      col = sampleInput(uv);
+    }
+    col = mix(col, vec4(strobeColor.rgb, 1.0), strobeMix);
+  }
+  gl_FragColor = toOutputFormat(col);
+}
+";

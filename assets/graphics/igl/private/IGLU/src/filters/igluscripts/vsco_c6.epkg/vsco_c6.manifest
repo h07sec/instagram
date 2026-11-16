@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "2408558299334475",
+  "displayName": "VSCO C6",
+  "description": "[IG Edits] Color filter name. With \"VSCO C6\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3369
+  },
+  "assets": [
+    {
+      "name": "vsco_c6_lut.png",
+      "assetHash": "ff7549561f30e1b96cc7a84d7c97821d35e8d1553b3cde7747cae40b35f9fba0",
+      "hubAssetId": "1636137158001741"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAMruSiVfwp"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e42f550a",
+      "handle": "AQAF_FTOkfyM",
+      "md5": "9ce018625b9bc4d433b59e09c31385eb"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GN230jTqPrYdoO0GAKoqChIYnyNebhQoAAAD"
+    }
+  }
+}

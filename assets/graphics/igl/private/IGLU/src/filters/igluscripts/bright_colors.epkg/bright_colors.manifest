@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "487906425934459",
+  "displayName": "bright colors",
+  "description": "[IG Edits] Color filter name. With \"bright colors\", the creator can apply a Spark-ported bright, saturated, warm color grade.",
+  "iglu": {
+    "legacyId": 3395
+  },
+  "assets": [
+    {
+      "name": "bright_colors_lut.png",
+      "assetHash": "e56c72d6796eff7513cb217f458be14e0762b97a95bf53ed10f2b3d90d6535bb",
+      "hubAssetId": "1726434065665929"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFOe36POrB"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "e3e53b2d",
+      "handle": "AQAD9B0hLk8l",
+      "md5": "4781a20ce51e23271529278e6dcb6163"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "F7A39E87-ABE7-4240-AAB2-4CF31D741A73",
+  "displayName": "Flickering",
+  "description": "[IG Edits] Video effect name. With \"Flickering\", the creator's video flickers on and off to black at a steady beat, like a faulty old screen.",
+  "iglu": {
+    "legacyId": 3267
+  },
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD5bMpZwu4"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "231c6eeb",
+      "handle": "AQAExaUWSkC8",
+      "md5": "69e1278ec9c3e29656000f81673cca7a"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGc_9DI_JU-YclwGAF5zX6IHxw9jbhQoAAAD"
+    }
+  }
+}

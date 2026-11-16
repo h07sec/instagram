@@ -1,0 +1,210 @@
+[Filter VideoGlitch2Out]
+# Glitch transition effect — content disappears with glitch distortion.
+# Outro version of VideoGlitch2 — reuses same shaders with outro=1.
+#
+# Single-pass pipeline:
+#   Procedural noise-driven glitch offset with posterized time stepping.
+#   outro parameter controls direction: 0 = appearing, 1 = disappearing.
+#   The 7 slice positions, flips and the offset size depend only on the posterized
+#   progress, so PreRender computes them once per frame; the shaders only compare
+#   each pixel against them.
+
+[Init]
+fun init(Filter filter) {
+    filter.parameters = {
+        {duration = 2.0, min = 1.0, max = 5.0, description = "Duration"},
+        {intensity = 0.5, min = 0.01, max = 1.0, description = "Intensity"},
+    };
+
+    filter.passes = {
+        {
+            name = 'pass0,
+            inputs = {'default},
+            uniforms = {
+                line0 = 0.0,
+                line1 = 0.0,
+                line2 = 0.0,
+                line3 = 0.0,
+                line4 = 0.0,
+                line5 = 0.0,
+                line6 = 0.0,
+                flip0 = 0.0,
+                flip1 = 0.0,
+                flip2 = 0.0,
+                flip3 = 0.0,
+                flip4 = 0.0,
+                flip5 = 0.0,
+                flip6 = 0.0,
+                offsetScale = 0.0,
+                visible = 0.0,
+            },
+            glslShader = glslGlitch,
+            metalShader = metalGlitch,
+        },
+    };
+}
+
+fun glitchStep(f32 edge, f32 x) f32 {
+    if (x < edge) {
+        return 0.0;
+    }
+    return 1.0;
+}
+
+fun dotNoise(f32 px, f32 py, f32 pz) f32 {
+    f32 phi = 1.618033988;
+    vec3 c0 = {-0.571464913, 0.814921382, 0.096597072};
+    vec3 c1 = {-0.278044873, -0.303026659, 0.911518454};
+    vec3 c2 = {0.772087367, 0.494042493, 0.399753815};
+    f32 a0 = c0.x * px + c1.x * py + c2.x * pz;
+    f32 a1 = c0.y * px + c1.y * py + c2.y * pz;
+    f32 a2 = c0.z * px + c1.z * py + c2.z * pz;
+    vec3 q = {phi * px, phi * py, phi * pz};
+    f32 b0 = dot(q, c0);
+    f32 b1 = dot(q, c1);
+    f32 b2 = dot(q, c2);
+    return cos(a0) * sin(b0) + cos(a1) * sin(b1) + cos(a2) * sin(b2);
+}
+
+fun dividingLine(f32 x, f32 posterized) f32 {
+    f32 line = (dotNoise(x * 113.45, posterized * 56.2, 0.0) + 3.0) / 6.0;
+    return line;
+}
+
+fun flip(f32 x, f32 posterized) f32 {
+    return glitchStep(0.0, dotNoise(x * 113.45 + 5.0, posterized * 56.2 + 16.3, -9.0));
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    f32 progress = getParameterFloat('progress);
+    f32 timeSteps = 12.5 * getParameterFloat('duration);
+    f32 p = mix(progress, 1.0 - progress, glitchStep(0.5, 1.0));
+    f32 posterized = ceil(p * timeSteps) / timeSteps;
+    f32 curve = pow(1.0 - posterized, 8.0);
+    setShaderUniform('pass0, 'line0, dividingLine(0.0, posterized));
+    setShaderUniform('pass0, 'line1, dividingLine(1.0, posterized));
+    setShaderUniform('pass0, 'line2, dividingLine(2.0, posterized));
+    setShaderUniform('pass0, 'line3, dividingLine(3.0, posterized));
+    setShaderUniform('pass0, 'line4, dividingLine(4.0, posterized));
+    setShaderUniform('pass0, 'line5, dividingLine(5.0, posterized));
+    setShaderUniform('pass0, 'line6, dividingLine(6.0, posterized));
+    setShaderUniform('pass0, 'flip0, flip(0.0, posterized));
+    setShaderUniform('pass0, 'flip1, flip(1.0, posterized));
+    setShaderUniform('pass0, 'flip2, flip(2.0, posterized));
+    setShaderUniform('pass0, 'flip3, flip(3.0, posterized));
+    setShaderUniform('pass0, 'flip4, flip(4.0, posterized));
+    setShaderUniform('pass0, 'flip5, flip(5.0, posterized));
+    setShaderUniform('pass0, 'flip6, flip(6.0, posterized));
+    setShaderUniform('pass0, 'offsetScale, max(0.0, getParameterFloat('intensity) * curve));
+    setShaderUniform('pass0, 'visible, glitchStep(1.5 / timeSteps, p));
+}
+
+string glslGlitch = "
+    precision highp float;
+    varying vec2 sourceTextureCoordinate;
+    uniform float line0;
+    uniform float line1;
+    uniform float line2;
+    uniform float line3;
+    uniform float line4;
+    uniform float line5;
+    uniform float line6;
+    uniform float flip0;
+    uniform float flip1;
+    uniform float flip2;
+    uniform float flip3;
+    uniform float flip4;
+    uniform float flip5;
+    uniform float flip6;
+    uniform float offsetScale;
+    uniform float visible;
+
+    vec4 sampleInputClipped(vec2 uv) {
+        vec4 color = sampleInput(uv);
+        float inBounds = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
+        return color * inBounds;
+    }
+
+    vec2 shiftSlice(vec2 uv, float dividing_line, float flip, float vert) {
+        vec2 offset_h = vec2(step(dividing_line, uv.y) - 0.5, 0.0);
+        vec2 offset_v = vec2(0.0, step(dividing_line, uv.x) - 0.5);
+        vec2 offset = mix(offset_h, offset_v, vert);
+        offset = mix(offset, offset * -1.0, flip);
+        offset *= offsetScale;
+        return uv + offset;
+    }
+
+    void main() {
+        vec2 uv = sourceTextureCoordinate;
+        uv = shiftSlice(uv, line0, flip0, 0.0);
+        uv = shiftSlice(uv, line1, flip1, 1.0);
+        uv = shiftSlice(uv, line2, flip2, 0.0);
+        uv = shiftSlice(uv, line3, flip3, 1.0);
+        uv = shiftSlice(uv, line4, flip4, 0.0);
+        uv = shiftSlice(uv, line5, flip5, 1.0);
+        uv = shiftSlice(uv, line6, flip6, 0.0);
+        vec4 color = sampleInputClipped(uv);
+        color *= visible;
+        gl_FragColor = toOutputFormat(color);
+    }
+";
+
+string metalGlitch = "
+    struct fragmentOut { float4 _gl_FragColor [[color(0)]]; };
+    struct fragmentIn { float2 sourceTextureCoordinate [[user(locn1)]]; };
+
+    typedef struct {
+        BaseUniformsMetal;
+        float line0;
+        float line1;
+        float line2;
+        float line3;
+        float line4;
+        float line5;
+        float line6;
+        float flip0;
+        float flip1;
+        float flip2;
+        float flip3;
+        float flip4;
+        float flip5;
+        float flip6;
+        float offsetScale;
+        float visible;
+    } Uniforms;
+
+    float4 sampleInputClipped(DefaultInputs defaultInputs, float2 uv) {
+        float4 color = sampleInput(defaultInputs, uv);
+        float inBounds = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
+        return color * inBounds;
+    }
+
+    float2 shiftSlice(float2 uv, float dividing_line, float flip, float vert, float offsetScale) {
+        float2 offset_h = float2(step(dividing_line, uv.y) - 0.5, 0.0);
+        float2 offset_v = float2(0.0, step(dividing_line, uv.x) - 0.5);
+        float2 offset = mix(offset_h, offset_v, vert);
+        offset = mix(offset, offset * -1.0, flip);
+        offset *= offsetScale;
+        return uv + offset;
+    }
+
+    fragment fragmentOut fragmentShader(fragmentIn in [[stage_in]],
+                                        constant Uniforms & uniforms [[buffer(1)]],
+                                        DefaultInputs defaultInputs
+                                        ) {
+        float2 uv = in.sourceTextureCoordinate;
+        uv = shiftSlice(uv, uniforms.line0, uniforms.flip0, 0.0, uniforms.offsetScale);
+        uv = shiftSlice(uv, uniforms.line1, uniforms.flip1, 1.0, uniforms.offsetScale);
+        uv = shiftSlice(uv, uniforms.line2, uniforms.flip2, 0.0, uniforms.offsetScale);
+        uv = shiftSlice(uv, uniforms.line3, uniforms.flip3, 1.0, uniforms.offsetScale);
+        uv = shiftSlice(uv, uniforms.line4, uniforms.flip4, 0.0, uniforms.offsetScale);
+        uv = shiftSlice(uv, uniforms.line5, uniforms.flip5, 1.0, uniforms.offsetScale);
+        uv = shiftSlice(uv, uniforms.line6, uniforms.flip6, 0.0, uniforms.offsetScale);
+        float4 color = sampleInputClipped(defaultInputs, uv);
+        color *= uniforms.visible;
+        fragmentOut out = {};
+        out._gl_FragColor = toOutputFormat(color);
+        return out;
+    }
+";

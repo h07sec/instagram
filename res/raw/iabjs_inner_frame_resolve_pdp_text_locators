@@ -1,0 +1,1 @@
+(function(locatorsByFieldJSON){try{return window._META.IABInnerFrame.resolvePdpTextLocators(JSON.parse(locatorsByFieldJSON))}catch{return{}}})

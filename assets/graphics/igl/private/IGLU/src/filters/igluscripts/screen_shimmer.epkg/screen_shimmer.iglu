@@ -1,0 +1,239 @@
+[Filter ScreenShimmer]
+[MaskBehavior composite]
+[LightBehavior premultiplied]
+
+[Init]
+fun init(Filter filter) {
+  filter.parameters = {
+    {waveWidth = 0.22, min = 0.05, max = 2.0, description = "waveWidth"},
+    {opacity = 0.20, min = 0.0, max = 1.0, description = "opacity"},
+    {type = 0.0, min = 0.0, max = 1.0, description = "type"},
+    {easeIn = 0.0, min = 0.0, max = 1.0, description = "easeIn"},
+    {easeOut = 0.15, min = 0.0, max = 1.0, description = "easeOut"},
+    {dipAmount = 0.04, min = 0.0, max = 1.0, description = "dipAmount"},
+    {dipSlope = 0.25, min = 0.25, max = 6.0, description = "dipSlope"},
+    {edgeGain = 5.2, min = 0.0, max = 16.0, description = "edgeGain"},
+    {edgeBlur = 2.0, min = 0.0, max = 8.0, description = "edgeBlur"},
+    {edgeAmount = 0.75, min = 0.0, max = 1.0, description = "edgeAmount"},
+    {washColor = {1.0, 1.0, 1.0, 1.0}, description = "washColor"},
+  };
+
+  filter.passes = {
+    {
+      name = 'edges,
+      inputs = {'default},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        edgeGain = 4.0,
+      },
+      glslShader = edgesGlsl,
+    },
+    {
+      name = 'edgeBlurH,
+      inputs = {'edges},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 1.0,
+        axis = {1.0, 0.0},
+      },
+      glslShader = blurGlsl,
+    },
+    {
+      name = 'edgeBlurV,
+      inputs = {'edgeBlurH},
+      scale = {0.5, 0.5},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        blurStep = 1.0,
+        axis = {0.0, 1.0},
+      },
+      glslShader = blurGlsl,
+    },
+    {
+      name = 'compose,
+      inputs = {'default, 'edgeBlurV},
+      uniforms = {
+        outputSize = {1080.0, 1920.0},
+        phase = 0.0,
+        waveWidth = 0.5,
+        opacity = 0.6,
+        type = 0.0,
+        edgeAmount = 1.0,
+        dipAmount = 0.25,
+        dipSlope = 1.0,
+        washColor = {1.0, 1.0, 1.0, 1.0},
+      },
+      glslShader = composeGlsl,
+    }
+  };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+  vec2 size = getTextureSize('default);
+  f32 sizeScale = min(size.x, size.y) / 1080.0;
+
+  setShaderUniform('edges, 'outputSize, size);
+  setShaderUniform('edges, 'edgeGain, getParameterFloat('edgeGain));
+
+  f32 blurStep = getParameterFloat('edgeBlur) * sizeScale;
+  setShaderUniform('edgeBlurH, 'outputSize, size);
+  setShaderUniform('edgeBlurH, 'blurStep, blurStep);
+  setShaderUniform('edgeBlurV, 'outputSize, size);
+  setShaderUniform('edgeBlurV, 'blurStep, blurStep);
+
+  f32 p = clamp(getParameterFloat('progress), 0.0, 1.0);
+
+  f32 inDur = clamp(getParameterFloat('easeIn), 0.0, 1.0);
+  f32 outDur = clamp(getParameterFloat('easeOut), 0.0, 1.0);
+  f32 durSum = inDur + outDur;
+  if (durSum > 1.0) {
+    inDur = inDur / durSum;
+    outDur = outDur / durSum;
+  }
+
+  f32 total = 1.0 - 0.5 * (inDur + outDur);
+  f32 travelled = 0.5 * inDur + (p - inDur);
+
+  if (p < inDur) {
+    f32 x = p / inDur;
+    travelled = inDur * (x * x * x - 0.5 * x * x * x * x);
+  } else if (p > 1.0 - outDur) {
+    f32 y = (1.0 - p) / outDur;
+    f32 sy = y * y * y - 0.5 * y * y * y * y;
+    travelled = 0.5 * inDur + (1.0 - inDur - outDur) + outDur * (0.5 - sy);
+  }
+
+  f32 phase = travelled / total;
+
+  setShaderUniform('compose, 'edgeAmount, getParameterFloat('edgeAmount));
+  setShaderUniform('compose, 'dipAmount, getParameterFloat('dipAmount));
+  setShaderUniform('compose, 'dipSlope, max(getParameterFloat('dipSlope), 0.05));
+  setShaderUniform('compose, 'outputSize, size);
+  setShaderUniform('compose, 'phase, phase);
+  setShaderUniform('compose, 'waveWidth, max(getParameterFloat('waveWidth), 0.01));
+  setShaderUniform('compose, 'opacity, getParameterFloat('opacity));
+  setShaderUniform('compose, 'type, getParameterFloat('type));
+  setShaderUniform('compose, 'washColor, getParameterVec4('washColor));
+}
+
+string blurGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform float blurStep;
+uniform vec2 axis;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 offset = axis * blurStep / outputSize;
+
+  vec4 c = sampleInput(uv) * 0.2270270270;
+  c += (sampleInput(uv + offset) + sampleInput(uv - offset)) * 0.1945945946;
+  c += (sampleInput(uv + offset * 2.0) + sampleInput(uv - offset * 2.0)) * 0.1216216216;
+  c += (sampleInput(uv + offset * 3.0) + sampleInput(uv - offset * 3.0)) * 0.0540540541;
+  c += (sampleInput(uv + offset * 4.0) + sampleInput(uv - offset * 4.0)) * 0.0162162162;
+
+  gl_FragColor = toOutputFormat(c);
+}
+";
+
+string edgesGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 outputSize;
+uniform float edgeGain;
+
+float luma(vec3 c) {
+  return dot(c, vec3(0.299, 0.587, 0.114));
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec2 duv = 1.0 / outputSize;
+
+  float tl = luma(sampleInput(uv + duv * vec2(-1.0, 1.0)).rgb);
+  float tc = luma(sampleInput(uv + duv * vec2(0.0, 1.0)).rgb);
+  float tr = luma(sampleInput(uv + duv * vec2(1.0, 1.0)).rgb);
+  float ml = luma(sampleInput(uv + duv * vec2(-1.0, 0.0)).rgb);
+  float mr = luma(sampleInput(uv + duv * vec2(1.0, 0.0)).rgb);
+  float bl = luma(sampleInput(uv + duv * vec2(-1.0, -1.0)).rgb);
+  float bc = luma(sampleInput(uv + duv * vec2(0.0, -1.0)).rgb);
+  float br = luma(sampleInput(uv + duv * vec2(1.0, -1.0)).rgb);
+
+  float gx = tl + 2.0 * ml + bl - tr - 2.0 * mr - br;
+  float gy = tl + 2.0 * tc + tr - bl - 2.0 * bc - br;
+
+  float edge = clamp(sqrt(gx * gx + gy * gy) * edgeGain, 0.0, 1.0);
+
+  gl_FragColor = toOutputFormat(vec4(vec3(edge), 1.0));
+}
+";
+
+string composeGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+
+uniform vec2 outputSize;
+uniform float phase;
+uniform float waveWidth;
+uniform float opacity;
+uniform float type;
+uniform float edgeAmount;
+uniform float dipAmount;
+uniform float dipSlope;
+uniform vec4 washColor;
+
+#define PI 3.14159265
+#define GRADIENT_SMOOTH 0.15
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+
+  vec4 base = sampleInput(uv);
+
+  float halfBand = max(waveWidth * 0.5, 0.001);
+  float maxDip = dipAmount;
+
+  float startY = 0.0 - halfBand;
+  float endY = 1.0 + halfBand + maxDip;
+  float bandY = mix(startY, endY, phase);
+
+  float horizontal = clamp(abs(uv.x - 0.5) / 0.5, 0.0, 1.0);
+  float warped = pow(horizontal, 1.0 / max(dipSlope, 0.05));
+  float bell = 0.5 + 0.5 * cos(warped * PI);
+  float dipDirection = 1.0 - 2.0 * clamp(phase, 0.0, 1.0);
+  bandY = bandY + dipAmount * bell * dipDirection;
+
+  float d = clamp((uv.y - bandY) / halfBand, -1.0, 1.0);
+  float sineWave = 0.5 + 0.5 * cos(d * PI);
+
+  float f = clamp(0.5 - 0.5 * d, 0.0, 1.0);
+  float gradientWave = clamp(
+      f * smoothstep(0.0, GRADIENT_SMOOTH, 1.0 - f) / (1.0 - GRADIENT_SMOOTH),
+      0.0, 1.0);
+
+  float wave = mix(sineWave, gradientWave, type);
+
+  float edge = texture2D(auxSampler1, uv).r;
+  float edgeMask = mix(1.0, edge, edgeAmount);
+
+  float alpha = wave * opacity * washColor.a * edgeMask * base.a;
+
+  // Only the band's light, premultiplied: the host adds it to the paused frame it shows beneath
+  // this surface, which keeps an HDR frame in HDR.
+  gl_FragColor = toOutputFormat(vec4(washColor.rgb * alpha, alpha));
+}
+";

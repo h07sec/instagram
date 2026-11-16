@@ -1,0 +1,279 @@
+[Filter SeparableGaussianBlur]
+
+f32 BASE_FONT_SIZE = 100.0;
+
+# The wobble, ported from the C++ matcha animation, which displaced each glyph's geometry. Doing it
+# here on the composed mask instead moves the glow with the letter rather than only the shape the
+# glow is grown from, and costs no extra pass.
+#
+# Lattice cell as a fraction of font size: about one glyph wide, so neighboring letters draw
+# unrelated offsets and each still moves close to rigidly. The C++ cell was far narrower because it
+# sampled the noise once per glyph; here every fragment samples it, so a cell that small would warp
+# the strokes instead of shifting the letter.
+f32 WOBBLE_RATE = 5.0; # times a second the wobble jumps to a new arrangement
+f32 WOBBLE_STEP_CYCLE = 1024.0; # distinct arrangements before the sequence repeats
+
+[Init]
+fun init(Filter filter) {
+    filter.parameters = {
+        {blurRadius = 0.2, min = 0.0, max = 1.0, description = "Blur Radius"},
+        {blurRadiusEdge = 0.123, min = 0.0, max = 1.0, description = "Edge Blur Radius"},
+        {strength = 1.0, min = 0.0, max = 1.0, description = "Strength"},
+        {attenuation = 1.9, min = 0.0, max = 20.0, description = "Attenuation"},
+        {alpha = 1.0, min = 0.0, max = 1.0, description = "Overall Alpha"},
+        {wobble = 0.014, min = 0.0, max = 0.1, description = "Wobble"},
+        {wobbleSize = 0.265, min = 0.0, max = 1.0, description = "Wobble Size"},
+        {wobbleRate = 0.65, min = 0.0, max = 1.0, description = "Wobble Rate"},
+        {grain = 0.282, min = 0.0, max = 1.0, description = "Grain"},
+        {grainSize = 0.026, min = 0.01, max = 0.5, description = "Grain Size"},
+    };
+
+    #[[layout { '__output__ = {1281.32, 31.34}, 'compose = {955.55, 35.77} } ]]#
+    filter.passes = {
+        {
+            name = 'blurH,
+            inputs = {'default},
+            scale = 0.25,
+            uniforms = {
+                axis = {1.0, 0.0},
+                outputSize = {1024.0, 1024.0},
+                passScale = 0.25,
+                radius = 1.1,
+                attenuation = 1.0,
+            },
+            glslShader = glslBlur,
+        },
+        {
+            name = 'blurV,
+            inputs = {'blurH},
+            scale = 0.25,
+            uniforms = {
+                axis = {0.0, 1.0},
+                outputSize = {1024.0, 1024.0},
+                passScale = 0.25,
+                radius = 1.1,
+                attenuation = 1.0,
+            },
+            glslShader = glslBlur,
+        },
+        {
+            name = 'blurHGlobal,
+            inputs = {'blurV},
+            scale = 0.0625,
+            uniforms = {
+                axis = {1.0, 0.0},
+                outputSize = {1024.0, 1024.0},
+                passScale = 0.0625,
+                radius = 0.56,
+                attenuation = 1.0,
+            },
+            glslShader = glslBlur,
+        },
+        {
+            name = 'blurVGlobal,
+            inputs = {'blurHGlobal},
+            scale = 0.0625,
+            uniforms = {
+                axis = {0.0, 1.0},
+                outputSize = {1024.0, 1024.0},
+                passScale = 0.0625,
+                radius = 0.56,
+                attenuation = 1.0,
+            },
+            glslShader = glslBlur,
+        },
+        {
+            name = 'compose,
+            inputs = {'blurV, 'blurVGlobal},
+            uniforms = {
+                strength = 1.0,
+                alpha = 1.0,
+                textColor = {1.0, 1.0, 1.0, 1.0},
+                wobbleAmp = {0.0, 0.0},
+                wobbleCells = {1.0, 1.0},
+                wobbleStep = 0.0,
+                grainAmp = {0.0, 0.0},
+                grainCells = {1.0, 1.0},
+                grainBite = 0.0,
+            },
+            glslShader = glslCompose,
+        }
+    };
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+    vec2 size = getTextureSize('default);
+
+    f32 fontSize = getParameterFloat('fontSize);
+    if (fontSize < 1.0) {
+        fontSize = min(size.x, size.y) * 0.09;
+    }
+    f32 fontScale = fontSize / BASE_FONT_SIZE;
+
+    f32 edgeRadius = getParameterFloat('blurRadiusEdge) * fontScale;
+    f32 globalRadius = getParameterFloat('blurRadius) * fontScale;
+
+
+
+    setShaderUniform('blurH, 'outputSize, size);
+    setShaderUniform('blurV, 'outputSize, size);
+    setShaderUniform('blurHGlobal, 'outputSize, size);
+    setShaderUniform('blurVGlobal, 'outputSize, size);
+
+    setShaderUniform('blurH, 'radius, globalRadius);
+    setShaderUniform('blurV, 'radius, globalRadius);
+    setShaderUniform('blurHGlobal, 'radius, edgeRadius);
+    setShaderUniform('blurVGlobal, 'radius, edgeRadius);
+
+    # Displacement in UV, from a fraction of font size, so the tremble is the same look whatever
+    # resolution the host rendered at.
+    f32 wobblePixels = max(getParameterFloat('wobble), 0.0) * fontSize;
+    vec2 wobbleAmp = {wobblePixels / max(size.x, 1.0), wobblePixels / max(size.y, 1.0)};
+
+    # Square cells in pixels, so the lattice is not stretched by the frame's aspect ratio.
+
+    f32 wobbleSize = getParameterFloat('wobbleSize);
+    f32 cellPixels = max(fontSize * wobbleSize, 1.0);
+    vec2 wobbleCells = {size.x / cellPixels, size.y / cellPixels};
+
+    # Quantizing time is the whole trick: a fresh offset every frame reads as video noise, while a
+    # few jumps a second reads as a hand placing each letter.
+    #
+    # Wrapped, because the step feeds a sin() hash: left to grow it reaches magnitudes where f32 sin
+    # stops resolving neighboring steps apart and the wobble freezes late in a long clip. The cycle
+    # is WOBBLE_STEP_CYCLE / WOBBLE_RATE seconds of distinct arrangements, which no viewer reads as
+    # a repeat.
+
+    f32 rate = getParameterFloat('wobbleRate) * 10.0;
+    f32 rawStep = floor(max(getParameterFloat('time_sec), 0.0) * rate);
+    f32 wobbleStep = rawStep - floor(rawStep / WOBBLE_STEP_CYCLE) * WOBBLE_STEP_CYCLE;
+
+    setShaderUniform('compose, 'wobbleAmp, wobbleAmp);
+    setShaderUniform('compose, 'wobbleCells, wobbleCells);
+    setShaderUniform('compose, 'wobbleStep, wobbleStep);
+
+    # The grain is the same lattice as the wobble, just a much finer one, so it rides on top of the
+    # wobble instead of competing with it: the letter still shifts rigidly, and the outline it shifts
+    # with is the ragged one a pencil or a chalk stick leaves on tooth.
+    f32 grain = max(getParameterFloat('grain), 0.0);
+    f32 grainPixels = max(fontSize * getParameterFloat('grainSize), 1.0);
+    vec2 grainCells = {size.x / grainPixels, size.y / grainPixels};
+
+    # Displacement stays under a cell, otherwise the crumbs travel far enough to read as a second
+    # wobble rather than as texture on the edge.
+    f32 grainOffset = grain * grainPixels * 0.5;
+    vec2 grainAmp = {grainOffset / max(size.x, 1.0), grainOffset / max(size.y, 1.0)};
+
+    setShaderUniform('compose, 'grainAmp, grainAmp);
+    setShaderUniform('compose, 'grainCells, grainCells);
+    setShaderUniform('compose, 'grainBite, grain * 0.12);
+
+    vec4 textColor = getParameterVec4('textColor);
+    setShaderUniform('compose, 'textColor, textColor);
+
+    setShaderUniform('compose, 'strength, getParameterFloat('strength));
+}
+
+string glslBlur = "
+    precision mediump float;
+
+    varying vec2 sourceTextureCoordinate;
+    uniform vec2 axis;
+    uniform vec2 outputSize;
+    uniform float passScale;
+    uniform float radius;
+    uniform float attenuation;
+
+    const float W0 = 0.0910547;
+    const float W1 = 0.1722704;
+    const float W2 = 0.1379234;
+    const float W3 = 0.0924333;
+    const float W4 = 0.0518597;
+
+    const float O1 = 1.48314172;
+    const float O2 = 3.46073812;
+    const float O3 = 5.43848604;
+    const float O4 = 7.41649078;
+
+    void main() {
+        vec2 texSize = max(outputSize * passScale, vec2(1.0, 1.0));
+        vec2 step = axis * (radius / texSize);
+        vec2 uv = sourceTextureCoordinate;
+
+        vec2 d1 = O1 * step;
+        vec2 d2 = O2 * step;
+        vec2 d3 = O3 * step;
+        vec2 d4 = O4 * step;
+
+        vec4 sum = sampleInput(uv) * W0;
+        sum += (sampleInput(uv - d1) + sampleInput(uv + d1)) * W1;
+        sum += (sampleInput(uv - d2) + sampleInput(uv + d2)) * W2;
+        sum += (sampleInput(uv - d3) + sampleInput(uv + d3)) * W3;
+        sum += (sampleInput(uv - d4) + sampleInput(uv + d4)) * W4;
+
+        gl_FragColor = toOutputFormat(vec4(sum.rgb * attenuation, sum.a));
+    }
+";
+
+string glslCompose = "
+    precision highp float;
+
+    varying vec2 sourceTextureCoordinate;
+    uniform sampler2D auxSampler1;
+    uniform float strength;
+    uniform float alpha;
+    uniform vec2 wobbleAmp;
+    uniform vec2 wobbleCells;
+    uniform float wobbleStep;
+    uniform vec2 grainAmp;
+    uniform vec2 grainCells;
+    uniform float grainBite;
+
+    uniform vec4 textColor;
+
+    // Two decorrelated values in [-1, 1) for one lattice corner, out of a single sin.
+    vec2 hash2(vec2 cell, float timeStep) {
+        float h = sin(dot(vec3(cell, timeStep), vec3(127.1, 311.7, 74.7)));
+        return fract(h * vec2(43758.5453, 24634.6345)) * 2.0 - 1.0;
+    }
+
+    // Smooth value noise rather than a hash of the point: the core and the edge masks are sampled
+    // at the same displaced coordinate, and a discontinuous field would pull them apart along the
+    // cell boundaries. Interpolated with the same smootherstep the C++ lattice used.
+    vec2 noiseSigned2(vec2 p, float timeStep) {
+        vec2 cell = floor(p);
+        vec2 f = p - cell;
+        vec2 w = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+        vec2 lower = mix(hash2(cell, timeStep), hash2(cell + vec2(1.0, 0.0), timeStep), w.x);
+        vec2 upper =
+            mix(hash2(cell + vec2(0.0, 1.0), timeStep), hash2(cell + vec2(1.0, 1.0), timeStep), w.x);
+        return mix(lower, upper, w.y);
+    }
+
+    void main() {
+        vec2 wobbleUV = sourceTextureCoordinate
+            + noiseSigned2(sourceTextureCoordinate * wobbleCells, wobbleStep) * wobbleAmp;
+
+        // Sampled in the wobbled frame and on the wobble's own quantized step, so the grain is
+        // carried by the letter and re-rolls when the letter jumps. Grain fixed in screen space
+        // would read as film dirt the text slides under; grain re-rolled per frame would fizz.
+        // The two offsets only decorrelate these from the wobble's draw out of the same hash.
+        vec2 crumb = noiseSigned2(wobbleUV * grainCells, wobbleStep + 37.0);
+        float tooth = noiseSigned2(wobbleUV * grainCells * 2.7, wobbleStep + 91.0).x;
+
+        vec4 globalBlur = sampleInput(wobbleUV + crumb * grainAmp);
+        vec4 edgeBlur = texture2D(auxSampler1, wobbleUV + crumb * grainAmp);
+
+        // Pushing the thresholds instead of the alpha is what makes it chalk: the cut lands at a
+        // different height per speck along the blur's falloff, so the outline crumbles where the
+        // stroke is thin and holds where it is solid.
+        float bite = (crumb.y * 0.6 + tooth * 0.4) * grainBite;
+        float core = smoothstep(0.50 + bite, 0.55 + bite, globalBlur.a * strength);
+        float edge = smoothstep(0.30 , 0.35, edgeBlur.a * strength);
+
+        float mask = mix(core, edge, smoothstep(0.30, 0.8 , edgeBlur.r));
+
+        gl_FragColor = toOutputFormat(vec4(mask * textColor));
+    }
+";

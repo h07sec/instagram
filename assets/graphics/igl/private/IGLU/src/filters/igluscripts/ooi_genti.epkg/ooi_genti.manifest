@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "FB6E9F8B-44D4-4BBB-9DCC-E53DBDF49B2C",
+  "displayName": "Ooi genti! ✨",
+  "description": "[IG Edits] Color filter name. With \"Ooi genti! ✨\", the creator gets a warm, natural LUT color grade with soft skin smoothing and light film grain applied to the camera image.",
+  "iglu": {
+    "legacyId": 3279
+  },
+  "assets": [
+    {
+      "name": "ooi_genti_lut.png",
+      "assetHash": "6f599997770521edaf76165caeff19097221e89a7bf0796afc8c57f6cd634d85",
+      "hubAssetId": "1642603767395471"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD15mvIDDe"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "b804bdf1",
+      "handle": "AQAJQBTjEGMr",
+      "md5": "1294852b58c2e9d8915ae81b0565e0e0"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJQiSDNj3uaLpVsDALovVhcdoCl_bhQoAAAD"
+    }
+  }
+}

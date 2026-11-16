@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "333819782488337",
+  "displayName": "mango",
+  "description": "[IG Edits] Color filter name. With \"mango\", the creator can apply a Spark-ported warm, faded film grade with fine grain.",
+  "iglu": {
+    "legacyId": 3407
+  },
+  "assets": [
+    {
+      "name": "mango_lut_a.png",
+      "assetHash": "f84bdb7d398f0d9b0377a937d1aacd2560f8a7f06f58f3455c0e917693e51ef7",
+      "hubAssetId": "1166308319698245"
+    },
+    {
+      "name": "mango_lut_b.png",
+      "assetHash": "96e43f97206763dd1b24ec804d9277cf28098905ce27caef6df488bb2d6cfc27",
+      "hubAssetId": "1750975025964135"
+    },
+    {
+      "name": "mango_grain.png",
+      "assetHash": "c6b42f1c0349b606f8253ac70beff2ef6f8826371b165a53726401d2bd938249",
+      "hubAssetId": "1478490330843413"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHAFZEuod2"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "eec3f333",
+      "handle": "AQAEKd-ITfXf",
+      "md5": "92503fe123c1a793231c03385feb1459"
+    }
+  }
+}

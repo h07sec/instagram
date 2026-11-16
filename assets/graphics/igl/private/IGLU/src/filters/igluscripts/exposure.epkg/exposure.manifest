@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "A061591F-FA7C-4A04-9BCB-CC695354ED2D",
+  "displayName": "• exposure •",
+  "description": "[IG Edits] Color filter name. With \"• exposure •\", the creator gets a deep, saturated blue-sky LUT color grade with light skin smoothing applied to the camera image.",
+  "iglu": {
+    "legacyId": 3283
+  },
+  "assets": [
+    {
+      "name": "exposure_lut.png",
+      "assetHash": "e31295e34c4cb43d00815aee24d8b6c00a8b9087b696d76d2d064365dab003c7",
+      "hubAssetId": "1684708306356439"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAOCChSbylE"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "99f38509",
+      "handle": "AQAKlo4R0oKn",
+      "md5": "448047dd6f9506e0a9eadc3e9beba468"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GFmojDOEn63ISKwHAJ9_1VePD6YtbhQoAAAD"
+    }
+  }
+}

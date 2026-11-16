@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "1f47300b-d16c-4ef6-8746-7876dffa5ca2",
+  "displayName": "Emphasis",
+  "description": "[IG Edits] Effect name shown in the video effects picker. This is the user-facing label for a video effect.",
+  "iglu": {
+    "legacyId": 3130,
+    "behavior": {
+      "type": "stickyIntro",
+      "durationMs": 1125,
+      "curve": "linear"
+    },
+    "customization": [
+      {
+        "name": "amount",
+        "displayName": "Amount",
+        "default": 0.45,
+        "min": 0.0,
+        "max": 1.0
+      },
+      {
+        "name": "size",
+        "displayName": "Size",
+        "default": 0.45,
+        "min": 0.0,
+        "max": 1.0
+      },
+      {
+        "name": "duration",
+        "default": 1.125,
+        "min": 0.25,
+        "max": 1.5,
+        "displayName": "Duration",
+        "displayNameDescription": "[IG Edits] Slider label controlling how long a video effect's animation lasts; exact units and range vary per effect (seconds or normalized).",
+        "displayMethod": "time"
+      }
+    ]
+  }
+}

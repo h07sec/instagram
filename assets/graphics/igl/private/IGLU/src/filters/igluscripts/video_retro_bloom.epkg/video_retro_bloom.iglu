@@ -1,0 +1,778 @@
+[Filter IgluscriptRetroBloomFilter]
+
+[Init]
+fun init(Filter filter) {
+
+  filter.parameters = {
+    {intensity      = 1.0, min = 0.0, max = 1.0, description = "Intensity"},
+    {amount           = 0.2, min = 0.0, max = 0.3, description = "Amount"},
+    {bloom_radius   = 0.3, min = 0.0, max = 1.0, description = "Bloom Radius"},
+    {size  = 0.5, min = 0.0, max = 1.0, description = "Streak Length"},
+    {speed       = 4.0, min = 3.0, max = 8.0, description = "Number of Rays"},
+    {rotation       = 45.0, min = 0.0, max = 90.0, description = "Rotation"},
+    {decay       = 0.83, min = 0.0, max = 2.0, description = "Decay"},
+  };
+
+  filter.passes = {
+    {
+      name = 'threshold,
+      inputs = {'default},
+      scale = {0.5, 0.5},
+      uniforms = {
+        inputSize = {1920.0, 1080.0},
+        threshold = 0.8,
+        feather = 0.1,
+        darken = 3.0,
+      },
+      glslShader = thresholdGlsl,
+    },
+    {
+      name = 'blurH,
+      inputs = {'threshold},
+      scale = {0.5, 0.5},
+      uniforms = {
+        # inputSize is the size of the texture this pass READS ('threshold, at
+        # scale 0.5), because blurStep is in texels of that texture.
+        inputSize = {960.0, 540.0},
+        axis = {1.0, 0.0},
+        numSamples = 13.0,
+        blurStep = 1.0,
+        weightStart = 1.0,
+        weightRatio = 0.580567,
+        invTotalWeight = 0.273050,
+      },
+      glslShader = gaussianBlur1DGlsl,
+    },
+    {
+      name = 'blurV,
+      inputs = {'blurH},
+      scale = {0.5, 0.5},
+      uniforms = {
+        inputSize = {960.0, 540.0},
+        axis = {0.0, 1.0},
+        numSamples = 13.0,
+        blurStep = 1.0,
+        weightStart = 1.0,
+        weightRatio = 0.580567,
+        invTotalWeight = 0.273050,
+      },
+      glslShader = gaussianBlur1DGlsl,
+    },
+    {
+      name = 'streaks,
+      # 'threshold must come last: listed first, the graph renders it twice per frame.
+      inputs = {'blurV, 'threshold},
+      scale = {0.5, 0.5},
+      uniforms = {
+        inputSize = {1920.0, 1080.0},
+        numRays = 4.0,
+        rayDir = {0.707388269, 0.706825181},
+        rayRotator = {0.0000013267949, 1.0},
+        streakLength = 0.5,
+        decayEff = 0.83,
+        stepScale = 1.0,
+        energyScale = 1.0,
+        resScale = 1.0,
+        reachScale = 1.0,
+        bloomCoreGain = 0.58,
+      },
+      glslShader = starglowStreaksGlsl,
+    },
+    {
+      name = 'blurH2,
+      inputs = {'streaks},
+      scale = {0.25, 0.25},
+      uniforms = {
+        # Reads 'streaks at scale 0.5 while rendering at 0.25, so its inputSize
+        # is NOT its own target size.
+        inputSize = {960.0, 540.0},
+        axis = {1.0, 0.0},
+        numSamples = 7.0,
+        blurStep = 1.0,
+        weightStart = 1.0,
+        weightRatio = 0.404037,
+        invTotalWeight = 0.441213,
+      },
+      glslShader = gaussianBlur1DGlsl,
+    },
+    {
+      name = 'blurV2,
+      inputs = {'blurH2},
+      scale = {0.25, 0.25},
+      uniforms = {
+        inputSize = {480.0, 270.0},
+        axis = {0.0, 1.0},
+        numSamples = 7.0,
+        blurStep = 0.5,
+        weightStart = 1.0,
+        weightRatio = 0.404037,
+        invTotalWeight = 0.441213,
+      },
+      glslShader = gaussianBlur1DGlsl,
+    },
+    {
+      name = 'composite,
+      inputs = {'default, 'blurV2},
+      uniforms = {
+        starIntensity = 1.0,
+        tintColor = {0.7, 0.85, 1.0},
+        glowTexel = {0.00208333, 0.00370370},
+      },
+      glslShader = starglowCompositeGlsl,
+    }
+  };
+}
+
+# Derived blur kernel state, recomputed only when bloomRadius changes but pushed
+# to the passes every frame. Three weight sets, not two: blurH and blurV both
+# read a 0.5-scale surface and so share a kernel, but blurH2 reads at 0.5 while
+# blurV2 reads at 0.25, so the same spatial kernel resolves to a different tap
+# count on each.
+#
+# None of this state depends on resScale. Every quantity below is in reference
+# pixels (a frame whose short edge is 1080), so the tap counts and the weights
+# are the same at any output resolution; resScale enters only where a reference
+# pixel spacing is converted into the read surface's texels, i.e. blurStep.
+f32 lastBloomRadius = -1.0;
+f32 lastStreakTapPx = -1.0;
+f32 numSamplesA = 1.0;
+f32 weightRatioA = 1.0;
+f32 weightStartA = 1.0;
+f32 invTotalWeightA = 1.0;
+f32 blurStepA = 1.0;
+f32 numSamplesB1 = 1.0;
+f32 weightRatioB1 = 1.0;
+f32 weightStartB1 = 1.0;
+f32 invTotalWeightB1 = 1.0;
+f32 numSamplesB2 = 1.0;
+f32 weightRatioB2 = 1.0;
+f32 weightStartB2 = 1.0;
+f32 invTotalWeightB2 = 1.0;
+
+# Streak taps per direction: the shader used to run 16, it now runs
+# kStreakTaps. The step is widened by kStreakTapsOld / kStreakTaps so the
+# streak still reaches the same distance.
+f32 kStreakTapsOld = 16.0;
+f32 kStreakTaps = 10.0;
+
+# Total weight of a merged streak: one centre tap plus (n - 1) symmetric pairs
+# whose weights are d^1..d^(n-1). Used to keep brightness fixed when the tap
+# count changes.
+fun streakEnergy(f32 d, f32 n) f32 {
+  f32 energy = 2.0 * n - 1.0;
+  if (abs(d - 1.0) >= 0.001) {
+    energy = 2.0 * (1.0 - pow(d, n)) / (1.0 - d) - 1.0;
+  }
+  return energy;
+}
+
+# Every blur and streak distance below is authored in REFERENCE pixels — pixels
+# of a frame whose short edge is 1080. Scaling them by the real short edge keeps
+# the effect the same fraction of the frame, so a 4K export matches the HD
+# editing preview.
+fun sizeScale() f32 {
+  vec2 size = getTextureSize('default);
+  return min(size.x, size.y) / 1080.0;
+}
+
+# Reference pixels spanned by one TAP of each blur pass. A tap is `blurStep`
+# texels of the surface the pass READS, so this is (texel size) * blurStep and
+# is NOT forced to the texel grid -- a sub-texel blurStep samples between texels
+# and the hardware bilinear filter acts as the reconstruction filter.
+#   blurH  reads 'threshold @0.5  texel 2  blurStep per-frame -> kStageATapRatio / decayA
+#   blurV  reads 'blurH     @0.5  texel 2  blurStep per-frame -> kStageATapRatio / decayA
+#   blurH2 reads 'streaks   @0.5  texel 2  blurStep 1.0  -> 2   (renders at 0.25)
+#   blurV2 reads 'blurH2    @0.25 texel 4  blurStep 0.5  -> 2
+# Same idea as kWideStep/kMediumStep/kTightStep in video_ooe_halation.iglu:134-136.
+#
+# A pass's `scale` is a fraction of the frame, so the number of REAL pixels in
+# one of its texels tracks the output resolution while this reference-space
+# figure does not move. That is what lets the tap count and the weights below be
+# resolution-independent: only the conversion to texels, blurStep, carries
+# resScale.
+#
+# Two constraints bind here, and blurV2 is why its blurStep is sub-texel:
+#   C2 (sampling on read)  tap spacing must be <= the kernel's own decay length,
+#     or the kernel is under-resolved and the taps are wasted. At bloomRadius 2.9
+#     stage B's decay length is 2.21 reference px, so a 4 px tap spacing (one
+#     whole 0.25-scale texel) violated C2 at a ratio of 1.81. blurStep 0.5 brings
+#     the spacing to 2 px and the ratio to 0.91 for two extra taps.
+#   C1 (anti-alias on write) a blur that PRECEDES a downscale needs a decay
+#     length >= the DESTINATION texel size. blurH2 still violates this: it
+#     performs the 0.5 -> 0.25 downscale with a 2.21 px decay length against a
+#     4 px destination texel, so it aliases horizontally on write. Left alone
+#     deliberately -- fixing it needs either a box prefilter pass or a wider
+#     stage-B kernel, and neither is justified before a visual A/B says the
+#     0.25 downscale is actually contributing.
+# Both constraints are stated in reference px and both are therefore scale-free:
+# multiplying every length by resScale leaves each ratio unchanged, so a kernel
+# that satisfies C1/C2 at 1080p satisfies them at 4K too.
+#
+# Stage A no longer appears here: its spacing is derived per frame from its own
+# decay length (kStageATapRatio) rather than fixed, which satisfies C2 by
+# construction at every slider position.
+f32 kStepB1 = 2.0;
+f32 kStepB2 = 2.0;
+
+# Reference pixels spanned by one TEXEL of the surface each blur pass READS.
+# blurStep is expressed in those texels, so blurStep = (tap spacing) / this puts
+# a tap every (tap spacing) reference px. That ratio is what makes blurV2's step
+# sub-texel (2 / 4 = 0.5) without hardcoding the 0.5, and multiplying it by
+# resScale is the single place the output resolution enters the blur.
+f32 kReadTexelPxA = 2.0;   # blurH/blurV read 'threshold / 'blurH  @0.5
+f32 kReadTexelPxB1 = 2.0;  # blurH2      reads 'streaks            @0.5
+f32 kReadTexelPxB2 = 4.0;  # blurV2      reads 'blurH2             @0.25
+
+# Stage A's tap spacing, as a fraction of its own decay length (1 / decayA),
+# instead of a fixed 2 reference px.
+#
+# Stage A is the one kernel here whose width is not set by bloomRadius alone: it
+# is clamped wider to fuse the streak comb (kStreakCombFuseRatio), so its decay
+# length varies by ~4x across the sliders while a fixed step kept sampling it
+# every 2 px. The tap count is kExtentSigmas / (decay * step), so that fixed step
+# made the count grow with the width -- 13 taps at the default `size`, 25 at
+# `size` max, and the full 31 at `intensity` min. Those extra taps bought no
+# extra extent and no extra detail: the kernel was merely oversampled, by 3.8x at
+# `size` max.
+#
+# Deriving the step from the decay length instead holds the SAMPLING RATE fixed
+# rather than the spacing, so the tap count is constant (kExtentSigmas / this
+# ratio) and the kernel's shape and extent in image space are unchanged. 0.5
+# samples every half decay length, which satisfies C2 below with 2x margin.
+#
+# This is the same quantity C2 constrains; it is now an explicit parameter rather
+# than an accident of (fixed step) x (variable width).
+f32 kStageATapRatio = 0.5;
+
+# Spatial decay of each stage's kernel, per reference pixel per unit bloomRadius.
+# These are the rates the old code expressed implicitly: with taps s apart and a
+# ratio of exp(-s * falloff / 32) the weight at distance d is
+# exp(-(falloff / 32) * d) whatever s is, so falloff/32 IS the decay rate and is
+# the quantity that has to survive a change of tap spacing for the bloom to keep
+# its extent. Stage A had falloff 3 * bloomRadius, stage B had 5 * bloomRadius.
+#
+# Stage A is an upper bound only -- it is clamped per frame against the streak
+# tap spacing, see kStreakCombFuseRatio.
+f32 kDecayPerRadiusA = 0.09375;  # 3.0 / 32.0
+f32 kDecayPerRadiusB = 0.15625;  # 5.0 / 32.0
+
+# Where to truncate the kernel, in scale lengths (1 / decay). Ported from the
+# sigma-derived kernel size in video_ooe_halation.iglu:193-195, which sizes a
+# Gaussian at 2 sigma. 3 rather than 2 because this kernel is exponential, not
+# Gaussian: a Gaussian cut at 2 sigma discards 4.6% of its weight, an exponential
+# cut at 2 scale lengths discards exp(-2) = 13.5%, and 3 brings it back to 5%.
+f32 kExtentSigmas = 3.0;
+
+# ==========================================================================
+# Fidelity dial-in. These three are the tuning surface for matching the
+# pre-optimisation look; they hot-reload in EaselMac, so edit and save to see
+# the result without a rebuild. All three are FREE at the fetch level.
+# ==========================================================================
+
+# Unblurred 'threshold added back on top of the blurred bloom leg in 'streaks.
+#
+# Why this exists: the pre-optimisation stage-A kernel had a tap spacing of
+# 4*bloomRadius (11.6 full-res px at default intensity) against a decay length of
+# only 4.6 px, so it sampled almost entirely outside its own kernel and 85% of
+# its weight sat on the centre tap. Its point-spread function was therefore
+# BIMODAL -- a sharp spike plus a weak wide halo. The corrected kernel is a
+# unimodal mound with 27% on the centre tap, so the bloom leg's peak fell ~3.1x
+# while the ray-streak leg (which dominates the glow about 4:1) did not change at
+# all. That is what makes the glow read hazier AND makes the pre-existing 9-tap
+# ray ghost the dominant structure.
+#
+# No decay or extent value reproduces spike+halo from a monotone kernel, so the
+# spike is restored explicitly. 0.58 recovers the old centre fraction
+# (0.27 + 0.58 ~= 0.85); raise for a punchier core, lower for a softer one.
+# Costs zero fetches: 'streaks now takes its ray centre tap from the blurred
+# sampler it already reads for the halo leg, which frees the raw-bright-pass
+# fetch this term uses.
+f32 kBloomCoreGain = 0.58;
+
+# Scales the ray-streak reach. Ghost spacing is rigidly reach/9 because the tap
+# count is a compile-time loop bound. 1.0 keeps the shipping 144 px reach at the
+# default `size`; 0.8 gives 115 px reach and 12.8 px ghost spacing, so the nine
+# copies overlap more.
+#
+# This used to be the only lever on the visible ghost. It no longer is: the ray
+# taps now sample the stage-A blur, whose width is sized against this exact
+# spacing (kStreakCombFuseRatio), so the copies are fused rather than merely
+# packed closer. Kept at 0.8 pending a visual A/B -- 1.0 should now be viable
+# and would restore the full reach.
+f32 kStreakReachScale = 0.8;
+
+# How far stage A has to reach to fuse the ray comb, in units of the streak tap
+# spacing: decay length L = S / kStreakCombFuseRatio. 'streaks samples stage A's
+# output for its ray taps, so stage A's kernel is what fills the space between
+# them. An exponential kernel leaves a comb ripple of 1 / (1 + (2*pi*L/S)^2), so
+# 3 leaves ~19% and 2 leaves ~9%. Before this clamp L was fixed by bloomRadius
+# alone whatever S was: at intensity 1.0 that is 3.68 px, leaving 23% ripple at
+# the default size, 35% at size 0.7 and 50% at size 1.0 -- the visible gaps. The
+# clamp holds it at 19% across the slider and is inert below size ~0.5, and
+# inert at every size once intensity drops enough to widen the kernel anyway.
+#
+# Deliberately clamping stage A and not stage B. Stage B is 3x cheaper per unit
+# width (it runs at quarter res, stage A at half), but it is DOWNSTREAM of the
+# bloom core spike 'streaks adds, and that spike is the whole reason
+# kBloomCoreGain exists. Widening stage B to L = 7.7 px drops a delta's peak
+# ~11x, and no kBloomCoreGain value recovers it: matching the old energy raises
+# the peak ~17x, matching the old peak discards ~94% of the energy. Stage A sits
+# upstream of the spike, so widening it leaves the spike untouched.
+f32 kStreakCombFuseRatio = 3.0;
+
+# Taps on one side of the centre for a kernel decaying at decayPerPixel, sampled
+# every stepPx reference pixels. Both arguments are in reference space, so the
+# count this returns is the same at every output resolution. The cap plays the
+# role of ooe_halation's min(sigma * 2.0, 100.0) clamp: gaussianBlur1DGlsl runs
+# at most 16 pair iterations because GLSL ES 1.00 needs a constant loop bound,
+# and the first of those carries the centre tap, so 15 pairs -> 31 taps is the
+# widest kernel the shader can express.
+fun blurPairCount(f32 decayPerPixel, f32 stepPx) f32 {
+  return min(15.0, round(kExtentSigmas / (decayPerPixel * stepPx)));
+}
+
+# The blur kernel weight for tap i is ratio^|i - centre| about
+# centre = (n - 1) / 2. An even tap count straddles the centre, so the two
+# innermost taps share the half-power weight and no tap sits at the centre.
+fun blurCentreWeight(f32 ratio, f32 n) f32 {
+  f32 centre = (n - 1.0) * 0.5;
+  return pow(ratio, centre - floor(centre));
+}
+
+# Sum of every tap weight. The same for every fragment in a pass, so the shader
+# multiplies by its reciprocal instead of accumulating the sum per fragment.
+# Summed term by term rather than in closed form: that needs no ratio == 1
+# special case and stays correct for any tap count.
+fun blurWeightSum(f32 ratio, f32 n) f32 {
+  f32 centre = (n - 1.0) * 0.5;
+  f32 sum = 0.0;
+  for (f32 i = 0.0; i < n; i = i + 1.0) {
+    sum = sum + pow(ratio, abs(i - centre));
+  }
+  return sum;
+}
+
+[PreRender]
+fun preRender(Filter filter) {
+
+  vec2 outputSize = getTextureSize('default);
+
+  # inputSize is the size of the texture a pass SAMPLES, so that a shader can
+  # turn a texel count into a UV delta. It is a READ size and has nothing to do
+  # with the pass's own render target, which is what `scale` controls.
+  #
+  # threshold and streaks keep the full-res size because their offsets are in
+  # full-res pixels, and both are correct with it. threshold reads 'default at
+  # full res, so its 0.5/inputSize is half a FULL-RES texel: a 0.5-scale output
+  # texel centre sits on the corner shared by four full-res texels, and +-half a
+  # full-res texel is exactly those four centres. Feeding it its own 0.5-scale
+  # size would move all four taps a whole texel out, onto the wrong quad, and
+  # the fused 2x2 downsample would stop being a downsample.
+  #
+  # The four blur passes are the ones that were wrong: they also got the full-res
+  # size, which made blurStep mean "full-res pixels" no matter what resolution
+  # the surface they read is actually at. Each now gets the size of the surface
+  # it reads. Scaled from outputSize by that surface's own `scale` literal rather
+  # than queried with getTextureSize on an intermediate pass, matching
+  # video_golden_bloom.iglu:160-163: this cannot observe a target that the graph
+  # has not allocated yet, and a zero here would divide the tap offsets to
+  # infinity.
+  #
+  # Pushed unconditionally rather than behind a size dirty-check: the check keyed
+  # off a script global that outlives a rebuild of the pass uniform state, which
+  # would leave a rebuilt pass on its Init literal.
+  vec2 halfSize = {outputSize.x * 0.5, outputSize.y * 0.5};
+  vec2 quarterSize = {outputSize.x * 0.25, outputSize.y * 0.25};
+  setShaderUniform('threshold, 'inputSize, outputSize);
+  setShaderUniform('streaks,   'inputSize, outputSize);
+  setShaderUniform('blurH,     'inputSize, halfSize);     # reads 'threshold @0.5
+  setShaderUniform('blurV,     'inputSize, halfSize);     # reads 'blurH     @0.5
+  setShaderUniform('blurH2,    'inputSize, halfSize);     # reads 'streaks   @0.5
+  setShaderUniform('blurV2,    'inputSize, quarterSize);  # reads 'blurH2    @0.25
+
+  f32 intensity     = getParameterFloat('intensity);
+  f32 thresholdVal  = getParameterFloat('amount) * 0.4;
+  f32 bloomRadius   = mix(1.0, 2.9, intensity); #getParameterFloat('bloom_radius);
+  f32 streakLength  = getParameterFloat('size) * 1.6;
+  f32 numRays       = getParameterFloat('speed);
+  f32 rotationDeg   = getParameterFloat('rotation);
+  f32 decay         = getParameterFloat('decay);
+  f32 resScale      = sizeScale();
+
+  # Full-res pixels between consecutive streak taps, which is what stage A's
+  # kernel has to bridge. 'streaks steps stepPx / inputSize in UV against a
+  # 0.5-scale inputSize, so one unit of stepPx is 2 full-res px; the 0.5 inside
+  # the reachScale pushed below already supplies one of those two factors.
+  f32 stepScale    = kStreakTapsOld / kStreakTaps;
+  f32 streakTapPx  = (2.0 + streakLength * 10.0) * stepScale * kStreakReachScale;
+
+  # Threshold pass — extract bright pixels. 'feather and 'darken keep their
+  # [Init] values; re-sending the same constants every frame achieved nothing.
+  setShaderUniform('threshold, 'threshold, 1.01 - thresholdVal);
+
+  # The blur kernels depend only on bloomRadius, so the maths runs only when it
+  # changes. The uniforms are pushed unconditionally below, so a pass whose
+  # uniform state is rebuilt cannot be left on its Init literals.
+  #
+  # Each pass steps by one texel of the surface IT READS, and its tap count is
+  # derived from the kernel's own decay rate, so the shape and extent of the
+  # kernel are fixed in image space while the tap count falls to what that
+  # surface can resolve. This is the per-stage scaling in
+  # video_golden_bloom.iglu:181-196 and video_ooe_halation.iglu:188-202.
+  #
+  # resScale is deliberately NOT part of this guard and NOT in any expression
+  # here. Every term is in reference pixels, so the tap counts and the weights
+  # are resolution-independent; resScale appears only on blurStep below, which is
+  # what turns a reference-pixel spacing into texels of the surface being read.
+  # Keeping it out of the weights is what makes a resolution change free: it
+  # rescales the kernel without re-deriving it or changing the tap count.
+  if (abs(lastBloomRadius - bloomRadius) > 0.00001 or
+      abs(lastStreakTapPx - streakTapPx) > 0.00001) {
+    lastBloomRadius = bloomRadius;
+    lastStreakTapPx = streakTapPx;
+
+    # Clamped so stage A is never narrower than the streak comb needs. The
+    # radius-derived rate is the tight end of the range, so this only ever
+    # widens the kernel, and only once the taps are far enough apart to show.
+    f32 decayA = min(kDecayPerRadiusA * bloomRadius,
+                     kStreakCombFuseRatio / max(streakTapPx, 0.0001));
+    # Step with the kernel rather than across it: spacing is a fixed fraction of
+    # this kernel's own decay length, so the tap count below is constant and the
+    # kernel's extent (kExtentSigmas decay lengths) is unchanged. A fixed step
+    # instead grew the count to 25 or 31 taps purely to oversample a wider kernel.
+    f32 stepAPx = kStageATapRatio / max(decayA, 0.0001);
+    blurStepA = stepAPx / kReadTexelPxA;
+    f32 pairsA = min(15.0, round(kExtentSigmas / kStageATapRatio));
+    numSamplesA = 2.0 * pairsA + 1.0;
+    weightRatioA = exp(0.0 - kStageATapRatio);
+    weightStartA = blurCentreWeight(weightRatioA, numSamplesA);
+    invTotalWeightA = 1.0 / max(blurWeightSum(weightRatioA, numSamplesA), 0.0001);
+
+    f32 decayB = kDecayPerRadiusB * bloomRadius;
+    f32 pairsB1 = blurPairCount(decayB, kStepB1);
+    numSamplesB1 = 2.0 * pairsB1 + 1.0;
+    weightRatioB1 = exp(0.0 - decayB * kStepB1);
+    weightStartB1 = blurCentreWeight(weightRatioB1, numSamplesB1);
+    invTotalWeightB1 = 1.0 / max(blurWeightSum(weightRatioB1, numSamplesB1), 0.0001);
+
+    f32 pairsB2 = blurPairCount(decayB, kStepB2);
+    numSamplesB2 = 2.0 * pairsB2 + 1.0;
+    weightRatioB2 = exp(0.0 - decayB * kStepB2);
+    weightStartB2 = blurCentreWeight(weightRatioB2, numSamplesB2);
+    invTotalWeightB2 = 1.0 / max(blurWeightSum(weightRatioB2, numSamplesB2), 0.0001);
+  }
+
+  # Initial blur — softens the threshold output before streaks.
+  # weightRatio is the constant ratio between consecutive tap weights, which
+  # lets the shader walk the kernel with a multiply instead of an exp() per tap.
+  # blurStep IS pushed now: it is no longer the constant 1.0 its Init literal
+  # holds, because stage A's spacing tracks its own kernel width
+  # (kStageATapRatio) instead of being one texel of the surface it reads.
+  # blurStepA is the reference-space ratio; resScale converts it to the real
+  # output resolution and is applied here rather than inside the guard, which is
+  # keyed on bloomRadius and streakTapPx only.
+  setShaderUniform('blurH, 'blurStep,       blurStepA * resScale);
+  setShaderUniform('blurH, 'numSamples,     numSamplesA);
+  setShaderUniform('blurH, 'weightStart,    weightStartA);
+  setShaderUniform('blurH, 'weightRatio,    weightRatioA);
+  setShaderUniform('blurH, 'invTotalWeight, invTotalWeightA);
+  setShaderUniform('blurV, 'blurStep,       blurStepA * resScale);
+  setShaderUniform('blurV, 'numSamples,     numSamplesA);
+  setShaderUniform('blurV, 'weightStart,    weightStartA);
+  setShaderUniform('blurV, 'weightRatio,    weightRatioA);
+  setShaderUniform('blurV, 'invTotalWeight, invTotalWeightA);
+
+  # Streak pass — radial rays, rotation in radians.
+  # Raising decay to stepScale keeps the falloff profile at the taps that
+  # remain, and rescaling by the ratio of the two weight sums keeps the streak
+  # brightness identical at any decay.
+  # Successive rays sit a fixed angle apart, so the shader rotates one starting
+  # direction by rayRotator per ray rather than calling sin/cos per ray.
+  f32 rotationRad = radians(rotationDeg);
+  f32 rayCount = max(1.0, numRays);
+  f32 rayDelta = 6.28318 / rayCount;
+  vec2 rayDir = {cos(rotationRad), sin(rotationRad)};
+  vec2 rayRotator = {cos(rayDelta), sin(rayDelta)};
+
+  f32 decayEff = pow(decay, stepScale);
+  f32 energyScale =
+      streakEnergy(decay, kStreakTapsOld) / streakEnergy(decayEff, kStreakTaps);
+  setShaderUniform('streaks, 'numRays,      rayCount);
+  setShaderUniform('streaks, 'rayDir,       rayDir);
+  setShaderUniform('streaks, 'rayRotator,   rayRotator);
+  setShaderUniform('streaks, 'streakLength, streakLength);
+  setShaderUniform('streaks, 'decayEff,     decayEff);
+  setShaderUniform('streaks, 'stepScale,    stepScale);
+  setShaderUniform('streaks, 'energyScale,  energyScale);
+  setShaderUniform('streaks, 'resScale,     resScale);
+
+  # Streak reach compensation. `streaks` reads 'blurV as its primary input,
+  # and 'blurV renders at scale 0.5, so the igluscript_graph runtime
+  # overwrites this pass's `inputSize` with the HALF-res read size (960x540)
+  # AFTER [PreRender] runs -- on a non-root pass the framework's per-pass
+  # inputSize write wins over the setShaderUniform('streaks,'inputSize) above,
+  # which is therefore dead. The streak shader steps by stepPx / inputSize, so a
+  # halved inputSize doubles every ray's reach. reachScale = 0.5 cancels that
+  # exactly (stepPx*0.5/960 = stepPx/1920 = full-res reach). Unlike inputSize,
+  # reachScale is a CUSTOM uniform the framework never overwrites -- the same
+  # technique video_golden_bloom.iglu:160-170 uses with its 'blurStep.
+  setShaderUniform('streaks, 'reachScale, 0.5 * kStreakReachScale);
+
+  # Restores the bimodal spike the pre-optimisation stage-A kernel had. Zero
+  # extra fetches -- the shader reuses its existing centre tap.
+  setShaderUniform('streaks, 'bloomCoreGain, kBloomCoreGain);
+
+  # Final blur — broadens the streak glow. blurH2 and blurV2 share one spatial
+  # kernel but not one tap count: blurH2 reads 'streaks at 0.5 and blurV2 reads
+  # blurH2's 0.25 output, so the same kernel is four reference pixels per tap on
+  # the second and two on the first. Both still step one texel of what they read,
+  # so both take the same resScale blurStep.
+  setShaderUniform('blurH2, 'blurStep,       kStepB1 / kReadTexelPxB1 * resScale);
+  setShaderUniform('blurH2, 'numSamples,     numSamplesB1);
+  setShaderUniform('blurH2, 'weightStart,    weightStartB1);
+  setShaderUniform('blurH2, 'weightRatio,    weightRatioB1);
+  setShaderUniform('blurH2, 'invTotalWeight, invTotalWeightB1);
+  setShaderUniform('blurV2, 'blurStep,       kStepB2 / kReadTexelPxB2 * resScale);
+  setShaderUniform('blurV2, 'numSamples,     numSamplesB2);
+  setShaderUniform('blurV2, 'weightStart,    weightStartB2);
+  setShaderUniform('blurV2, 'weightRatio,    weightRatioB2);
+  setShaderUniform('blurV2, 'invTotalWeight, invTotalWeightB2);
+
+  # Composite — additive starglow
+  setShaderUniform('composite, 'starIntensity, intensity);
+
+  # 'blurV2 renders at 0.25 scale, so one bilinear fetch of it in 'composite is a
+  # 4x upscale. Hand that pass the glow texel size so it can reconstruct with four
+  # taps instead. Deliberately a separate uniform rather than 'inputSize: that name
+  # is auto-written per pass by the runtime from the size of the pass's FIRST
+  # declared input, which on 'composite is the full-resolution 'default, so it
+  # cannot carry the quarter-scale glow size.
+  vec2 glowTexel = {4.0 / max(outputSize.x, 1.0), 4.0 / max(outputSize.y, 1.0)};
+  setShaderUniform('composite, 'glowTexel, glowTexel);
+}
+
+# ==========================================================================
+# Threshold pass — extract bright pixels above threshold.
+# Runs at half resolution and folds the 2x2 downsample in, so the full-res
+# bright-pass surface is never stored.
+# ==========================================================================
+string thresholdGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 inputSize;
+uniform float threshold;
+uniform float feather;
+uniform float darken;
+
+float luma(vec3 color) {
+  return dot(color, vec3(0.3, 0.6, 0.1));
+}
+
+// One source pixel's contribution. The clamp is the saturation the 8-bit target
+// used to apply per pixel before anything averaged them, and it has to happen
+// here rather than after the sum: darken lifts every pixel above luma ~0.91
+// past 1.0, so for the highlights this pass exists to find it is the common
+// case, not an edge case. Averaging first and clamping after would brighten an
+// isolated highlight by up to darken (~2.8x).
+vec3 gatePixel(vec2 uv) {
+  vec4 color = sampleInput(uv);
+  float l = luma(color.xyz);
+  vec3 rgb = color.xyz * smoothstep(threshold - feather, threshold + feather, l);
+  return clamp(rgb * darken, 0.0, 1.0);
+}
+
+void main() {
+  // Each output texel covers the four source texels half a source texel away
+  // from its centre, because this pass is exactly half the size of its input.
+  // Gating those four and averaging them is what the full-res pass plus the
+  // consumers' bilinear read already computed, so the output is unchanged.
+  // Thresholding is non-linear, so the average must come after the gate: one
+  // gate on the averaged colour would drop any highlight smaller than an
+  // output texel.
+  vec2 halfTexel = 0.5 / inputSize;
+  vec2 uv = sourceTextureCoordinate;
+
+  vec3 rgb = gatePixel(uv - halfTexel) +
+             gatePixel(uv + vec2(halfTexel.x, -halfTexel.y)) +
+             gatePixel(uv + vec2(-halfTexel.x, halfTexel.y)) +
+             gatePixel(uv + halfTexel);
+
+  gl_FragColor = toOutputFormat(vec4(rgb * 0.25, 1.0));
+}
+";
+
+# ==========================================================================
+# 1D Gaussian blur — used for both horizontal and vertical passes,
+# and reused for both initial and final blur stages.
+# axis = (1,0) for horizontal, (0,1) for vertical.
+# ==========================================================================
+string gaussianBlur1DGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform vec2 inputSize;
+uniform vec2 axis;
+uniform float numSamples;
+uniform float blurStep;
+uniform float weightStart;
+uniform float weightRatio;
+uniform float invTotalWeight;
+
+void main() {
+  vec4 texel = vec4(0.0);
+
+  vec2 dir = axis / inputSize;
+
+  // Tap weights decay by a constant ratio per tap, so they are walked with a
+  // multiply rather than an exp() each. The kernel is two-sided, so the walk
+  // goes outward from the centre and applies each weight to both sides at once:
+  // a single pass over i = 0..numSamples-1 would have to invert the ratio at
+  // the centre, and would start from the smallest weight rather than the
+  // largest, losing precision in the taps that matter most.
+  // GLSL ES 1.00 needs a constant loop bound, so the pair count must be <= 16.
+  // numSamples is always odd, so the centre tap is a single tap and the widest
+  // kernel expressible here is 31 = centre + 15 pairs.
+  float centre = (numSamples - 1.0) * 0.5;
+  float first = ceil(centre);  // first tap at or past the centre
+  float last = floor(centre);  // last tap at or before it
+  float w = weightStart;
+
+  for (float j = 0.0; j < 16.0; j++) {
+    if (first + j > numSamples - 1.0) break;
+
+    float offset = (first + j - centre) * blurStep;
+    texel += sampleInput(sourceTextureCoordinate + dir * offset) * w;
+
+    // An even tap count straddles the centre, so both sides always exist. An
+    // odd one has a single tap on the centre, which must not be counted twice.
+    if (first != last || j > 0.0) {
+      texel += sampleInput(sourceTextureCoordinate - dir * offset) * w;
+    }
+
+    w *= weightRatio;
+  }
+
+  gl_FragColor = toOutputFormat(texel * invTotalWeight);
+}
+";
+
+# ==========================================================================
+# Star streak pass — draws one radial streak per ray for N rays.
+# Multi-input: sampleInput = blurV (initial bloom, additively combined with the
+# streaks), auxSampler1 = threshold (bright pixels).
+# ==========================================================================
+string starglowStreaksGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+
+uniform vec2 inputSize;
+uniform float numRays;
+uniform vec2 rayDir;
+uniform vec2 rayRotator;
+uniform float streakLength;
+uniform float decayEff;
+uniform float stepScale;
+uniform float energyScale;
+uniform float resScale;
+uniform float reachScale;
+uniform float bloomCoreGain;
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  float stepPx = (2.0 + streakLength * 10.0) * stepScale * resScale;
+
+  // The ray taps read the STAGE-A BLURRED bright pass (sampleInput), not the raw
+  // bright pass. Their spacing grows with streakLength and is already far wider
+  // than anything downstream of this pass can bridge -- the tap count is a
+  // compile-time loop bound, so the nine copies cannot be packed closer -- which
+  // means each tap has to arrive pre-smeared or they read as discrete dots.
+  // Stage A's kernel is sized against exactly this spacing; see
+  // kStreakCombFuseRatio. Also the ray centre tap, so the ray profile has no
+  // discontinuity at r = 0, and it is the same fetch as the halo leg below.
+  vec4 blurred = sampleInput(uv);
+  vec4 col = blurred * numRays;
+
+  // The raw bright pass. Used only for the bloom core spike, which is the one
+  // term that must stay sharp.
+  vec4 coreTap = texture2D(auxSampler1, uv);
+
+  // One unidirectional streak per ray. Sampling both directions would emit two
+  // opposite streaks per ray, which cancels out for even counts (the opposite
+  // ray lands on the same line) but yields 2N streaks for odd counts.
+  // The weight is doubled to keep the brightness of the two-direction sampling.
+  vec2 dir = rayDir;
+  for (float r = 0.0; r < 16.0; r++) {
+    if (r >= numRays) break;
+
+    vec2 step = dir * stepPx * reachScale / inputSize;
+
+    float w = 1.0;
+    for (int i = 1; i < 10; i++) {
+      w *= decayEff;
+      col += sampleInput(uv + step * float(i)) * (w * 2.0);
+    }
+
+    // Rays are a fixed angle apart, so rotate the previous direction.
+    dir = vec2(dir.x * rayRotator.x - dir.y * rayRotator.y,
+               dir.x * rayRotator.y + dir.y * rayRotator.x);
+  }
+
+  // blurred is the unimodal halo leg; coreTap * bloomCoreGain is the sharp spike
+  // that the pre-optimisation kernel produced by accident. Together they
+  // reproduce its bimodal spike-plus-halo profile.
+  gl_FragColor = toOutputFormat(col * (0.1 * energyScale) +
+                                blurred + coreTap * bloomCoreGain);
+}
+";
+
+# ==========================================================================
+# Composite pass — additively blend starglow over the original frame
+# and apply tint.  Multi-input: sampleInput = default, auxSampler1 = glow.
+# ==========================================================================
+string starglowCompositeGlsl = "
+precision highp float;
+
+varying vec2 sourceTextureCoordinate;
+BaseUniformsOpenGL;
+
+uniform sampler2D auxSampler1;
+uniform float starIntensity;
+uniform vec3 tintColor;
+uniform vec2 glowTexel;
+
+// auxSampler1 holds the quarter-scale bloom, so a single bilinear fetch would be
+// a 4x upscale: piecewise-linear, with a slope break at every glow texel boundary
+// that shows up as faceting and 4px blocks in the glow. These four taps sit on
+// the corners of the surrounding 2x2 glow texels, so each is an exact four-texel
+// average and the reconstruction is smooth across those boundaries. All four read
+// a quarter-scale target and stay texture-cache resident.
+vec3 sampleGlow(vec2 uv) {
+  vec2 h = glowTexel * 0.5;
+
+  vec3 sum = texture2D(auxSampler1, uv + vec2(-h.x, -h.y)).rgb;
+  sum += texture2D(auxSampler1, uv + vec2(h.x, -h.y)).rgb;
+  sum += texture2D(auxSampler1, uv + vec2(-h.x, h.y)).rgb;
+  sum += texture2D(auxSampler1, uv + vec2(h.x, h.y)).rgb;
+
+  return sum * 0.25;
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 original = sampleInput(uv);
+  vec3 glow = sampleGlow(uv);
+
+  vec3 result = mix(original.rgb, (original.rgb + glow) * tintColor, starIntensity);
+
+  gl_FragColor = toOutputFormat(vec4(clamp(result, 0.0, 1.0), original.a));
+}
+";

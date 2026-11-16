@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "213026050749069",
+  "displayName": "pink tea :-)",
+  "description": "[IG Edits] Color filter name. With \"pink tea :-)\", the creator can apply a Spark-ported soft pink, brightened grade with a film grain overlay.",
+  "iglu": {
+    "legacyId": 3414
+  },
+  "assets": [
+    {
+      "name": "pink_tea_lut.png",
+      "assetHash": "fd3c7a9a563fcb6a7bba228168dcafb5ed2b122d3535833036719838d2e70ed4",
+      "hubAssetId": "2499068287287093"
+    },
+    {
+      "name": "pink_tea_grain.png",
+      "assetHash": "1ea7efc5e491371ecb46fcffccf0c0400ce424334f216026937b6bad209025fd",
+      "hubAssetId": "1158729156580181"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAHsU1UCLcK"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "41a59cb0",
+      "handle": "AQAFIt1YPC56",
+      "md5": "8d602eca831997c7ef40f89bfa800c63"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="center|left|top" android:height="28.0dip" android:width="28.0dip" android:drawable="@drawable/ig_audio_yt_playlist_28" />
+    <item android:gravity="center|left|top" android:height="16.0dip" android:width="16.0dip" android:drawable="@drawable/ig_audio_youtube_music_color" android:left="18.0dip" android:top="15.0dip" />
+</layer-list>

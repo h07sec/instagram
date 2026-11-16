@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="36.0dip" android:width="36.0dip" android:viewportWidth="36.0" android:viewportHeight="36.0"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <path android:fillColor="?igds_color_elevated_background" android:pathData="M18,0A18,18 0,0 1,36 18A18,18 0,0 1,18 36A18,18 0,0 1,0 18A18,18 0,0 1,18 0z" />
+    <path android:fillColor="#ffffffff" android:pathData="M18,3.5A14.5,14.5 0,0 1,32.5 18A14.5,14.5 0,0 1,18 32.5A14.5,14.5 0,0 1,3.5 18A14.5,14.5 0,0 1,18 3.5z" />
+    <group android:scaleX="0.0775" android:scaleY="0.0775" android:translateX="1.286" android:translateY="0.087">
+        <path android:fillColor="@drawable/$madrid_request_badge__0" android:pathData="M308.23,102.05C347.65,101.73 372.37,144.52 352.4,178.51L263.39,329.99C234.77,378.71 161.06,365.89 150.56,310.37L140.54,257.37C139.71,252.97 137.41,248.98 134.01,246.06L93.27,211.05C50.43,174.23 76.14,103.97 132.63,103.5L308.23,102.05ZM132.83,127.74C98.73,128.02 83.2,170.44 109.07,192.67L149.81,227.68C150.16,227.99 150.51,228.3 150.86,228.62L227.94,184.11C233.73,180.77 241.14,182.75 244.49,188.55C247.84,194.35 245.85,201.76 240.05,205.1L163.52,249.29C163.85,250.46 164.13,251.66 164.36,252.87L174.38,305.87C180.71,339.39 225.22,347.13 242.5,317.72L331.5,166.23C341.94,148.47 329.02,126.12 308.43,126.29L132.83,127.74Z" />
+    </group>
+</vector>

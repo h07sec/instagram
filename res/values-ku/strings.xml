@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="APKTOOL_DUMMYVAL_0x7f130003">Bajar</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130004">Navnîşan</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130006">Apartman/sûyît (dilxwazî)</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13002c">Lêgerokê bigire</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130030">%1$s dixwaze şûngehê cîhaza te bikar bîne.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130033">Destûr bide</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130034">Asteng Bike</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f130039">Li ser malperê berdewam bike</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003a">Vegere</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003b">Pirsgirêkek di bawernameya ewlehîya ku %1$s bikar tîne de heye. Agahdarîyên te yên şexsî, wekî şîfre an hejmarên karta krediyê, dema ku bi vê malperê re bê parve kirin dibe ku ewle nebe.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003c">Ev malper pêwendîyeke ewle bi kar nayîne</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13003d">Vegere Paş</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009d">Tiştek Şaş E</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f13009f">Epeyam</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a1">Malpera ku tu lê dinêrî hewl dide aplîkasyoneke derveyî veke. Tu dixwazî berdewam bikî?</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a2">Berdewam bike</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a3">Tu ji aplîkasyona me derdikevî</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a4">Dibe ku ev ji ber çewtiyeke teknîkî be ku em niha li ser çareserkirina wê dixebitin. Ji kerema xwe ji nû ve barkirina rûpelê biceribîne.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a5">Nû bike</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a6">Rûpel niha ne berdest e</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a7">Paşnav</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a8">Rûpel nayê barkirin</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300a9">Bi rêya %1$s veke</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ab">Zêdetir vebijêrk</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300ac">Pêşnav</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c3">Tu niha ekranê tam dibînî. Ji bo derketinê bixijikînê çepê an jî bişkoka paşve bitikîne.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300c8">Niha pirsgirêkên me hene di bicihkirina %2$s bi zimanê %1$s . Tu dikarî careke din biceribînî,yan jî %2$s bi Îngilîzî (US) bi awayekî demkî bi kar bînî.</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f1">Kêlîyekê sebir bike heta em %1$s bi cih dikin…</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f2">Dîsa biceribîne</string>
+    <string name="APKTOOL_DUMMYVAL_0x7f1300f3">Bi Îngilîzî (DYA) dewam bike</string>
+</resources>

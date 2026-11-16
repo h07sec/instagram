@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "686853326348184",
+  "displayName": "𝐀𝐬𝐡 𝐁𝐥𝐮𝐞 🧿",
+  "description": "[IG Edits] Color filter name. With \"𝐀𝐬𝐡 𝐁𝐥𝐮𝐞 🧿\", the creator can apply a Spark-ported color look to their video.",
+  "iglu": {
+    "legacyId": 3373
+  },
+  "assets": [
+    {
+      "name": "ash_blue_lut.png",
+      "assetHash": "caa14ff2413e7b012355fd7c003863c6fa3caf3bc85f1df2134783341f4b1efe",
+      "hubAssetId": "1728072848293189"
+    },
+    {
+      "name": "ash_blue_scanlines.png",
+      "assetHash": "7a15979a4189683247c4fdf8875c56afdcaacfe8865bb7c59faa04a93bbbc368",
+      "hubAssetId": "3695643090594141"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGjG3l5pM9"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "136a73c3",
+      "handle": "AQAFFyvk8iHI",
+      "md5": "ea1b047f230989131ff0812763120aea"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GJ0lWTROWv7S6m8GAPa3N8Maz_NgbhQoAAAD"
+    }
+  }
+}

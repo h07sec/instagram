@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "626850415321700",
+  "displayName": "polaroid",
+  "description": "[IG Edits] Color filter name. With \"polaroid\", the creator gets a color-graded photo centered over a B&W background plus subtle film grain, like an instant photo print.",
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAD3NO__luY"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "a6fbd03d",
+      "handle": "AQAE_cDRvZfG",
+      "md5": "b7f5b71fc357a542a092efb888351ac8"
+    }
+  },
+  "iglu": {
+    "legacyId": 3095
+  },
+  "assets": [
+    {
+      "name": "polaroid_lut_bw.png",
+      "assetHash": "608665fcd4d00ab297132d03f10128aa857942ae898eea1891bf68e9d2e3d940",
+      "hubAssetId": "4505759056405331"
+    },
+    {
+      "name": "polaroid_lut_color.png",
+      "assetHash": "bef076f8ed1d595f4fc03750729f98494235358aa9da2a1dbd696520eec1a099",
+      "hubAssetId": "1615369646990270"
+    },
+    {
+      "name": "polaroid_grain.png",
+      "assetHash": "3d3985e928bb83cc41e9acb7c55bdb4674cb8c1017036e6e199acf4e2f8415c3",
+      "hubAssetId": "2614946165569566"
+    }
+  ],
+  "desktop": {
+    "previewAsset": {
+      "handle": "GDO-QTI2R_6nttUDAGry9vCybUAybhQoAAAD"
+    }
+  }
+}

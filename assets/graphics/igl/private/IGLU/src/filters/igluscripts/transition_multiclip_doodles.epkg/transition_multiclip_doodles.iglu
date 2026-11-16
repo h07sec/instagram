@@ -1,0 +1,181 @@
+[Filter TransitionMulticlipDoodles]
+
+# Clip B is scribbled in by a glowing brush-stroke mask over an untouched clip A,
+# then a top-to-bottom wipe settles it onto its own alpha.
+#
+# Ported from the Easel web tool's multiclip_doodles.iglu, with Easel's
+# transition_doodle inlined: that effect is not in this repo.
+#
+# The brush mask is the named input 'brushout, which the host binds (the texture
+# symbol is the asset's file stem, brushout.png). Nothing delivers it in
+# production yet; unbound, it samples as transparent black and clip B shows only
+# as the wipe passes over it. brush_path points the loader at a local file for
+# the sample app.
+
+[Init]
+fun init(Filter filter) {
+  makeTexture('transition);
+  makeTexture('brushout);
+
+  filter.parameters = {
+    {smoothParam = 0.05, min = 0.0, max = 0.5, description = "Smoothstep edge softness"},
+    {glowColor = {0.9, 0.0, 1.0, 1.0}, description = "Color"},
+    {glowSize = 1.2, min = 0.0, max = 2.0, description = "Glow intensity"},
+    {brushUVOffset = 0.2, min = 0.0, max = 1.0, description = "Expand brush UV range outside the frame"},
+    {angle = 0.0, min = 0.0, max = 360.0, description = "Brush UV rotation (degrees)"},
+    {framerate = 0.15, min = 0.0, max = 1.0, description = "1 = full framerate, 0 = 1 fps (over 4s)"},
+    {wipeOffset = 0.0, min = 0.0, max = 1.4, description = "Alpha wipe time offset (progress where the wipe starts)"},
+    {wipeGradient = 0.2, min = 0.0, max = 1.0, description = "Alpha wipe gradient size (screen heights)"},
+  };
+
+  filter.passes = {
+    {
+      name = 'composite,
+      inputs = {'default, 'transition, 'brushout},
+      shaderInputNames = {'default, 's_texture1, 'brushout},
+      uniforms = {
+        threshold = 0.0,
+        smoothParam = 0.05,
+        glowColor = {0.9, 0.0, 1.0, 1.0},
+        glowWidth = 0.12,
+        brushUVOffset = 0.2,
+        brushDenom = 1.4,
+        brushMatrix = {1.0, 0.0, 0.0, 1.0},
+        wipeGradient = 0.2,
+        wipeThreshold = 0.0,
+      },
+      glslShader = glsl,
+    },
+  };
+}
+
+string brush_path = "brush_path";
+string brush_filename = "";
+
+[PreRender]
+fun preRender(Filter filter) {
+  string brush_path_parameter = getParameterString(brush_path);
+  if (brush_path_parameter != "") {
+    string new_brush_filename = stringAppend("textureFilePath://", brush_path_parameter);
+    if (new_brush_filename != brush_filename) {
+      brush_filename = new_brush_filename;
+      loadTexture('brushout, brush_filename);
+    }
+  }
+
+  f32 progress = max(getParameterFloat('progress), getParameterFloat('transition_progress));
+
+  # Quantize progress to simulate a lower framerate, treating 0-1 as 4 seconds:
+  # framerate 1 is 60 fps (effectively smooth), 0 is 1 fps (4 steps).
+  f32 fps = 1.0 + getParameterFloat('framerate) * 59.0;
+  f32 totalFrames = fps * 4.0;
+  f32 p = floor(progress * totalFrames) / totalFrames * 1.5;
+
+  # The brush texture spans the frame grown by brushUVOffset on each side, then
+  # rotates by angle about its centre. Column-major 2x2 (m00, m10, m01, m11).
+  f32 brushUVOffset = getParameterFloat('brushUVOffset);
+  f32 rad = getParameterFloat('angle) * 3.14159265 / 180.0;
+  f32 c = cos(rad);
+  f32 s = sin(rad);
+  vec4 brushMatrix = {c, s, 0.0 - s, c};
+
+  # Blend back to clip B's own alpha as a top-to-bottom gradient wipe.
+  # wipeOffset is the p where the head sits at the top; the rest of the p budget
+  # (up to 1.5) sweeps it to the bottom. Padding the head by the gradient width
+  # keeps the last row fully wiped at any gradient size.
+  f32 wipeOffset = getParameterFloat('wipeOffset);
+  f32 wipeG = max(getParameterFloat('wipeGradient), 0.001);
+  f32 wipeT = clamp((p - wipeOffset) / max(1.5 - wipeOffset, 0.001), 0.0, 1.0);
+
+  setShaderUniform('composite, 'threshold, p);
+  setShaderUniform('composite, 'smoothParam, getParameterFloat('smoothParam));
+  setShaderUniform('composite, 'glowColor, getParameterVec4('glowColor));
+  setShaderUniform('composite, 'glowWidth, getParameterFloat('glowSize) * 0.1);
+  setShaderUniform('composite, 'brushUVOffset, brushUVOffset);
+  setShaderUniform('composite, 'brushDenom, 1.0 + 2.0 * brushUVOffset);
+  setShaderUniform('composite, 'brushMatrix, brushMatrix);
+  setShaderUniform('composite, 'wipeGradient, wipeG);
+  setShaderUniform('composite, 'wipeThreshold, wipeT * (1.0 + wipeG));
+}
+
+string glsl = "
+precision highp float;
+varying vec2 sourceTextureCoordinate;
+
+BaseUniformsOpenGL;
+
+uniform sampler2D s_texture1;
+uniform sampler2D brushout;
+// Quantized, scaled progress.
+uniform float threshold;
+uniform float smoothParam;
+uniform vec4 glowColor;
+uniform float glowWidth;
+uniform float brushUVOffset;
+uniform float brushDenom;
+uniform vec4 brushMatrix;
+uniform float wipeGradient;
+uniform float wipeThreshold;
+
+// The alpha guard only matters where the brush is fully transparent, where
+// Easel divides by zero; the result is multiplied by brushAlpha^3 either way.
+float brushValue(vec4 brush) {
+  return brush.r / max(brush.a, 1e-4);
+}
+
+float getActualAlpha(float inalpha, vec4 brush) {
+  float brushVal = brushValue(brush);
+  float brushAlpha = brush.a;
+
+  float mask = smoothstep(brushVal, brushVal + smoothParam, threshold);
+
+  float edge = 1.0 - smoothstep(brushVal, brushVal + glowWidth, threshold);
+  float edgeVal = edge * edge * edge * 3.0;
+  return clamp(max(inalpha, edgeVal) * mask * (brushAlpha * brushAlpha * brushAlpha), 0.0, 1.0);
+}
+
+void main() {
+  vec2 uv = sourceTextureCoordinate;
+  vec4 a = sampleInput(uv);
+  vec4 color = texture2D(s_texture1, uv);
+
+  // The brush math is Easel's, which runs in OpenGL orientation: screen top at
+  // y = 1, and PNG row 0 at v = 0. On Metal both axes run the other way, so
+  // flipping y there reproduces the same mask. Identity on OpenGL.
+  vec2 easelUV = vec2(uv.x, max(DOWN, 0.0) + UP * uv.y);
+
+  vec2 centered = (easelUV + brushUVOffset) / brushDenom - 0.5;
+  vec2 brushUV = brushMatrix.xy * centered.x + brushMatrix.zw * centered.y + 0.5;
+
+  vec4 brush = texture2D(brushout, brushUV);
+  vec4 brushUp = texture2D(brushout, brushUV + vec2(0.0, 0.007));
+  vec4 brushDown = texture2D(brushout, brushUV - vec2(0.0, 0.007));
+  float brushNext = texture2D(brushout, brushUV + vec2(0.0, 2.0 / 512.0)).r;
+
+  float brushVal = brushValue(brush);
+  float brushBrightness = 0.8 + (brush.r - brushNext) * 10.0;
+
+  float edge = 1.0 - smoothstep(brushVal, brushVal + glowWidth, threshold);
+  float edgeVal = edge * edge * edge * 3.0;
+
+  // Smoothed alpha: the mask at this tap and one tap above and below.
+  float alpha = getActualAlpha(color.a, brush) * getActualAlpha(color.a, brushUp) *
+      getActualAlpha(color.a, brushDown);
+
+  // A separate wipe can expose RGB ahead of the brush; tint only painted coverage.
+  // Coverage must not apply clip B's opacity a second time.
+  float brushCoverage = getActualAlpha(1.0, brush) * getActualAlpha(1.0, brushUp) *
+      getActualAlpha(1.0, brushDown);
+  float mixVal = clamp(edgeVal * (1.0 - (threshold - brushVal)), 0.0, 1.0) * brushCoverage;
+  color.rgb = mix(color.rgb, glowColor.xyz * brushBrightness, mixVal);
+
+  float depth = 1.0 - easelUV.y;
+  float wipeReveal = smoothstep(depth, depth + wipeGradient, wipeThreshold);
+  color.a = mix(alpha, color.a, wipeReveal);
+
+  float outA = color.a + a.a * (1.0 - color.a);
+  vec3 rgb = (color.rgb * color.a + a.rgb * a.a * (1.0 - color.a)) / max(outA, 1e-5);
+
+  gl_FragColor = toOutputFormat(vec4(rgb, outA));
+}
+";

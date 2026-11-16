@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <size android:height="@dimen/avatar_size_customization_sheet_redesign" android:width="@dimen/avatar_size_customization_sheet_redesign" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+    <item android:gravity="center|left|top" android:height="124.0dip" android:width="124.0dip" android:drawable="@drawable/ig_illustrations_qp_link_refresh" android:left="68.0dip" android:top="64.0dip" />
+    <item android:gravity="center|left|top" android:height="102.0dip" android:width="102.0dip" android:drawable="@drawable/ig_cross_app_linking_whatsapp_badge" android:left="6.0dip" android:top="18.0dip" />
+</layer-list>

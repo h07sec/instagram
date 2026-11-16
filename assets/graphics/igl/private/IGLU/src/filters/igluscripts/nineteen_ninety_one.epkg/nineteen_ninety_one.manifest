@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "160118CC-E2B9-41BA-BD09-12C080E69277",
+  "displayName": "1991",
+  "description": "[IG Edits] Color filter name. With \"1991\", the creator gets a retro color grade with a slight color fringe toward the frame edges and light skin smoothing.",
+  "iglu": {
+    "legacyId": 3324
+  },
+  "assets": [
+    {
+      "name": "nineteen_ninety_one_lut.png",
+      "assetHash": "57e1b939ef39e229596bc4bd8b96d85bfcef90c09ba061408e0a0bbc62e94b84",
+      "hubAssetId": "2650327632078347"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAE-8coM-la"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "a04d1c34",
+      "handle": "AQCMCOYhKV0t",
+      "md5": "f977f245cbfb312572add62bdd12540e"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMw1jTOMCxWDxRwEAP-QFjx5_cxGbhQoAAAD"
+    }
+  }
+}

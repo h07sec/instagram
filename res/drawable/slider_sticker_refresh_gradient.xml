@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="fill_horizontal|center">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/abc_button_padding_horizontal_material" />
+            <size android:height="@dimen/afi_controller_pill_bottom_margin" />
+            <solid android:color="@color/slider_sticker_refresh_default_track" />
+        </shape>
+    </item>
+    <item android:gravity="fill_horizontal|center">
+        <clip>
+            <scale android:scaleWidth="100%">
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/abc_button_padding_horizontal_material" />
+                    <size android:height="@dimen/afi_controller_pill_bottom_margin" />
+                    <gradient android:startColor="@color/igds_prism_purple_05" android:endColor="@color/igds_prism_pink_05" android:angle="0.0" android:centerX="0.651" android:centerColor="@color/igds_prism_lavender_05" />
+                </shape>
+            </scale>
+        </clip>
+    </item>
+</layer-list>

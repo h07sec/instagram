@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "45BCF99C-C61E-4472-80C7-9F88A31B799B",
+  "displayName": "cybercore:",
+  "description": "[IG Edits] Color filter name. With \"cybercore:\", the creator gets a bright, washed-out look with a soft green additive bloom over the camera image.",
+  "iglu": {
+    "legacyId": 3327
+  },
+  "assets": [
+    {
+      "name": "cybercore_lut.png",
+      "assetHash": "72ee670f5b80afd8c24ab518cdd14ca4d5b06de1fecdb22e7dfaf5c203dbfce2",
+      "hubAssetId": "29649375954646558"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAER0qnNPO6"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "7e72146c",
+      "handle": "AQAFtSWqkz-O",
+      "md5": "3507c8e3b69cf0a4f524870d7493bdd7"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GMwDYTOWOzP9ciUGAJ6uTMz0rGQobhQoAAAD"
+    }
+  }
+}

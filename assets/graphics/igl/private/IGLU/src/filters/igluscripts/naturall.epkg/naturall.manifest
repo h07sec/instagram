@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "C2EC2C65-1BBB-4422-ABB3-07C6287B308D",
+  "displayName": "Naturall ✧",
+  "description": "[IG Edits] Color filter name. With \"Naturall\", the creator gets a soft natural LUT color grade with light skin smoothing.",
+  "iglu": {
+    "legacyId": 3243
+  },
+  "assets": [
+    {
+      "name": "naturall_lut.png",
+      "assetHash": "707d3ae72a9f72de6e7394762699e60f819134c5887463f0ae20068a52fd90a5",
+      "hubAssetId": "1093586636769976"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAFuUJ73ZNf"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "90ba12ad",
+      "handle": "AQAF4d1tZoaT",
+      "md5": "ddf864ab440c9748d187aede2eb483ae"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GPFdIDOCQOvvCsADANtBFW2lvI0AbhQoAAAD"
+    }
+  }
+}

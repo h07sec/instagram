@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "341669634866752",
+  "displayName": "PUMP",
+  "description": "[IG Edits] Color filter name. With \"PUMP\", the creator can apply a Spark-ported punchy, sharpened, high-contrast color grade.",
+  "iglu": {
+    "legacyId": 3342
+  },
+  "assets": [
+    {
+      "name": "pump_lut.png",
+      "assetHash": "ac0339dd9c138d5b191bb91fe9ed86e49049dd579690510bd8aa1f0dba78390f",
+      "hubAssetId": "3615826905248998"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAGf6pCwg1j"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "8cf72589",
+      "handle": "AQBmj7b22czV",
+      "md5": "cd5f217f4b2a4004ec02ebdbb84e55ac"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GIY04zMRm9xn9a8FABaWDa0jRCdibhQoAAAD"
+    }
+  }
+}

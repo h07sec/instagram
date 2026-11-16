@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "562640752714276",
+  "displayName": "BNW",
+  "description": "[IG Edits] Color filter name. With \"BNW\", the creator can apply a Spark-ported soft black-and-white grade.",
+  "iglu": {
+    "legacyId": 3352
+  },
+  "assets": [
+    {
+      "name": "bnw_lut.png",
+      "assetHash": "7a20e83859324c8f675b8b06ddd91b145ee147d7563f48e4653f7f4d1f35942f",
+      "hubAssetId": "1143297074950989"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAIhjB60shj"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "40457484",
+      "handle": "AQAFLQ4dng5k",
+      "md5": "8667c28efc09713fbbf6ccaddc7c94a0"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GGR7jzNQQCEeqqMHAJAc-u0Ki3tebhQoAAAD"
+    }
+  }
+}

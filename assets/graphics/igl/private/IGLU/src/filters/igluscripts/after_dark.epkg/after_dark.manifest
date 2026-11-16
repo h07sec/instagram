@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "70E6F7E4-0F66-40AB-BB20-2B11FCD72B8F",
+  "displayName": "ᴀꜰᴛᴇʀ 𝗱𝗮𝗿𝗸 ✧",
+  "description": "[IG Edits] Color filter name. With \"After Dark\", the creator gets a moody, darker 8x8 LUT color grade applied to the camera image.",
+  "iglu": {
+    "legacyId": 3232
+  },
+  "assets": [
+    {
+      "name": "after_dark_lut.png",
+      "assetHash": "bdec414d4c2e2511990c930c2a86c90129a8a40f8f28f7aa0e21efbc724eeda4",
+      "hubAssetId": "1328680615909174"
+    }
+  ],
+  "ios": {
+    "previewAsset": {
+      "handle": "AQAEDcS0N-Tn"
+    }
+  },
+  "android": {
+    "previewAsset": {
+      "key": "265e771a",
+      "handle": "AQAFMSFFeHKc",
+      "md5": "f02a7e6beab31662eb0f97eed2381d0f"
+    }
+  },
+  "desktop": {
+    "previewAsset": {
+      "handle": "GNE68TLt0L4ico0FAFeh-0PflcBfbhQoAAAD"
+    }
+  }
+}

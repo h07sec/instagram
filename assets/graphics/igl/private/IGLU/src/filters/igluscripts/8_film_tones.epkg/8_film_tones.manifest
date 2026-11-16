@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "identifier": "458981909014077",
+  "displayName": "8+ film tones",
+  "description": "[IG Edits] Video effect name. With \"8+ film tones\", the creator can apply a Spark-ported film look chosen from eight colour tones, with grain and a dot-matrix date stamp.",
+  "iglu": {
+    "legacyId": 3428
+  },
+  "assets": [
+    {
+      "name": "8_film_tones_luts.png",
+      "assetHash": "6a319f2534c11b6915c1057d6bfbf6566ccf74e878ca26201ebd028476c13dbd",
+      "hubAssetId": "1142035131639465"
+    },
+    {
+      "name": "8_film_tones_grain.png",
+      "assetHash": "deb67431a2dcd57dd46904457492ca820b1b583b7bff1bf6726d977c74daec3e",
+      "hubAssetId": "1119056904434292"
+    },
+    {
+      "name": "8_film_tones_glyphs.png",
+      "assetHash": "86e52c60cdb27690fefd4b8e81ca59ff25fd1fe345918077e5d1dfdf271c2895",
+      "hubAssetId": "1826643978670326"
+    }
+  ]
+}
